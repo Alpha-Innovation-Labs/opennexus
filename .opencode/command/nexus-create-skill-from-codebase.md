@@ -1,0 +1,1 @@
+../../.nexus/commands/nexus-create-skill-from-codebase.md

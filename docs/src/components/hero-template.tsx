@@ -92,11 +92,6 @@ const FALLBACK_EXAMPLES = [
         href: '/docs/commands/nexus-2-investigate',
       },
       {
-        label: 'nexus-3-plan',
-        value: 'Build implementation plan',
-        href: '/docs/commands/nexus-3-plan',
-      },
-      {
         label: 'nexus-3.5-critique',
         value: 'Critique plan risks',
         href: '/docs/commands/nexus-3-5-critique',
@@ -107,9 +102,9 @@ const FALLBACK_EXAMPLES = [
         href: '/docs/commands/nexus-4-code',
       },
       {
-        label: 'nexus-5-llms-txt-generate',
+        label: 'nexus-create-skill-from-codebase',
         value: 'Generate llms.txt',
-        href: '/docs/commands/nexus-5-llms-txt-generate',
+        href: '/docs/commands/nexus-create-skill-from-codebase',
       },
     ],
   },

@@ -5,6 +5,7 @@
 
 use anyhow::{Context, Result};
 use include_dir::{include_dir, Dir};
+use std::collections::HashSet;
 use std::fs;
 #[cfg(unix)]
 use std::os::unix::fs::symlink;
@@ -30,6 +31,9 @@ pub fn run_setup(format: OutputFormat) -> Result<()> {
     // Extract bundled .nexus directory
     extract_nexus_directory(format)?;
 
+    // Remove stale command files that no longer exist in embedded assets
+    let (_nexus_removed, _opencode_removed) = prune_stale_command_files(format)?;
+
     // Create symlinks in .opencode/command/ for all nexus commands
     let (_symlinks_created, _symlinks_skipped) = create_command_symlinks(format)?;
 
@@ -41,6 +45,85 @@ pub fn run_setup(format: OutputFormat) -> Result<()> {
     }
 
     Ok(())
+}
+
+/// Remove stale command files from .nexus/commands and .opencode/command.
+///
+/// Any command file not present in the embedded `.nexus/commands` assets is deleted.
+fn prune_stale_command_files(format: OutputFormat) -> Result<(usize, usize)> {
+    let nexus_commands_dir = Path::new(".nexus/commands");
+    let opencode_command_dir = Path::new(".opencode/command");
+
+    if !nexus_commands_dir.exists() {
+        return Ok((0, 0));
+    }
+
+    let Some(embedded_commands_dir) = NEXUS_ASSETS.get_dir("commands") else {
+        return Ok((0, 0));
+    };
+
+    let allowed_files: HashSet<String> = embedded_commands_dir
+        .files()
+        .filter_map(|file| file.path().file_name())
+        .map(|name| name.to_string_lossy().to_string())
+        .collect();
+
+    let mut nexus_removed = 0;
+    for entry in fs::read_dir(nexus_commands_dir)? {
+        let entry = entry?;
+        let path = entry.path();
+        let metadata = fs::symlink_metadata(&path)?;
+
+        if metadata.file_type().is_dir() {
+            continue;
+        }
+
+        let Some(file_name) = path
+            .file_name()
+            .map(|name| name.to_string_lossy().to_string())
+        else {
+            continue;
+        };
+
+        if !allowed_files.contains(&file_name) {
+            fs::remove_file(&path)?;
+            nexus_removed += 1;
+        }
+    }
+
+    let mut opencode_removed = 0;
+    if opencode_command_dir.exists() {
+        for entry in fs::read_dir(opencode_command_dir)? {
+            let entry = entry?;
+            let path = entry.path();
+            let metadata = fs::symlink_metadata(&path)?;
+
+            if metadata.file_type().is_dir() {
+                continue;
+            }
+
+            let Some(file_name) = path
+                .file_name()
+                .map(|name| name.to_string_lossy().to_string())
+            else {
+                continue;
+            };
+
+            if !allowed_files.contains(&file_name) {
+                fs::remove_file(&path)?;
+                opencode_removed += 1;
+            }
+        }
+    }
+
+    if format != OutputFormat::Json && (nexus_removed > 0 || opencode_removed > 0) {
+        print_success(&format!(
+            "Removed stale commands ({} from .nexus/commands, {} from .opencode/command)",
+            nexus_removed, opencode_removed
+        ));
+    }
+
+    Ok((nexus_removed, opencode_removed))
 }
 
 /// Extract the bundled .nexus directory to the current working directory.

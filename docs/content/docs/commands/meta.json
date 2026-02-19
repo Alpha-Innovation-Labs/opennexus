@@ -9,9 +9,8 @@
     "nexus-1-4-context-review",
     "nexus-1-5-context-from-code",
     "nexus-2-investigate",
-    "nexus-3-plan",
     "nexus-3-5-critique",
     "nexus-4-code",
-    "nexus-5-llms-txt-generate"
+    "nexus-create-skill-from-codebase"
   ]
 }
