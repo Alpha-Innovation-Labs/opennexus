@@ -226,4 +226,4 @@ jobs:
       - name: Publish opennexus crate
         env:
           CARGO_REGISTRY_TOKEN: ${{ secrets.CARGO_REGISTRY_TOKEN }}
-        run: cargo publish --package opennexus
+        run: RUSTC_WRAPPER="" cargo publish --package opennexus
