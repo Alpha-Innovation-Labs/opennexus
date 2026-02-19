@@ -22,7 +22,7 @@ const FALLBACK_EXAMPLES = [
   {
     id: 'example-a',
     label: 'Install',
-    code: 'cargo install nex-us\n# install the Nexus CLI',
+    code: 'cargo install nex-us --bin nexus\n# install the Nexus CLI binary',
   },
   {
     id: 'example-b',
@@ -51,7 +51,7 @@ export function HeroTemplate() {
   const [copied, setCopied] = useState(false);
 
   const selectedExample = examples.find((item) => item.id === activeTab) ?? examples[0];
-  const installCommand = HOME_TEMPLATE.installCommand || 'cargo install nex-us';
+  const installCommand = HOME_TEMPLATE.installCommand || 'cargo install nex-us --bin nexus';
 
   async function handleCopyCommand() {
     if (!navigator.clipboard) return;
