@@ -17,13 +17,13 @@
 - [nexus-5-llms-txt-generate](/docs/commands/nexus-5-llms-txt-generate): Strict orchestrator for full or incremental llms.txt generation
 - [Reference](/docs/reference): Auto-generated reference documentation
 - [Skills](/docs/skills): Shipped OpenNexus skills organized by language and domain
-- [crate_root](/docs/reference/crate-root/crate_root--crate_root): Nexus CLI library exports.
-- [Crate Root](/docs/reference/crate-root): Generated crate-root reference
 - [Cli](/docs/reference/cli/cli--cli): No additional documentation available yet.
 - [Commands](/docs/reference/cli/cli--commands): No additional documentation available yet.
 - [OutputFormat](/docs/reference/cli/cli--outputformat): No additional documentation available yet.
 - [parse_args](/docs/reference/cli/cli--parse_args): No additional documentation available yet.
 - [Cli](/docs/reference/cli): Generated cli reference
+- [crate_root](/docs/reference/crate-root/crate_root--crate_root): Nexus CLI library exports.
+- [Crate Root](/docs/reference/crate-root): Generated crate-root reference
 - [commands](/docs/reference/commands/commands--commands): Command implementations for the Nexus CLI.
 - [run_setup](/docs/reference/commands/commands-setup--run_setup): Run the setup command.
 - [setup](/docs/reference/commands/commands-setup--setup): Setup command for initializing OpenNexus in a project.
@@ -32,11 +32,11 @@
 - [run_update](/docs/reference/commands/commands-update--run_update): Run the update command.
 - [update](/docs/reference/commands/commands-update--update): Update command for upgrading OpenNexus via cargo.
 - [Commands](/docs/reference/commands): Generated commands reference
-- [Rust Skills](/docs/skills/rust): Shipped Rust-focused skills for OpenNexus
-- [opencode-rs-sdk](/docs/skills/rust/opencode-rs-sdk): Built-in skill for the OpenCode Rust SDK HTTP and SSE workflows
-- [ratkit](/docs/skills/rust/ratkit): Built-in skill for the ratkit Rust TUI library and feature-gated modules
 - [Output](/docs/reference/output): Generated output reference
 - [output](/docs/reference/output/output--output): Output formatting utilities for the setup-only CLI.
 - [print_error](/docs/reference/output/output--print_error): Print an error message (red).
 - [print_info](/docs/reference/output/output--print_info): Print an info message (blue).
 - [print_success](/docs/reference/output/output--print_success): Print a success message (green checkmark).
+- [Rust Skills](/docs/skills/rust): Shipped Rust-focused skills for OpenNexus
+- [opencode-rs-sdk](/docs/skills/rust/opencode-rs-sdk): Built-in skill for the OpenCode Rust SDK HTTP and SSE workflows
+- [ratkit](/docs/skills/rust/ratkit): Built-in skill for the ratkit Rust TUI library and feature-gated modules

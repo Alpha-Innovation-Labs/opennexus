@@ -391,32 +391,6 @@ Rust [#rust]
 Skill pages are long-form operational references designed for direct agent use.
 
 
-# crate_root
-
-
-
-Signature [#signature]
-
-```rust
-mod crate_root
-```
-
-Documentation [#documentation]
-
-Nexus CLI library exports.
-
-Related Items [#related-items]
-
-* No related items in this module yet.
-
-
-# Crate Root
-
-
-
-This section is generated from Rust doc comments.
-
-
 # Cli
 
 
@@ -518,6 +492,32 @@ Related Items [#related-items]
 
 
 # Cli
+
+
+
+This section is generated from Rust doc comments.
+
+
+# crate_root
+
+
+
+Signature [#signature]
+
+```rust
+mod crate_root
+```
+
+Documentation [#documentation]
+
+Nexus CLI library exports.
+
+Related Items [#related-items]
+
+* No related items in this module yet.
+
+
+# Crate Root
 
 
 
@@ -670,48 +670,6 @@ Related Items [#related-items]
 This section is generated from Rust doc comments.
 
 
-# Rust Skills
-
-
-
-This section contains Rust-oriented built-in skills.
-
-| Skill                                  | Focus                                                                   |
-| -------------------------------------- | ----------------------------------------------------------------------- |
-| [`ratkit`](./ratkit)                   | Rust TUI component library patterns, feature flags, and usage playbooks |
-| [`opencode-rs-sdk`](./opencode-rs-sdk) | Rust SDK for OpenCode HTTP + SSE with client/server workflows           |
-
-
-# opencode-rs-sdk
-
-
-
-`opencode-rs-sdk` is a built-in skill for the Rust SDK that wraps OpenCode HTTP APIs and SSE streaming.
-
-Crate reference: [`opencode-sdk` on crates.io](https://crates.io/crates/opencode-sdk).
-
-* Covers client ergonomics, API modules, event streaming, and lifecycle patterns.
-* Documents feature flags (`http`, `sse`, optional `server` and `cli`) and platform constraints.
-* Provides usage cards, endpoint maps, and failure-mode guidance.
-
-Primary source: `.nexus/skills/opencode-rs-sdk/SKILL.md`.
-
-
-# ratkit
-
-
-
-`ratkit` is a comprehensive skill for a feature-gated Rust TUI component library built on ratatui.
-
-Crate reference: [`ratkit` on crates.io](https://crates.io/crates/ratkit).
-
-* Covers 21 modules across primitives, widgets, services, and runtime.
-* Emphasizes feature-flag correctness and stateful widget patterns.
-* Includes task playbooks, usage cards, API references, and common pitfalls.
-
-Primary source: `.nexus/skills/ratkit/SKILL.md`.
-
-
 # Output
 
 
@@ -801,3 +759,45 @@ Related Items [#related-items]
 * [output](./output--output)
 * [print\_error](./output--print_error)
 * [print\_info](./output--print_info)
+
+
+# Rust Skills
+
+
+
+This section contains Rust-oriented built-in skills.
+
+| Skill                                  | Focus                                                                   |
+| -------------------------------------- | ----------------------------------------------------------------------- |
+| [`ratkit`](./ratkit)                   | Rust TUI component library patterns, feature flags, and usage playbooks |
+| [`opencode-rs-sdk`](./opencode-rs-sdk) | Rust SDK for OpenCode HTTP + SSE with client/server workflows           |
+
+
+# opencode-rs-sdk
+
+
+
+`opencode-rs-sdk` is a built-in skill for the Rust SDK that wraps OpenCode HTTP APIs and SSE streaming.
+
+Crate reference: [`opencode-sdk` on crates.io](https://crates.io/crates/opencode-sdk).
+
+* Covers client ergonomics, API modules, event streaming, and lifecycle patterns.
+* Documents feature flags (`http`, `sse`, optional `server` and `cli`) and platform constraints.
+* Provides usage cards, endpoint maps, and failure-mode guidance.
+
+Primary source: `.nexus/skills/opencode-rs-sdk/SKILL.md`.
+
+
+# ratkit
+
+
+
+`ratkit` is a comprehensive skill for a feature-gated Rust TUI component library built on ratatui.
+
+Crate reference: [`ratkit` on crates.io](https://crates.io/crates/ratkit).
+
+* Covers 21 modules across primitives, widgets, services, and runtime.
+* Emphasizes feature-flag correctness and stateful widget patterns.
+* Includes task playbooks, usage cards, API references, and common pitfalls.
+
+Primary source: `.nexus/skills/ratkit/SKILL.md`.
