@@ -12,9 +12,8 @@
 - [nexus-1.5-context-from-code](/docs/commands/nexus-1-5-context-from-code): Propose context specs from observed user-facing behavior in code
 - [nexus-2-investigate](/docs/commands/nexus-2-investigate): Multi-agent investigation with consensus and disagreement analysis
 - [nexus-3.5-critique](/docs/commands/nexus-3-5-critique): Pre-implementation critique that stress-tests plans before execution
-- [nexus-3-plan](/docs/commands/nexus-3-plan): Convert investigation findings into an executable implementation plan
 - [nexus-4-code](/docs/commands/nexus-4-code): Technical-lead execution orchestrator for parallel implementation tracks
-- [nexus-5-llms-txt-generate](/docs/commands/nexus-5-llms-txt-generate): Strict orchestrator for full or incremental llms.txt generation
+- [nexus-create-skill-from-codebase](/docs/commands/nexus-create-skill-from-codebase): Strict orchestrator for full or incremental llms.txt generation
 - [Reference](/docs/reference): Auto-generated reference documentation
 - [Skills](/docs/skills): Shipped OpenNexus skills organized by language and domain
 - [Cli](/docs/reference/cli/cli--cli): No additional documentation available yet.
