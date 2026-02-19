@@ -96,6 +96,37 @@ function runBinary(binaryPath) {
   process.exit(typeof result.status === "number" ? result.status : 0);
 }
 
+function resolveLocalBinary() {
+  const command = process.platform === "win32" ? "where" : "which";
+  const lookup = spawnSync(command, ["opennexus"], { encoding: "utf8" });
+
+  if (lookup.error || typeof lookup.status !== "number" || lookup.status !== 0) {
+    return null;
+  }
+
+  const firstPath = lookup.stdout
+    .split(/\r?\n/)
+    .map((line) => line.trim())
+    .find(Boolean);
+
+  if (!firstPath) {
+    return null;
+  }
+
+  try {
+    const currentScript = fs.realpathSync(__filename);
+    const resolvedCandidate = fs.realpathSync(firstPath);
+    if (resolvedCandidate === currentScript) {
+      return null;
+    }
+  } catch {
+    // Ignore realpath failures and fall back to managed binary.
+    return null;
+  }
+
+  return firstPath;
+}
+
 async function ensureManagedBinary(target) {
   const cacheRoot = getCacheRoot();
   const installDir = path.join(
@@ -128,18 +159,10 @@ async function ensureManagedBinary(target) {
 }
 
 async function main() {
-  const localBinary = spawnSync("opennexus", ["--version"], {
-    stdio: "ignore",
-  });
-
-  if (!localBinary.error) {
-    runBinary("opennexus");
+  const localBinary = resolveLocalBinary();
+  if (localBinary) {
+    runBinary(localBinary);
     return;
-  }
-
-  if (localBinary.error.code !== "ENOENT") {
-    console.error(`Failed checking local opennexus: ${localBinary.error.message}`);
-    process.exit(1);
   }
 
   const target = resolveTarget();
