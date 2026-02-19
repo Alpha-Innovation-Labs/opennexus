@@ -89,7 +89,7 @@ jobs:
 
       - name: Build release binary
         shell: bash
-        run: RUSTC_WRAPPER= cargo build --release --bin opennexus --target ${{ matrix.target }}
+        run: RUSTC_WRAPPER="" cargo build --release --bin opennexus --target ${{ matrix.target }}
 
       - name: Stage binary asset (Unix)
         if: runner.os != 'Windows'
@@ -162,12 +162,18 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: "20"
+          node-version: "22.14.0"
+
+      - name: Upgrade npm for trusted publishing
+        run: npm install -g npm@latest
+
+      - name: Verify npm/node versions
+        run: |
+          node -v
+          npm -v
 
       - name: Publish opennexus to npm
         working-directory: wrappers/npm/opennexus
-        env:
-          NODE_AUTH_TOKEN: ""
         run: npm publish --access public --provenance
 
   publish-pypi:
