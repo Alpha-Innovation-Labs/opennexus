@@ -4,7 +4,7 @@
 
 install:
     @echo "Installing nexus globally..."
-    cargo install --path . --force
+    cargo install --path . --bin nexus --force
     @echo "Installation complete!"
     @echo "  - Run 'nexus --help' for CLI help"
     @echo "  - Run 'nexus setup' to extract .nexus assets"

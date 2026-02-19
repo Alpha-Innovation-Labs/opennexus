@@ -15,7 +15,7 @@ pub fn run_uninstall(format: OutputFormat) -> Result<()> {
     }
 
     let status = Command::new("cargo")
-        .args(["uninstall", "nex-us"])
+        .args(["uninstall", "--package", "nex-us", "--bin", "nexus"])
         .status()
         .context("Failed to run cargo. Is Rust/cargo installed?")?;
 

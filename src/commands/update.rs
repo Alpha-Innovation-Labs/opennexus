@@ -15,7 +15,7 @@ pub fn run_update(format: OutputFormat) -> Result<()> {
     }
 
     let status = Command::new("cargo")
-        .args(["install", "nex-us", "--force"])
+        .args(["install", "nex-us", "--bin", "nexus", "--force"])
         .status()
         .context("Failed to run cargo. Is Rust/cargo installed?")?;
 

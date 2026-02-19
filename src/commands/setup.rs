@@ -126,10 +126,9 @@ fn extract_dir_recursive(
     for subdir in dir.dirs() {
         let subdir_name = subdir.path().file_name().unwrap_or_default();
         let subdir_path = target_path.join(subdir_name);
+
         if is_root && subdir_name == "context" {
-            if !subdir_path.exists() {
-                fs::create_dir_all(&subdir_path)?;
-            }
+            extract_allowed_context_projects(subdir, &subdir_path, files_written, files_replaced)?;
             continue;
         }
 
@@ -137,6 +136,63 @@ fn extract_dir_recursive(
     }
 
     Ok(())
+}
+
+fn extract_allowed_context_projects(
+    context_dir: &Dir,
+    target_context_path: &Path,
+    files_written: &mut usize,
+    files_replaced: &mut usize,
+) -> Result<()> {
+    if !target_context_path.exists() {
+        fs::create_dir_all(target_context_path)?;
+    }
+
+    let allowlist = context_projects_allowlist();
+
+    for source in context_dir.dirs() {
+        let project = source
+            .path()
+            .file_name()
+            .unwrap_or_default()
+            .to_string_lossy()
+            .to_string();
+
+        if !allowlist.iter().any(|allowed| allowed == &project) {
+            continue;
+        }
+
+        let target = target_context_path.join(&project);
+        extract_dir_recursive(source, &target, files_written, files_replaced, false)?;
+    }
+
+    Ok(())
+}
+
+fn context_projects_allowlist() -> Vec<String> {
+    let default = vec!["fumadocs".to_string()];
+
+    let allowlist_file = match NEXUS_ASSETS.get_file("context/.extract-allowlist") {
+        Some(file) => file,
+        None => return default,
+    };
+
+    match std::str::from_utf8(allowlist_file.contents()) {
+        Ok(content) => {
+            let entries: Vec<String> = content
+                .lines()
+                .map(str::trim)
+                .filter(|line| !line.is_empty() && !line.starts_with('#'))
+                .map(ToOwned::to_owned)
+                .collect();
+            if entries.is_empty() {
+                default
+            } else {
+                entries
+            }
+        }
+        Err(_) => default,
+    }
 }
 
 /// Create symlinks in .opencode/command/ for all files in .nexus/commands/.
