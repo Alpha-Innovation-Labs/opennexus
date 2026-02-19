@@ -4,6 +4,14 @@ import { JetBrains_Mono, Space_Grotesk } from 'next/font/google';
 import type { Metadata } from 'next';
 
 export const metadata: Metadata = {
+  metadataBase: new URL('https://opennexus.xyz'),
+  openGraph: {
+    images: ['/og-image.png'],
+  },
+  twitter: {
+    card: 'summary_large_image',
+    images: ['/og-image.png'],
+  },
   icons: {
     icon: '/icon.svg',
     shortcut: '/icon.svg',
