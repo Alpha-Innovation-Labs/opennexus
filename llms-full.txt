@@ -411,6 +411,97 @@ Related Items [#related-items]
 This section is generated from Rust doc comments.
 
 
+# Output
+
+
+
+This section is generated from Rust doc comments.
+
+
+# output
+
+
+
+Signature [#signature]
+
+```rust
+mod output
+```
+
+Documentation [#documentation]
+
+Output formatting utilities for the setup-only CLI.
+
+Related Items [#related-items]
+
+* [print\_error](./output--print_error)
+* [print\_info](./output--print_info)
+* [print\_success](./output--print_success)
+
+
+# print_error
+
+
+
+Signature [#signature]
+
+```rust
+pub fn print_error(message: &str) {
+```
+
+Documentation [#documentation]
+
+Print an error message (red).
+
+Related Items [#related-items]
+
+* [output](./output--output)
+* [print\_info](./output--print_info)
+* [print\_success](./output--print_success)
+
+
+# print_info
+
+
+
+Signature [#signature]
+
+```rust
+pub fn print_info(message: &str) {
+```
+
+Documentation [#documentation]
+
+Print an info message (blue).
+
+Related Items [#related-items]
+
+* [output](./output--output)
+* [print\_error](./output--print_error)
+* [print\_success](./output--print_success)
+
+
+# print_success
+
+
+
+Signature [#signature]
+
+```rust
+pub fn print_success(message: &str) {
+```
+
+Documentation [#documentation]
+
+Print a success message (green checkmark).
+
+Related Items [#related-items]
+
+* [output](./output--output)
+* [print\_error](./output--print_error)
+* [print\_info](./output--print_info)
+
+
 # Cli
 
 
@@ -662,97 +753,6 @@ Related Items [#related-items]
 
 
 This section is generated from Rust doc comments.
-
-
-# Output
-
-
-
-This section is generated from Rust doc comments.
-
-
-# output
-
-
-
-Signature [#signature]
-
-```rust
-mod output
-```
-
-Documentation [#documentation]
-
-Output formatting utilities for the setup-only CLI.
-
-Related Items [#related-items]
-
-* [print\_error](./output--print_error)
-* [print\_info](./output--print_info)
-* [print\_success](./output--print_success)
-
-
-# print_error
-
-
-
-Signature [#signature]
-
-```rust
-pub fn print_error(message: &str) {
-```
-
-Documentation [#documentation]
-
-Print an error message (red).
-
-Related Items [#related-items]
-
-* [output](./output--output)
-* [print\_info](./output--print_info)
-* [print\_success](./output--print_success)
-
-
-# print_info
-
-
-
-Signature [#signature]
-
-```rust
-pub fn print_info(message: &str) {
-```
-
-Documentation [#documentation]
-
-Print an info message (blue).
-
-Related Items [#related-items]
-
-* [output](./output--output)
-* [print\_error](./output--print_error)
-* [print\_success](./output--print_success)
-
-
-# print_success
-
-
-
-Signature [#signature]
-
-```rust
-pub fn print_success(message: &str) {
-```
-
-Documentation [#documentation]
-
-Print a success message (green checkmark).
-
-Related Items [#related-items]
-
-* [output](./output--output)
-* [print\_error](./output--print_error)
-* [print\_info](./output--print_info)
 
 
 # Rust Skills
