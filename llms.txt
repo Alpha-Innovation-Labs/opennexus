@@ -22,8 +22,6 @@
 - [OutputFormat](/docs/reference/cli/cli--outputformat): No additional documentation available yet.
 - [parse_args](/docs/reference/cli/cli--parse_args): No additional documentation available yet.
 - [Cli](/docs/reference/cli): Generated cli reference
-- [crate_root](/docs/reference/crate-root/crate_root--crate_root): Nexus CLI library exports.
-- [Crate Root](/docs/reference/crate-root): Generated crate-root reference
 - [commands](/docs/reference/commands/commands--commands): Command implementations for the Nexus CLI.
 - [run_setup](/docs/reference/commands/commands-setup--run_setup): Run the setup command.
 - [setup](/docs/reference/commands/commands-setup--setup): Setup command for initializing OpenNexus in a project.
@@ -32,6 +30,8 @@
 - [run_update](/docs/reference/commands/commands-update--run_update): Run the update command.
 - [update](/docs/reference/commands/commands-update--update): Update command for upgrading OpenNexus via cargo.
 - [Commands](/docs/reference/commands): Generated commands reference
+- [crate_root](/docs/reference/crate-root/crate_root--crate_root): Nexus CLI library exports.
+- [Crate Root](/docs/reference/crate-root): Generated crate-root reference
 - [Rust Skills](/docs/skills/rust): Shipped Rust-focused skills for OpenNexus
 - [opencode-rs-sdk](/docs/skills/rust/opencode-rs-sdk): Built-in skill for the OpenCode Rust SDK HTTP and SSE workflows
 - [ratkit](/docs/skills/rust/ratkit): Built-in skill for the ratkit Rust TUI library and feature-gated modules

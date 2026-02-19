@@ -498,32 +498,6 @@ Related Items [#related-items]
 This section is generated from Rust doc comments.
 
 
-# crate_root
-
-
-
-Signature [#signature]
-
-```rust
-mod crate_root
-```
-
-Documentation [#documentation]
-
-Nexus CLI library exports.
-
-Related Items [#related-items]
-
-* No related items in this module yet.
-
-
-# Crate Root
-
-
-
-This section is generated from Rust doc comments.
-
-
 # commands
 
 
@@ -664,6 +638,32 @@ Related Items [#related-items]
 
 
 # Commands
+
+
+
+This section is generated from Rust doc comments.
+
+
+# crate_root
+
+
+
+Signature [#signature]
+
+```rust
+mod crate_root
+```
+
+Documentation [#documentation]
+
+Nexus CLI library exports.
+
+Related Items [#related-items]
+
+* No related items in this module yet.
+
+
+# Crate Root
 
 
 
