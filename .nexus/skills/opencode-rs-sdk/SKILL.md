@@ -9,10 +9,12 @@ Use this file to understand the SDK structure, feature flags, and correct API us
 1. **Always check feature flags** before using APIs - `http` and `sse` are enabled by default, `server` and `cli` require explicit enabling.
 2. **Unix platforms only** - Windows will fail at compile time with `compile_error!`.
 3. **Subscribe before sending** - For streaming workflows, create SSE subscription before sending async prompts to avoid missing early events.
-4. **Use convenience methods** - Prefer `Client::run_simple_text()` and `send_text_async_and_wait_for_idle()` for common workflows.
+4. **Use convenience methods** - Prefer `Client::run_simple_text()` and `wait_for_idle_text()` for common workflows.
 5. **Handle all error variants** - Match on `OpencodeError` variants, using helper methods like `is_not_found()` and `is_validation_error()`.
 6. **Drop subscriptions to cancel** - `SseSubscription` and `RawSseSubscription` cancel on drop; explicitly call `.close()` for early termination.
 7. **Server processes auto-kill** - `ManagedServer` kills child process on drop; call `.stop()` for graceful shutdown.
+8. **Directory header required** - Most operations require `x-opencode-directory` header set via `ClientBuilder::directory()` or `ManagedRuntimeBuilder::directory()`.
+9. **URL encode path parameters** - All path parameters must be URL-encoded using `urlencoding::encode()` to handle special characters.
 
 ## Environment and Version Constraints
 
@@ -116,7 +118,7 @@ Chain configuration before building:
 - `base_url(url)` - Server URL (default: `http://127.0.0.1:4096`)
 - `directory(dir)` - Set `x-opencode-directory` header
 - `timeout_secs(secs)` - Request timeout (default: 300)
-- `build()` - Create the client
+- `build()` - Create the client (requires `http` feature)
 
 ### HTTP API Accessor Methods
 
@@ -180,18 +182,28 @@ All API modules require the `http` feature (enabled by default).
 | `list()` | GET /session | List all sessions |
 | `delete(id)` | DELETE /session/{id} | Delete session |
 | `fork(id)` | POST /session/{id}/fork | Fork session |
+| `abort(id)` | POST /session/{id}/abort | Abort active session |
 | `update(id, req)` | PATCH /session/{id} | Update session |
+| `init(id)` | POST /session/{id}/init | Initialize session |
 | `share(id)` | POST /session/{id}/share | Share session |
 | `unshare(id)` | DELETE /session/{id}/share | Unshare session |
 | `revert(id, req)` | POST /session/{id}/revert | Revert to message |
+| `unrevert(id)` | POST /session/{id}/unrevert | Undo revert |
 | `summarize(id, req)` | POST /session/{id}/summarize | Summarize session |
-| `compact(id)` | POST /session/{id}/compact | Compact session |
 | `diff(id)` | GET /session/{id}/diff | Get session diff |
-| `export(id)` | GET /session/{id}/export | Export session |
-| `status()` | GET /status | Get server status |
+| `diff_since_message(id, msg_id)` | GET /session/{id}/diff?messageId={msg_id} | Get diff since message |
+| `status()` | GET /session/status | Get server status |
+| `children(id)` | GET /session/{id}/children | Get forked sessions |
 | `todo(id)` | GET /session/{id}/todo | Get todo items |
-| `mark_todo(id, todo_id)` | POST /session/{id}/todo/{todo_id} | Mark todo done |
-| `unmark_todo(id, todo_id)` | DELETE /session/{id}/todo/{todo_id} | Unmark todo |
+
+**Important:** Session creation requires `directory` as a query parameter, not in the JSON body:
+```rust
+let path = if let Some(directory) = &req.directory {
+    format!("/session?directory={}", urlencoding::encode(directory))
+} else {
+    "/session".to_string()
+};
+```
 
 ### MessagesApi ([`src/http/messages.rs`](src/http/messages.rs))
 
@@ -204,12 +216,14 @@ All API modules require the `http` feature (enabled by default).
 | `get(session_id, message_id)` | GET /session/{id}/message/{mid} | Get message |
 | `remove(session_id, message_id)` | DELETE /session/{id}/message/{mid} | Remove message |
 
+**Important:** `prompt()` and `prompt_async()` return empty body on success - use `request_empty()` not `request_json()`.
+
 ### Other API Modules
 
 - **PartsApi** (`src/http/parts.rs`) - Message part CRUD operations
 - **PermissionsApi** (`src/http/permissions.rs`) - Permission management
 - **QuestionsApi** (`src/http/questions.rs`) - Question operations
-- **FilesApi** (`src/http/files.rs`) - File operations
+- **FilesApi** (`src/http/files.rs`) - File operations (requires URL encoding for paths)
 - **FindApi** (`src/http/find.rs`) - Search operations
 - **ProvidersApi** (`src/http/providers.rs`) - Provider management
 - **McpApi** (`src/http/mcp.rs`) - MCP operations
@@ -240,7 +254,7 @@ pub struct Session {
 }
 
 pub struct SessionCreateOptions { /* builder pattern */ }
-pub struct CreateSessionRequest { parent_id, title, permission, directory }
+pub struct CreateSessionRequest { parent_id, title, permission, directory }  // directory is query param!
 pub struct UpdateSessionRequest { title }
 pub struct SummarizeRequest { provider_id, model_id, auto }
 pub struct RevertRequest { message_id, part_id }
@@ -279,7 +293,7 @@ pub enum Part {  // 12 variants
     Retry { id, attempt, error },
     Compaction { id, auto },
     Subtask { id, prompt, description, agent, command },
-    Unknown,
+    Unknown,  // For forward compatibility
 }
 
 pub enum PromptPart {
@@ -299,14 +313,16 @@ pub struct PromptRequest {
     pub variant: Option<String>,
 }
 
-pub enum ToolState {  // 5 variants
-    Pending(ToolStatePending),
-    Running(ToolStateRunning),
-    Completed(ToolStateCompleted),
+pub enum ToolState {  // 5 variants - ORDER MATTERS for untagged deserialization
+    Completed(ToolStateCompleted),   // Must come before more specific variants
     Error(ToolStateError),
+    Running(ToolStateRunning),
+    Pending(ToolStatePending),
     Unknown(serde_json::Value),
 }
 ```
+
+**Important:** `ToolState` uses `#[serde(untagged)]`. More specific variants (`Completed`, `Error`) with more required fields must come before less specific ones (`Pending`, `Running`) to avoid incorrect deserialization.
 
 ### Event Types ([`src/types/event.rs`](src/types/event.rs))
 
@@ -318,21 +334,21 @@ pub enum ToolState {  // 5 variants
 
 **Messages (4):** `MessageUpdated`, `MessageRemoved`, `MessagePartUpdated`, `MessagePartRemoved`
 
-**PTY (4):** `PtyCreated`, `PtyData`, `PtyClosed`, `PtyResized`
+**PTY (4):** `PtyCreated`, `PtyUpdated`, `PtyExited`, `PtyDeleted`
 
-**Questions (3):** `QuestionCreated`, `QuestionUpdated`, `QuestionRemoved`
+**Permissions (4):** `PermissionUpdated`, `PermissionReplied`, `PermissionAsked`, `PermissionRepliedNext`
 
-**Permissions (3):** `PermissionRequested`, `PermissionReplied`, `PermissionExecuted`
+**Project/Files (4):** `ProjectUpdated`, `FileEdited`, `FileWatcherUpdated`, `VcsBranchUpdated`
 
-**Files (2):** `FileChanged`, `FileSynced`
+**LSP/Tools (4):** `LspUpdated`, `LspClientDiagnostics`, `CommandExecuted`, `McpToolsChanged`
 
-**Worktree (2):** `WorktreeSyncStarted`, `WorktreeSyncCompleted`
+**Installation (3):** `InstallationUpdated`, `InstallationUpdateAvailable`, `IdeInstalled`
 
-**MCP (4):** `MCPServerConnected`, `MCPServerDisconnected`, `MCPError`, `MCPLog`
+**TUI (4):** `TuiPromptAppend`, `TuiCommandExecute`, `TuiToastShow`, `TuiSessionSelect`
 
-**Tool (2):** `ToolCallCreated`, `ToolCallUpdated`
+**Todo (1):** `TodoUpdated`
 
-**Other (4):** `ConfigUpdated`, `ProviderUpdated`, `FindResultsUpdated`, `Notification`
+Event deserialization uses `#[serde(tag = "type")]` - the `"type"` field determines the variant. Session ID aliases are supported via `#[serde(alias = "sessionID")]`. Unknown events deserialize to `Event::Unknown` for forward compatibility.
 
 ## SSE Streaming
 
@@ -359,12 +375,12 @@ pub struct SessionEventRouterOptions {
 }
 
 pub struct SseStreamStats {
-    pub events_in: u64,
-    pub events_out: u64,
-    pub dropped: u64,
-    pub parse_errors: u64,
-    pub reconnects: u64,
-    pub last_event_id: Option<String>,
+    pub events_in: u64,        // server frames received
+    pub events_out: u64,      // delivered to caller
+    pub dropped: u64,         // filtered or channel full
+    pub parse_errors: u64,     // bad JSON
+    pub reconnects: u64,       // retry count
+    pub last_event_id: Option<String>,  // resumption token
 }
 ```
 
@@ -384,7 +400,7 @@ pub async fn session_event_router(&self, opts: SessionEventRouterOptions) -> Res
 
 ```rust
 impl SseSubscription {
-    pub async fn recv(&mut self) -> Option<Event>;
+    pub async fn recv(&mut self) -> Option<Event>;  // None = stream closed
     pub fn stats(&self) -> SseStreamStats;
     pub fn close(&self);
 }
@@ -408,7 +424,13 @@ impl SessionEventRouter {
 - Jitter applied to prevent thundering herd
 - Last-Event-ID header sent for resumption
 - No max retry limit (infinite reconnection)
-- Backoff resets on successful connection
+- Backoff resets on successful connection (`EsEvent::Open`)
+
+### Session Filtering
+
+- Client-side session filtering - `subscribe_session()` filters events after parsing; server still sends all events
+- Session ID extraction has fallbacks - for `message.part.updated`, extracts from `properties.part.sessionID|sessionId`; for `session.idle/error`, from `properties.sessionID|sessionId`
+- Events without session ID are dropped when filtered (counts toward `dropped` stat)
 
 ## Server and CLI Features
 
@@ -474,6 +496,33 @@ pub struct CliRunner {
 
 CliEvent helper methods: `is_text()`, `is_step_start()`, `is_step_finish()`, `is_error()`, `is_tool_use()`, `text()`.
 
+**Important:** CLI stderr is inherited (`Stdio::inherit()`) to prevent buffer deadlock when CLI writes >64KB to stdout.
+
+### ManagedRuntime (requires server and http features)
+
+Combined server process + client for integration testing:
+
+```rust
+let runtime = ManagedRuntime::builder()
+    .hostname("127.0.0.1")
+    .port(4096)
+    .directory("/test/project")
+    .startup_timeout_ms(10_000)
+    .start()
+    .await?;
+
+let client = runtime.client();
+// Use client...
+runtime.stop().await?;
+// Or just drop runtime to stop server
+```
+
+Quick start with current directory:
+```rust
+let runtime = ManagedRuntime::start_for_cwd().await?;
+let session = runtime.client().run_simple_text("test").await?;
+```
+
 ## Usage Cards
 
 ### Client Usage Card
@@ -504,6 +553,7 @@ let client = Client::builder().build()?;
 **Pitfalls:**
 - Forgetting to subscribe before `prompt_async` - events will be lost
 - Not handling `OpencodeError::Http` - may miss structured error data
+- Missing `http` feature causes `build()` to return `OpencodeError::InvalidConfig`
 
 **Source:** [`src/client.rs`](src/client.rs)
 
@@ -537,6 +587,7 @@ let sessions = client.sessions();
 **Pitfalls:**
 - Session IDs are strings - don't assume UUID format
 - `create_with` is more ergonomic than manual `CreateSessionRequest`
+- **Critical:** `directory` is a query parameter, NOT in the JSON body
 
 **Source:** [`src/http/sessions.rs`](src/http/sessions.rs)
 
@@ -574,36 +625,89 @@ let messages = client.messages();
 
 ---
 
-### SseSubscription Usage Card
+### SseSubscriber Usage Card
 
-**Use when:** Streaming real-time events from OpenCode
+**Use when:** Consuming real-time OpenCode events (session updates, message streaming, permission requests)
 
 **Enable/Install:** `sse` feature (default)
 
 **Import/Invoke:**
 ```rust
-use opencode_sdk::sse::SseOptions;
-let subscription = client.subscribe_session(&session_id).await?;
+use opencode_sdk::sse::{SseSubscriber, SseOptions};
+
+let subscriber = SseSubscriber::new(
+    "http://127.0.0.1:4096".into(),
+    Some("/my/project".into()),
+    None,  // optional ReqClient
+);
+let mut sub = subscriber.subscribe(SseOptions::default()).await?;
+while let Some(event) = sub.recv().await {
+    // handle event
+}
 ```
 
 **Minimal flow:**
-1. Subscribe: `let mut sub = client.subscribe_session(&id).await?`
-2. Receive: `while let Some(event) = sub.recv().await { /* process */ }`
-3. Stats: `let stats = sub.stats()` for diagnostics
+1. Create subscriber: `SseSubscriber::new(base_url, directory, client)`
+2. Subscribe: `subscriber.subscribe(SseOptions::default()).await?`
+3. Receive: `while let Some(event) = sub.recv().await { /* process */ }`
 4. Drop or `sub.close()` to cancel
 
 **Key APIs:**
-- `SseSubscription::recv().await` - Get next event
-- `SseSubscription::stats()` - Stream diagnostics
-- `SseSubscription::close()` - Cancel subscription
-- `SessionEventRouter::subscribe(id).await` - Multiplexed session subscription
+- `subscribe(opts)` - Subscribe to typed events
+- `subscribe_session(session_id, opts)` - Filter by session
+- `subscribe_global(opts)` - Subscribe to global events
+- `subscribe_raw(opts)` - Raw JSON frames for debugging
 
 **Pitfalls:**
-- Not subscribing before async operations - miss early events
-- Channel lag causes dropped events - check `stats().dropped`
-- Parse errors in `stats().parse_errors` indicate schema mismatch
+- Drop cancels stream - both `SseSubscription` and `RawSseSubscription` cancel on drop
+- `recv()` can return `None` (stream closed) - handle this case
+- Monitor `stats().dropped` to detect backpressure or filtering issues
 
 **Source:** [`src/sse.rs`](src/sse.rs)
+
+---
+
+### Event Enum Usage Card
+
+**Use when:** Handling specific OpenCode event types (40 variants)
+
+**Enable/Install:** Part of `opencode_sdk::types::event` module
+
+**Import/Invoke:**
+```rust
+use opencode_sdk::types::event::Event;
+```
+
+**Minimal flow:**
+```rust
+let event: Event = serde_json::from_str(&json)?;
+match event {
+    Event::MessagePartUpdated { properties } => {
+        // Streaming text delta
+        if let Some(delta) = &properties.delta {
+            print!("{}", delta);
+        }
+    }
+    Event::SessionIdle { properties } => println!("Session idle: {}", properties.info.id),
+    Event::PermissionAsked { properties } => {
+        let request = &properties.request;
+        println!("Permission: {} for {:?}", request.permission, request.patterns);
+    }
+    Event::Unknown => println!("Unknown event type"),
+    _ => {}
+}
+```
+
+**Key APIs:**
+- `event.session_id()` - Extract session ID if present (returns `Option<&str>`)
+- `event.is_heartbeat()` - Check for keep-alive
+- `event.is_connected()` - Check for connection event
+
+**Pitfalls:**
+- Only 10 of 40 event variants contain session_id - use `session_id()` method which handles this correctly
+- Unknown types deserialize to `Event::Unknown` - always handle this case
+
+**Source:** [`src/types/event.rs`](src/types/event.rs)
 
 ---
 
@@ -675,15 +779,71 @@ let mut runner = CliRunner::start("Hello", RunOptions::new()).await?;
 
 **Source:** [`src/cli.rs`](src/cli.rs)
 
+---
+
+### OpencodeError Usage Card
+
+**Use when:** Handling errors from SDK operations
+
+**Enable/Install:** Part of `opencode_sdk` crate (re-exported from `lib.rs`)
+
+**Import/Invoke:**
+```rust
+use opencode_sdk::{OpencodeError, Result};
+
+fn handle_error(err: OpencodeError) {
+    match err {
+        OpencodeError::Http { status, name, message, .. } => {
+            eprintln!("HTTP {}: {}", status, message);
+        }
+        OpencodeError::Network(msg) => {
+            eprintln!("Network error: {}", msg);
+        }
+        OpencodeError::StreamClosed => {
+            eprintln!("SSE stream closed unexpectedly");
+        }
+        _ => eprintln!("Other error: {}", err),
+    }
+}
+```
+
+**Minimal flow:**
+```rust
+let result = client.run_simple_text("test").await;
+if let Err(e) = result {
+    if e.is_not_found() {
+        // Handle 404
+    } else if e.is_server_error() {
+        // Handle 5xx
+    }
+}
+```
+
+**Key APIs:**
+- `OpencodeError::http(status, body)` - Parse HTTP error with NamedError body
+- `is_not_found()` - Check for 404 errors
+- `is_validation_error()` - Check for 400 validation errors
+- `is_server_error()` - Check for 5xx errors
+- `error_name()` - Get NamedError name (e.g., "ValidationError")
+
+**Pitfalls:**
+- HTTP errors may contain structured `data` field with additional context
+- Plain text HTTP responses fall back to generic "HTTP {status}" message
+- SSE `StreamClosed` error requires re-subscription to recover
+
+**Source:** [`src/error.rs`](src/error.rs)
+
+---
+
 ## API Reference
 
 ### Core Types
 
 | Type | Location | Description |
 |------|----------|-------------|
-| `Client` | [`src/client.rs:15`](src/client.rs:15) | Main ergonomic API client |
-| `ClientBuilder` | [`src/client.rs:27`](src/client.rs:27) | Builder for Client |
-| `OpencodeError` | [`src/error.rs:9`](src/error.rs:9) | Error enum (13 variants) |
+| `Client` | [`src/client.rs:12`](src/client.rs:12) | Main ergonomic API client |
+| `ClientBuilder` | [`src/client.rs:24`](src/client.rs:24) | Builder for Client |
+| `OpencodeError` | [`src/error.rs:7`](src/error.rs:7) | Error enum (13 variants) |
 | `Result<T>` | [`src/error.rs:6`](src/error.rs:6) | Type alias for Result |
 
 ### SSE Types
@@ -705,6 +865,7 @@ let mut runner = CliRunner::start("Hello", RunOptions::new()).await?;
 |------|----------|-------------|
 | `ManagedServer` | [`src/server.rs:88`](src/server.rs:88) | Managed server process |
 | `ServerOptions` | [`src/server.rs:14`](src/server.rs:14) | Server configuration |
+| `ManagedRuntime` | [`src/runtime.rs`](src/runtime.rs) | Server + Client combo |
 | `CliRunner` | [`src/cli.rs:186`](src/cli.rs:186) | CLI wrapper |
 | `RunOptions` | [`src/cli.rs:13`](src/cli.rs:13) | CLI options |
 | `CliEvent` | [`src/cli.rs:133`](src/cli.rs:133) | CLI output event |
@@ -723,14 +884,14 @@ let mut runner = CliRunner::start("Hello", RunOptions::new()).await?;
 | Type | Location | Description |
 |------|----------|-------------|
 | `Session` | [`src/types/session.rs:9`](src/types/session.rs:9) | Session model |
-| `SessionCreateOptions` | [`src/types/session.rs:152`](src/types/session.rs:152) | Builder for create |
+| `SessionCreateOptions` | [`src/types/session.rs:153`](src/types/session.rs:153) | Builder for create |
 | `Message` | [`src/types/message.rs:45`](src/types/message.rs:45) | Message with parts |
-| `MessageInfo` | [`src/types/message.rs:9`](src/types/message.rs:9) | Message metadata |
+| `MessageInfo` | [`src/types/message.rs:11`](src/types/message.rs:11) | Message metadata |
 | `Part` | [`src/types/message.rs:75`](src/types/message.rs:75) | Content part enum (12 variants) |
 | `PromptRequest` | [`src/types/message.rs:513`](src/types/message.rs:513) | Prompt request |
-| `PromptPart` | [`src/types/message.rs:582`](src/types/message.rs:582) | Prompt part enum |
-| `Event` | [`src/types/event.rs:20`](src/types/event.rs:20) | SSE event enum (40 variants) |
-| `GlobalEventEnvelope` | [`src/types/event.rs:11`](src/types/event.rs:11) | Global event wrapper |
+| `PromptPart` | [`src/types/message.rs:584`](src/types/message.rs:584) | Prompt part enum |
+| `Event` | [`src/types/event.rs:22`](src/types/event.rs:22) | SSE event enum (40 variants) |
+| `GlobalEventEnvelope` | [`src/types/event.rs:12`](src/types/event.rs:12) | Global event wrapper |
 | `ToolState` | [`src/types/message.rs:423`](src/types/message.rs:423) | Tool execution state |
 
 ## Common Pitfalls
@@ -739,10 +900,10 @@ let mut runner = CliRunner::start("Hello", RunOptions::new()).await?;
 
 ```rust
 // ❌ Won't compile without http feature
-let client = Client::builder().build()?;  // Error: http feature required
+let client = Client::builder().build()?;  // Returns OpencodeError::InvalidConfig
 
 // ✅ Enable http feature in Cargo.toml
-opencode-rs-sdk = { version = "0.1", features = ["http"] }
+opencode-sdk = { version = "0.1", features = ["http"] }
 ```
 
 ### Missing SSE Subscription
@@ -762,7 +923,7 @@ client.send_text_async(&session_id, "Hello", None).await?;
 
 ```rust
 // ❌ Compiling on Windows will fail with:
-// error: opencode_rs only supports Unix-like platforms (Linux/macOS). Windows is not supported.
+// error: opencode_sdk only supports Unix-like platforms (Linux/macOS). Windows is not supported.
 
 // ✅ Use WSL, Docker, or macOS/Linux
 ```
@@ -817,11 +978,47 @@ if sub.stats().dropped > 0 {
 }
 ```
 
+### Session Directory Not Applied
+
+```rust
+// ❌ Treating directory as body field
+let request = CreateSessionRequest {
+    directory: Some("/my/project".to_string()),
+    ..Default::default()
+};
+// Session won't have directory context!
+
+// ✅ Directory is a query parameter - use builder
+let request = SessionCreateOptions::new()
+    .with_directory("/my/project")
+    .into();
+```
+
+### URL Encoding Missing
+
+```rust
+// ❌ Path with special characters causes 404
+let content = files.read("path/with spaces/file.txt").await;
+
+// ✅ URL encode path parameters
+let content = files.read(&urlencoding::encode("path/with spaces/file.txt")).await;
+```
+
+### Blocking on recv() Without Timeout
+
+```rust
+// ❌ Can hang indefinitely if stream closes
+let event = subscription.recv().await;
+
+// ✅ Use timeout
+let event = tokio::time::timeout(Duration::from_secs(30), subscription.recv()).await?;
+```
+
 ## Optional
 
 ### Additional Resources
 
-- [API Documentation](https://docs.rs/opencode-rs-sdk): Full rustdocs
+- [API Documentation](https://docs.rs/opencode-sdk): Full rustdocs
 - [Repository](https://github.com/allisoneer/agentic_auxilary): Source code
 - [OpenCode Documentation](https://opencode.ai): Platform docs
 
@@ -861,4 +1058,4 @@ Apache-2.0
 
 ---
 
-*Generated for opencode-rs-sdk v0.1.3*
+*Generated for opencode-sdk v0.1.7*

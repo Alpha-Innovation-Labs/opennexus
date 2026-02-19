@@ -105,6 +105,7 @@ Each subagent must:
   - the current `llms.txt` content (incremental mode)
   - required document shape and usage-card requirements
   - explicit instruction to comply with `.nexus/rules/llms-txt.md`
+  - **Must read the actual version from the project's manifest file** (e.g., Cargo.toml, package.json, pyproject.toml) and use it in the generated file
 - Assembly subagent responsibilities:
   - In full mode: consolidate all domain drafts into one unified `llms.txt` draft.
   - In incremental mode: update only impacted sections/cards and preserve untouched sections verbatim.
@@ -126,6 +127,7 @@ Each subagent must:
   - verify every quality-gate rule
   - verify links, counts, and referenced paths
   - verify usage-card API names against real code symbols
+  - **verify version string matches the project's manifest file** (common mistake: hardcoding wrong version)
   - verify incremental updates only touched impacted sections unless full-mode escalation occurred
   - return pass/fail with a concrete issue list and required fixes
 
@@ -206,6 +208,7 @@ Card coverage rules:
 - no stale/incorrect counts (workspace crate counts must match current state)
 - no unverifiable claims
 - no generic filler text
+- version string matches project's manifest file (Cargo.toml, package.json, etc.)
 - usage cards reflect inferred entity type and include executable usage guidance
 - all APIs named in usage cards are verified against current codebase symbols
 - incremental updates changed only impacted sections unless escalation to full mode occurred
