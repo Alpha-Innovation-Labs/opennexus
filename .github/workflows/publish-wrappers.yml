@@ -89,7 +89,7 @@ jobs:
 
       - name: Build release binary
         shell: bash
-        run: cargo build --release --bin opennexus --target ${{ matrix.target }}
+        run: RUSTC_WRAPPER= cargo build --release --bin opennexus --target ${{ matrix.target }}
 
       - name: Stage binary asset (Unix)
         if: runner.os != 'Windows'
