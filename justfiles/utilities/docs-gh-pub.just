@@ -23,9 +23,15 @@ docs-gh-pub:
     fi
 
     REPO_NAME=$(basename "${REMOTE_URL%.git}")
-    BASE_PATH="/${REPO_NAME}"
+    CUSTOM_DOMAIN="opennexus.xyz"
 
-    echo "Building docs for GitHub Pages (base path: ${BASE_PATH})..."
+    if [[ -n "$CUSTOM_DOMAIN" ]]; then
+        BASE_PATH=""
+    else
+        BASE_PATH="/${REPO_NAME}"
+    fi
+
+    echo "Building docs for GitHub Pages (base path: ${BASE_PATH:-/}, custom domain: ${CUSTOM_DOMAIN:-none})..."
     (
         cd docs
         bun install
@@ -61,7 +67,9 @@ docs-gh-pub:
 
     rsync -a --delete --exclude=.git docs/out/ "$WORKTREE_DIR"/
     touch "$WORKTREE_DIR/.nojekyll"
-    printf '%s\n' "opennexus.xyz" > "$WORKTREE_DIR/CNAME"
+    if [[ -n "$CUSTOM_DOMAIN" ]]; then
+        printf '%s\n' "$CUSTOM_DOMAIN" > "$WORKTREE_DIR/CNAME"
+    fi
 
     (
         cd "$WORKTREE_DIR"
