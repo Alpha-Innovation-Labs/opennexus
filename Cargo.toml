@@ -1,0 +1,33 @@
+[workspace]
+members = ["."]
+resolver = "2"
+
+[package]
+name = "nexus-cli"
+version = "0.1.2"
+edition = "2021"
+description = "Thin CLI client for the Nexus context-driven development system"
+authors = ["Alpha"]
+license = "MIT"
+autobins = false
+
+[lib]
+name = "nexus_cli"
+
+[dependencies]
+clap = { version = "4.5", features = ["derive"] }
+anyhow = "1.0"
+include_dir = "0.7"
+
+[[bin]]
+name = "nexus"
+path = "src/main.rs"
+
+[dev-dependencies]
+tempfile = "3.0"
+
+[workspace.metadata.dev-dependencies]
+# Allow optional RAG features to be toggled during development
+# Heavy dependencies (lancedb, fastembed) are now optional via the `rag` feature
+# Use: cargo build --features rag to enable RAG functionality
+# Default builds exclude RAG to reduce compile time (~67s savings)
