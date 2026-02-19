@@ -1,0 +1,6 @@
+1:"$Sreact.fragment"
+2:I[682725,["/opennexus/_next/static/chunks/4aceff5238a9a8c7.js","/opennexus/_next/static/chunks/7826e780302d0993.js","/opennexus/_next/static/chunks/90080f4179a98991.js","/opennexus/_next/static/chunks/abb7cfb563747c0a.js","/opennexus/_next/static/chunks/0accadcb97ada296.js"],"HeroTemplate"]
+3:I[897367,["/opennexus/_next/static/chunks/d96012bcfc98706a.js","/opennexus/_next/static/chunks/73e3194f06db260e.js"],"OutletBoundary"]
+4:"$Sreact.suspense"
+0:{"buildId":"pr-U4mGwOthgT7Eqk9B7R","rsc":["$","$1","c",{"children":[["$","$L2",null,{}],[["$","script","script-0",{"src":"/opennexus/_next/static/chunks/0accadcb97ada296.js","async":true}]],["$","$L3",null,{"children":["$","$4",null,{"name":"Next.MetadataOutlet","children":"$@5"}]}]]}],"loading":null,"isPartial":false}
+5:null

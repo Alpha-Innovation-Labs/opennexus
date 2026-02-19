@@ -1,0 +1,797 @@
+# Quickstart
+
+
+
+OpenNexus is a Rust CLI package (`opennexus`) centered on the `nexus` command. It installs governance and workflow assets into your project, keeps command specs in sync, and gives teams a repeatable way to run context-driven development.
+
+Start Here [#start-here]
+
+1. Install the CLI:
+
+```bash
+cargo install opennexus
+```
+
+2. Initialize OpenNexus in your project root:
+
+```bash
+nexus setup
+```
+
+After install + setup, your repository is prepared with Nexus assets as documented in the README:
+
+```text
+.
+├── .nexus/
+│   ├── .version
+│   ├── commands/
+│   │   ├── nexus-0-prompt.md
+│   │   ├── nexus-1.2-context-create.md
+│   │   └── ...
+│   ├── context/
+│   │   ├── .extract-allowlist
+│   │   ├── nexus/
+│   │   ├── nexus-cli/
+│   │   └── fumadocs/
+│   ├── rules/
+│   │   ├── context.md
+│   │   ├── rs.md
+│   │   └── ...
+│   └── templates/
+│       ├── PROJECT.md
+│       ├── AGENTS.md
+│       └── nexus/
+└── .opencode/
+    └── command/
+        ├── nexus-0-prompt.md -> ../../.nexus/commands/nexus-0-prompt.md
+        ├── nexus-1.2-context-create.md -> ../../.nexus/commands/nexus-1.2-context-create.md
+        └── ...
+```
+
+If you are new to the workflow, read the [Context Driven Development (CDD) guide](/docs/cdd) for the specification model and project structure.
+
+Core Commands [#core-commands]
+
+| Command           | What it does                                                                         |
+| ----------------- | ------------------------------------------------------------------------------------ |
+| `nexus setup`     | Installs/refreshes `.nexus` assets and `.opencode/command` links in the current repo |
+| `nexus update`    | Upgrades the installed `nexus` command to the latest published version               |
+| `nexus uninstall` | Removes the globally installed `nexus` command                                       |
+| `nexus --help`    | Shows available commands and options                                                 |
+
+Features [#features]
+
+Slash Commands [#slash-commands]
+
+OpenCode command-form workflows are documented in the [Slash Commands catalog](/docs/commands).
+
+| Slash Command                                                               | Purpose                                                                                 |
+| --------------------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [`nexus-0-prompt`](/docs/commands/nexus-0-prompt)                           | Rewrites a user prompt for clarity/structure and returns only the rewritten prompt      |
+| [`nexus-1.1-context-search`](/docs/commands/nexus-1-1-context-search)       | Finds relevant Desired Outcomes and Next Actions from `.nexus/context/`                 |
+| [`nexus-1.2-context-create`](/docs/commands/nexus-1-2-context-create)       | Creates new context specs from goals with correct IDs/prefixes and E2E-testable actions |
+| [`nexus-1.3-context-sync`](/docs/commands/nexus-1-3-context-sync)           | Produces an analysis-only Context Sync Report without editing files                     |
+| [`nexus-1.4-context-review`](/docs/commands/nexus-1-4-context-review)       | Audits context quality, proposes fixes, and can suggest context splitting               |
+| [`nexus-1.5-context-from-code`](/docs/commands/nexus-1-5-context-from-code) | Proposes candidate contexts or updates by analyzing code behavior                       |
+| [`nexus-2-investigate`](/docs/commands/nexus-2-investigate)                 | Runs 5 parallel analysts and consolidates severity-grouped findings                     |
+| [`nexus-3-plan`](/docs/commands/nexus-3-plan)                               | Converts investigation findings into a structured implementation plan                   |
+| [`nexus-3.5-critique`](/docs/commands/nexus-3-5-critique)                   | Stress-tests a plan for risks, logic gaps, and edge cases                               |
+| [`nexus-4-code`](/docs/commands/nexus-4-code)                               | Orchestrates implementation tracks across parallel workstreams                          |
+| [`nexus-5-llms-txt-generate`](/docs/commands/nexus-5-llms-txt-generate)     | Orchestrates full/incremental `llms.txt` generation with quality gates                  |
+
+Skills [#skills]
+
+OpenNexus ships built-in skills under [Skills -> Rust](/docs/skills/rust).
+
+| Skill                                                  | Purpose                                                                                          |
+| ------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
+| [`ratkit`](/docs/skills/rust/ratkit)                   | Operational guide for the ratkit Rust TUI ecosystem, feature flags, modules, and usage patterns  |
+| [`opencode-rs-sdk`](/docs/skills/rust/opencode-rs-sdk) | Operational guide for OpenCode Rust SDK HTTP, SSE streaming, and managed server/client workflows |
+
+llms.txt Generation [#llmstxt-generation]
+
+OpenNexus can use AIs to generate a friendly `llms.txt` file that captures project knowledge in an agent-consumable format.
+
+* Generated `llms.txt` content can be converted into reusable skills.
+* This is the same workflow used to create `.nexus/skills/ratkit/SKILL.md` and `.nexus/skills/opencode-rs-sdk/SKILL.md`.
+* Use the slash-command workflow to iterate from project context to `llms.txt`, then from `llms.txt` to skill artifacts.
+
+
+# Context
+
+
+
+Raw Markdown [#raw-markdown]
+
+```markdown
+---
+context_id: APP_001
+title: User Authentication Flow
+project: app-core
+created: "2026-02-19"
+---
+
+# APP_001: User Authentication Flow
+
+## Desired Outcome
+
+Users can sign in and sign out through the public interface with consistent success and error behavior.
+
+## Reference
+
+| Reference File | Coverage |
+|----------------|----------|
+| `_reference/auth-flow.md` | Login and logout behavior map |
+
+## Next Actions
+
+| Description | Test |
+|-------------|------|
+| Implement sign-in flow that accepts valid credentials and creates an active session | `sign_in_creates_session` |
+| Require invalid credentials to return a user-visible authentication error | `invalid_credentials_show_error` |
+| Create sign-out flow that clears active session state | `sign_out_clears_session` |
+| Add session persistence across restart using configured storage | `session_persists_across_restart` |
+```
+
+Example Render [#example-render]
+
+Frontmatter [#frontmatter]
+
+| Field        | Value                      |
+| ------------ | -------------------------- |
+| `context_id` | `APP_001`                  |
+| `title`      | `User Authentication Flow` |
+| `project`    | `app-core`                 |
+| `created`    | `2026-02-19`               |
+
+APP_001: User Authentication Flow [#app_001-user-authentication-flow]
+
+Desired Outcome [#desired-outcome]
+
+Users can sign in and sign out through the public interface with consistent success and error behavior.
+
+Reference [#reference]
+
+| Reference File            | Coverage                      |
+| ------------------------- | ----------------------------- |
+| `_reference/auth-flow.md` | Login and logout behavior map |
+
+Next Actions [#next-actions]
+
+| Description                                                                         | Test                              |
+| ----------------------------------------------------------------------------------- | --------------------------------- |
+| Implement sign-in flow that accepts valid credentials and creates an active session | `sign_in_creates_session`         |
+| Require invalid credentials to return a user-visible authentication error           | `invalid_credentials_show_error`  |
+| Create sign-out flow that clears active session state                               | `sign_out_clears_session`         |
+| Add session persistence across restart using configured storage                     | `session_persists_across_restart` |
+
+Use this as a baseline shape when authoring new context specs.
+
+
+# Context Driven Development
+
+
+
+What CDD Is [#what-cdd-is]
+
+Context Driven Development is a specification-first way to build software where project intent lives in context files, not in transient chat state.
+
+The most important principle is reproducibility: a project should be reconstructable from scratch from context files only, with clear outcomes and verifiable actions.
+
+What a Context File Is [#what-a-context-file-is]
+
+A context file defines one desired outcome and the next actions required to reach it.
+
+* One file = one outcome.
+* Context files describe **what** to build, not implementation details.
+* Each file uses required YAML frontmatter (`context_id`, `title`, `project`, `created`).
+* Required sections are ordered: Desired Outcome, optional Reference, and Next Actions.
+* Next Actions are black-box E2E testable and written as `Description` + `Test` table rows.
+
+What a Project Is [#what-a-project-is]
+
+A project is an operational unit with its own project index at `.context/<project-name>/index.md`.
+
+* The index is operational knowledge, not a numbered context spec.
+* It documents overview, architecture, CLI usage, key dependencies, environment variables, and troubleshooting.
+* It focuses on what the project does and how to run it, without embedding implementation code.
+* Project metadata (`project_id`, status, dependencies) keeps project relationships and sequencing explicit.
+
+
+# Slash Commands
+
+
+
+These are OpenCode-only command specs. They are command-form workflows, not shell commands.
+
+| Slash Command                                                  | Summary                                                                                 |
+| -------------------------------------------------------------- | --------------------------------------------------------------------------------------- |
+| [`nexus-0-prompt`](./nexus-0-prompt)                           | Rewrites user prompts for clarity and structure, then returns only the rewritten prompt |
+| [`nexus-1.1-context-search`](./nexus-1-1-context-search)       | Finds and ranks relevant context Desired Outcomes and Next Actions                      |
+| [`nexus-1.2-context-create`](./nexus-1-2-context-create)       | Creates new context specs with proper IDs, format, and E2E-testable actions             |
+| [`nexus-1.3-context-sync`](./nexus-1-3-context-sync)           | Produces an analysis-only Context Sync Report of proposed updates                       |
+| [`nexus-1.4-context-review`](./nexus-1-4-context-review)       | Audits context quality, suggests fixes, and can propose context splitting               |
+| [`nexus-1.5-context-from-code`](./nexus-1-5-context-from-code) | Analyzes code to propose new contexts or context updates                                |
+| [`nexus-2-investigate`](./nexus-2-investigate)                 | Runs 5 parallel analysts and synthesizes consensus and disagreement                     |
+| [`nexus-3-plan`](./nexus-3-plan)                               | Turns findings into a structured product and implementation plan                        |
+| [`nexus-3.5-critique`](./nexus-3-5-critique)                   | Stress-tests plans for risk, logic gaps, and edge cases                                 |
+| [`nexus-4-code`](./nexus-4-code)                               | Orchestrates parallel implementation tracks and consolidates outcomes                   |
+| [`nexus-5-llms-txt-generate`](./nexus-5-llms-txt-generate)     | Generates `llms.txt` with quality gates and state tracking                              |
+
+
+# nexus-0-prompt
+
+
+
+This command rewrites a user's prompt to improve clarity, structure, and execution readiness without executing the request itself.
+
+* Keeps user intent unchanged while improving wording and task framing.
+* Returns only the rewritten prompt as the output payload.
+* Triggers a reporting notification after completion.
+
+Use this when the user has a vague or overloaded prompt and needs a cleaner prompt before running another command.
+
+
+# nexus-1.1-context-search
+
+
+
+This command scans `.nexus/context/` and identifies the most relevant Desired Outcomes and Next Actions for the current user request.
+
+* Performs context discovery across project folders.
+* Scores matches by relevance, not just keyword overlap.
+* Returns structured results with ranked candidates and recommendations.
+
+Use this before implementation when you need to anchor work to existing context files.
+
+
+# nexus-1.2-context-create
+
+
+
+This command helps author a new context file from a user goal while enforcing naming, format, and testability standards.
+
+* Checks overlap with existing contexts to avoid duplicates.
+* Determines project prefix and next sequence ID.
+* Produces properly formatted context files with E2E-testable Next Actions.
+
+Use this when no existing context cleanly represents the requested outcome.
+
+
+# nexus-1.3-context-sync
+
+
+
+This command maps conversation facts to existing context files and indexes, then proposes maintenance updates.
+
+* Produces a "Context Sync Report" with suggested adds/edits/splits.
+* Does not edit files directly.
+* Focuses on alignment between current work and context inventory.
+
+Use this after a long work session to identify context drift before making manual edits.
+
+
+# nexus-1.4-context-review
+
+
+
+This command reviews context files for format and content quality, then proposes fix options interactively.
+
+* Detects issues in frontmatter, required sections, and action testability.
+* Suggests remediation and can propose splitting oversized contexts.
+* Can optionally suggest AGENTS documentation updates after approval.
+
+Use this before releases or handoffs when context quality and consistency are critical.
+
+
+# nexus-1.5-context-from-code
+
+
+
+This command analyzes a file or folder and proposes context candidates based on real behavior found in code.
+
+* Spawns 3 subagents for parallel behavior analysis.
+* Extracts user-visible outcomes and validation signals.
+* Recommends either new context specs or updates to existing contexts.
+
+Use this when code has evolved and you need context specs to catch up with reality.
+
+
+# nexus-2-investigate
+
+
+
+This command launches 5 parallel analysts on the same prompt and merges their outputs into an actionable investigation report.
+
+* Highlights agreement and disagreement across analysts.
+* Groups recommendations by severity.
+* Uses interactive prompts to let users decide how to proceed.
+
+Use this when a problem is ambiguous or high-risk and you need broad technical coverage before planning.
+
+
+# nexus-3.5-critique
+
+
+
+This command pressure-tests a plan before coding starts by looking for flaws, risk clusters, and weak assumptions.
+
+* Aggregates 3 focused critique angles into one prioritized output.
+* Surfaces logic gaps, technical risks, and edge cases early.
+* Produces findings ordered by impact and urgency.
+
+Use this after planning and before implementation to reduce rework and prevent avoidable failures.
+
+
+# nexus-3-plan
+
+
+
+This command transforms investigation output into a concrete product and engineering plan.
+
+* Uses 3 subagents for plan synthesis.
+* Produces executive summary, work breakdown, and success metrics.
+* Includes user confirmation checkpoints before finalizing.
+
+Use this after investigation when you need a clear, staged plan before coding.
+
+
+# nexus-4-code
+
+
+
+This command orchestrates implementation from an approved plan by splitting work into parallel tracks and coordinating delivery.
+
+* Decomposes plan scope into independent workstreams.
+* Chooses agent count dynamically (up to 6 concurrent tracks).
+* Consolidates outcomes, blockers, and next actions into one handoff view.
+
+Use this when you are ready to execute and want controlled parallelism instead of one linear coding pass.
+
+
+# nexus-5-llms-txt-generate
+
+
+
+This command generates `llms.txt` through a gated orchestration pipeline with decomposition, assembly, and validation stages.
+
+* Supports full generation and incremental regeneration modes.
+* Enforces quality gates before output is accepted.
+* Tracks run state in `.nexus/llms-state.json` for continuity and auditability.
+
+Use this when project documentation has changed and you need a trustworthy AI-friendly `llms.txt` output.
+
+
+# Reference
+
+
+
+Reference pages are generated from Rust source documentation comments.
+
+
+# Skills
+
+
+
+OpenNexus ships built-in skills grouped by ecosystem.
+
+Rust [#rust]
+
+| Skill                                                  | Focus                                                                   |
+| ------------------------------------------------------ | ----------------------------------------------------------------------- |
+| [`ratkit`](/docs/skills/rust/ratkit)                   | Rust TUI component library patterns, feature flags, and usage playbooks |
+| [`opencode-rs-sdk`](/docs/skills/rust/opencode-rs-sdk) | Rust SDK for OpenCode HTTP + SSE with client/server workflows           |
+
+Skill pages are long-form operational references designed for direct agent use.
+
+
+# crate_root
+
+
+
+Signature [#signature]
+
+```rust
+mod crate_root
+```
+
+Documentation [#documentation]
+
+Nexus CLI library exports.
+
+Related Items [#related-items]
+
+* No related items in this module yet.
+
+
+# Crate Root
+
+
+
+This section is generated from Rust doc comments.
+
+
+# Cli
+
+
+
+Signature [#signature]
+
+```rust
+pub struct Cli {
+```
+
+Documentation [#documentation]
+
+No additional documentation available yet.
+
+Fields and Members [#fields-and-members]
+
+Review the signature and source-level documentation for detailed members.
+
+Related Items [#related-items]
+
+* [Commands](./cli--commands)
+* [OutputFormat](./cli--outputformat)
+* [cli](./cli--cli)
+* [parse\_args](./cli--parse_args)
+
+
+# Commands
+
+
+
+Signature [#signature]
+
+```rust
+pub enum Commands {
+```
+
+Documentation [#documentation]
+
+No additional documentation available yet.
+
+Fields and Members [#fields-and-members]
+
+Review the signature and source-level documentation for detailed members.
+
+Related Items [#related-items]
+
+* [Cli](./cli--cli)
+* [OutputFormat](./cli--outputformat)
+* [cli](./cli--cli)
+* [parse\_args](./cli--parse_args)
+
+
+# OutputFormat
+
+
+
+Signature [#signature]
+
+```rust
+pub enum OutputFormat {
+```
+
+Documentation [#documentation]
+
+No additional documentation available yet.
+
+Fields and Members [#fields-and-members]
+
+Review the signature and source-level documentation for detailed members.
+
+Related Items [#related-items]
+
+* [Cli](./cli--cli)
+* [Commands](./cli--commands)
+* [cli](./cli--cli)
+* [parse\_args](./cli--parse_args)
+
+
+# parse_args
+
+
+
+Signature [#signature]
+
+```rust
+pub fn parse_args() -> Self {
+```
+
+Documentation [#documentation]
+
+No additional documentation available yet.
+
+Related Items [#related-items]
+
+* [Cli](./cli--cli)
+* [Commands](./cli--commands)
+* [OutputFormat](./cli--outputformat)
+* [cli](./cli--cli)
+
+
+# Cli
+
+
+
+This section is generated from Rust doc comments.
+
+
+# commands
+
+
+
+Signature [#signature]
+
+```rust
+mod commands
+```
+
+Documentation [#documentation]
+
+Command implementations for the Nexus CLI.
+
+Related Items [#related-items]
+
+* No related items in this module yet.
+
+
+# run_setup
+
+
+
+Signature [#signature]
+
+```rust
+pub fn run_setup(format: OutputFormat) -> Result<()> {
+```
+
+Documentation [#documentation]
+
+Run the setup command.
+
+This extracts the bundled .nexus directory to the current working directory.
+Existing files are overwritten to keep assets up to date.
+
+Related Items [#related-items]
+
+* [setup](./commands-setup--setup)
+
+
+# setup
+
+
+
+Signature [#signature]
+
+```rust
+mod commands_setup
+```
+
+Documentation [#documentation]
+
+Setup command for initializing OpenNexus in a project.
+
+This is a local operation that extracts the bundled .nexus directory
+(containing commands, rules, and templates) to the current working directory.
+
+Related Items [#related-items]
+
+* [run\_setup](./commands-setup--run_setup)
+
+
+# run_uninstall
+
+
+
+Signature [#signature]
+
+```rust
+pub fn run_uninstall(format: OutputFormat) -> Result<()> {
+```
+
+Documentation [#documentation]
+
+Run the uninstall command.
+
+Related Items [#related-items]
+
+* [uninstall](./commands-uninstall--uninstall)
+
+
+# uninstall
+
+
+
+Signature [#signature]
+
+```rust
+mod commands_uninstall
+```
+
+Documentation [#documentation]
+
+Uninstall command for removing OpenNexus via cargo.
+
+Related Items [#related-items]
+
+* [run\_uninstall](./commands-uninstall--run_uninstall)
+
+
+# run_update
+
+
+
+Signature [#signature]
+
+```rust
+pub fn run_update(format: OutputFormat) -> Result<()> {
+```
+
+Documentation [#documentation]
+
+Run the update command.
+
+Related Items [#related-items]
+
+* [update](./commands-update--update)
+
+
+# update
+
+
+
+Signature [#signature]
+
+```rust
+mod commands_update
+```
+
+Documentation [#documentation]
+
+Update command for upgrading OpenNexus via cargo.
+
+Related Items [#related-items]
+
+* [run\_update](./commands-update--run_update)
+
+
+# Commands
+
+
+
+This section is generated from Rust doc comments.
+
+
+# Output
+
+
+
+This section is generated from Rust doc comments.
+
+
+# output
+
+
+
+Signature [#signature]
+
+```rust
+mod output
+```
+
+Documentation [#documentation]
+
+Output formatting utilities for the setup-only CLI.
+
+Related Items [#related-items]
+
+* [print\_error](./output--print_error)
+* [print\_info](./output--print_info)
+* [print\_success](./output--print_success)
+
+
+# print_error
+
+
+
+Signature [#signature]
+
+```rust
+pub fn print_error(message: &str) {
+```
+
+Documentation [#documentation]
+
+Print an error message (red).
+
+Related Items [#related-items]
+
+* [output](./output--output)
+* [print\_info](./output--print_info)
+* [print\_success](./output--print_success)
+
+
+# print_info
+
+
+
+Signature [#signature]
+
+```rust
+pub fn print_info(message: &str) {
+```
+
+Documentation [#documentation]
+
+Print an info message (blue).
+
+Related Items [#related-items]
+
+* [output](./output--output)
+* [print\_error](./output--print_error)
+* [print\_success](./output--print_success)
+
+
+# print_success
+
+
+
+Signature [#signature]
+
+```rust
+pub fn print_success(message: &str) {
+```
+
+Documentation [#documentation]
+
+Print a success message (green checkmark).
+
+Related Items [#related-items]
+
+* [output](./output--output)
+* [print\_error](./output--print_error)
+* [print\_info](./output--print_info)
+
+
+# Rust Skills
+
+
+
+This section contains Rust-oriented built-in skills.
+
+| Skill                                  | Focus                                                                   |
+| -------------------------------------- | ----------------------------------------------------------------------- |
+| [`ratkit`](./ratkit)                   | Rust TUI component library patterns, feature flags, and usage playbooks |
+| [`opencode-rs-sdk`](./opencode-rs-sdk) | Rust SDK for OpenCode HTTP + SSE with client/server workflows           |
+
+
+# opencode-rs-sdk
+
+
+
+`opencode-rs-sdk` is a built-in skill for the Rust SDK that wraps OpenCode HTTP APIs and SSE streaming.
+
+Crate reference: [`opencode-sdk` on crates.io](https://crates.io/crates/opencode-sdk).
+
+* Covers client ergonomics, API modules, event streaming, and lifecycle patterns.
+* Documents feature flags (`http`, `sse`, optional `server` and `cli`) and platform constraints.
+* Provides usage cards, endpoint maps, and failure-mode guidance.
+
+Primary source: `.nexus/skills/opencode-rs-sdk/SKILL.md`.
+
+
+# ratkit
+
+
+
+`ratkit` is a comprehensive skill for a feature-gated Rust TUI component library built on ratatui.
+
+Crate reference: [`ratkit` on crates.io](https://crates.io/crates/ratkit).
+
+* Covers 21 modules across primitives, widgets, services, and runtime.
+* Emphasizes feature-flag correctness and stateful widget patterns.
+* Includes task playbooks, usage cards, API references, and common pitfalls.
+
+Primary source: `.nexus/skills/ratkit/SKILL.md`.

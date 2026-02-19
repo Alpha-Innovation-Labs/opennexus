@@ -1,0 +1,42 @@
+# Documentation
+
+- [Quickstart](/docs): OpenNexus is a Rust CLI for bootstrapping, updating, and uninstalling context-driven project workflows
+- [Context](/docs/cdd/context): Sample context file format for Context Driven Development
+- [Context Driven Development](/docs/cdd): Rebuild projects from scratch using context files as the source of truth
+- [Slash Commands](/docs/commands): OpenCode slash-command catalog with one page per command
+- [nexus-0-prompt](/docs/commands/nexus-0-prompt): Prompt rewriting assistant that returns only an improved prompt
+- [nexus-1.1-context-search](/docs/commands/nexus-1-1-context-search): Discover and rank relevant context files for a given request
+- [nexus-1.2-context-create](/docs/commands/nexus-1-2-context-create): Create new context specs from goals with correct structure and IDs
+- [nexus-1.3-context-sync](/docs/commands/nexus-1-3-context-sync): Analysis-only context maintenance report across conversations and project indexes
+- [nexus-1.4-context-review](/docs/commands/nexus-1-4-context-review): Quality audit workflow for context specs and project context hygiene
+- [nexus-1.5-context-from-code](/docs/commands/nexus-1-5-context-from-code): Propose context specs from observed user-facing behavior in code
+- [nexus-2-investigate](/docs/commands/nexus-2-investigate): Multi-agent investigation with consensus and disagreement analysis
+- [nexus-3.5-critique](/docs/commands/nexus-3-5-critique): Pre-implementation critique that stress-tests plans before execution
+- [nexus-3-plan](/docs/commands/nexus-3-plan): Convert investigation findings into an executable implementation plan
+- [nexus-4-code](/docs/commands/nexus-4-code): Technical-lead execution orchestrator for parallel implementation tracks
+- [nexus-5-llms-txt-generate](/docs/commands/nexus-5-llms-txt-generate): Strict orchestrator for full or incremental llms.txt generation
+- [Reference](/docs/reference): Auto-generated reference documentation
+- [Skills](/docs/skills): Shipped OpenNexus skills organized by language and domain
+- [crate_root](/docs/reference/crate-root/crate_root--crate_root): Nexus CLI library exports.
+- [Crate Root](/docs/reference/crate-root): Generated crate-root reference
+- [Cli](/docs/reference/cli/cli--cli): No additional documentation available yet.
+- [Commands](/docs/reference/cli/cli--commands): No additional documentation available yet.
+- [OutputFormat](/docs/reference/cli/cli--outputformat): No additional documentation available yet.
+- [parse_args](/docs/reference/cli/cli--parse_args): No additional documentation available yet.
+- [Cli](/docs/reference/cli): Generated cli reference
+- [commands](/docs/reference/commands/commands--commands): Command implementations for the Nexus CLI.
+- [run_setup](/docs/reference/commands/commands-setup--run_setup): Run the setup command.
+- [setup](/docs/reference/commands/commands-setup--setup): Setup command for initializing OpenNexus in a project.
+- [run_uninstall](/docs/reference/commands/commands-uninstall--run_uninstall): Run the uninstall command.
+- [uninstall](/docs/reference/commands/commands-uninstall--uninstall): Uninstall command for removing OpenNexus via cargo.
+- [run_update](/docs/reference/commands/commands-update--run_update): Run the update command.
+- [update](/docs/reference/commands/commands-update--update): Update command for upgrading OpenNexus via cargo.
+- [Commands](/docs/reference/commands): Generated commands reference
+- [Output](/docs/reference/output): Generated output reference
+- [output](/docs/reference/output/output--output): Output formatting utilities for the setup-only CLI.
+- [print_error](/docs/reference/output/output--print_error): Print an error message (red).
+- [print_info](/docs/reference/output/output--print_info): Print an info message (blue).
+- [print_success](/docs/reference/output/output--print_success): Print a success message (green checkmark).
+- [Rust Skills](/docs/skills/rust): Shipped Rust-focused skills for OpenNexus
+- [opencode-rs-sdk](/docs/skills/rust/opencode-rs-sdk): Built-in skill for the OpenCode Rust SDK HTTP and SSE workflows
+- [ratkit](/docs/skills/rust/ratkit): Built-in skill for the ratkit Rust TUI library and feature-gated modules
