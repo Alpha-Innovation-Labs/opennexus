@@ -1,0 +1,29 @@
+---
+title: Context Driven Development
+description: Rebuild projects from scratch using context files as the source of truth
+---
+
+## What CDD Is
+
+Context Driven Development is a specification-first way to build software where project intent lives in context files, not in transient chat state.
+
+The most important principle is reproducibility: a project should be reconstructable from scratch from context files only, with clear outcomes and verifiable actions.
+
+## What a Context File Is
+
+A context file defines one desired outcome and the next actions required to reach it.
+
+- One file = one outcome.
+- Context files describe **what** to build, not implementation details.
+- Each file uses required YAML frontmatter (`context_id`, `title`, `project`, `created`).
+- Required sections are ordered: Desired Outcome, optional Reference, and Next Actions.
+- Next Actions are black-box E2E testable and written as `Description` + `Test` table rows.
+
+## What a Project Is
+
+A project is an operational unit with its own project index at `.context/<project-name>/index.md`.
+
+- The index is operational knowledge, not a numbered context spec.
+- It documents overview, architecture, CLI usage, key dependencies, environment variables, and troubleshooting.
+- It focuses on what the project does and how to run it, without embedding implementation code.
+- Project metadata (`project_id`, status, dependencies) keeps project relationships and sequencing explicit.

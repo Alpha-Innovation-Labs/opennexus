@@ -41,6 +41,7 @@ help:
     @echo "  just \033[0;33mclean\033[0m                    \033[0;32mClean build artifacts\033[0m"
     @echo "  just \033[0;33minstall\033[0m                  \033[0;32mInstall nexus globally\033[0m"
     @echo "  just \033[0;33muninstall\033[0m                \033[0;32mUninstall nexus globally\033[0m"
+    @echo "  just \033[0;33mdocs-gh-pub\033[0m              \033[0;32mPublish docs to gh-pages\033[0m"
     @echo "  just \033[0;33mpub\033[0m                      \033[0;32mBump, tag, and publish crate\033[0m"
     @echo "  just \033[0;33msetup\033[0m                    \033[0;32mRun setup with local binary\033[0m"
     @echo "  just \033[0;33msetup-test\033[0m               \033[0;32mRun setup in fresh tmp dir\033[0m"
@@ -76,6 +77,7 @@ import 'justfiles/verification/docs-sync-check.just'
 import 'justfiles/utilities/clean.just'
 import 'justfiles/utilities/install.just'
 import 'justfiles/utilities/uninstall.just'
+import 'justfiles/utilities/docs-gh-pub.just'
 import 'justfiles/utilities/pub.just'
 import 'justfiles/utilities/setup.just'
 import 'justfiles/utilities/setup-test.just'

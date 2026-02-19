@@ -151,11 +151,22 @@ fn collect_rs_files_recursive(dir: &Path, out: &mut Vec<PathBuf>) -> Result<(), 
             continue;
         }
 
-        if file_type.is_file() && path.extension().and_then(|x| x.to_str()) == Some("rs") {
+        if file_type.is_file()
+            && path.extension().and_then(|x| x.to_str()) == Some("rs")
+            && should_include_in_reference(&path)
+        {
             out.push(path);
         }
     }
     Ok(())
+}
+
+fn should_include_in_reference(path: &Path) -> bool {
+    let file_name = path
+        .file_name()
+        .and_then(|value| value.to_str())
+        .unwrap_or("");
+    file_name != "docs_sync.rs"
 }
 
 fn parse_rust_file(

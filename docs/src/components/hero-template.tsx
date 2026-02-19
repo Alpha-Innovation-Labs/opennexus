@@ -10,7 +10,7 @@ const HOME_TEMPLATE = {
   primaryCtaLabel: '',
   primaryCtaHref: '/docs',
   secondaryCtaLabel: '',
-  secondaryCtaHref: '#',
+  secondaryCtaHref: 'https://github.com/Alpha-Innovation-Labs/opennexus',
   examples: [
     { id: 'example-a', label: '', code: '' },
     { id: 'example-b', label: '', code: '' },
@@ -21,18 +21,18 @@ const HOME_TEMPLATE = {
 const FALLBACK_EXAMPLES = [
   {
     id: 'example-a',
-    label: 'Install',
-    code: 'cargo install nex-us --bin nexus\n# install the Nexus CLI binary',
+    label: 'CDD',
+    code: 'Context Driven Development:\n- context files define desired outcomes\n- next actions are E2E-testable\n- projects can be recreated from context only\n\nSee: /docs/cdd',
   },
   {
     id: 'example-b',
-    label: 'Setup',
-    code: 'nexus setup\n# initialize Nexus in your project',
+    label: 'Commands',
+    code: 'Open the slash-command catalog:\n/docs/commands',
   },
   {
     id: 'example-c',
-    label: 'Verify',
-    code: 'nexus --help\n# list available commands',
+    label: 'Skills',
+    code: 'Open shipped built-in skills:\n/docs/skills',
   },
 ] as const;
 
@@ -51,7 +51,7 @@ export function HeroTemplate() {
   const [copied, setCopied] = useState(false);
 
   const selectedExample = examples.find((item) => item.id === activeTab) ?? examples[0];
-  const installCommand = HOME_TEMPLATE.installCommand || 'cargo install nex-us --bin nexus';
+  const installCommand = HOME_TEMPLATE.installCommand || 'cargo install opennexus';
 
   async function handleCopyCommand() {
     if (!navigator.clipboard) return;
@@ -68,16 +68,16 @@ export function HeroTemplate() {
       <section className="relative mx-auto flex w-full max-w-6xl flex-col gap-10 px-6 py-14 md:px-10 lg:grid lg:grid-cols-[1.08fr_0.92fr] lg:items-center lg:gap-8 lg:py-20">
         <div className="space-y-7">
           <p className="inline-flex w-fit rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs uppercase tracking-[0.22em] text-cyan-300">
-            Documentation Platform
+            Nexus - CDD
           </p>
 
           <div className="space-y-4">
             <h1 className="text-4xl font-semibold tracking-tight text-white sm:text-5xl">
-              {HOME_TEMPLATE.headline || 'Ship Nexus Docs With Confidence'}
+              {HOME_TEMPLATE.headline || 'Context Driven Development'}
             </h1>
             <p className="max-w-2xl text-base text-zinc-300 sm:text-lg">
               {HOME_TEMPLATE.description ||
-                'Install the Nexus CLI and run a single setup command to initialize context-driven workflows in your project.'}
+                'OpenNexus installs a complete context-driven workflow into your repo: slash commands, rules, templates, and skill-ready llms.txt generation grounded in project context.'}
             </p>
           </div>
 
@@ -103,7 +103,7 @@ export function HeroTemplate() {
               {HOME_TEMPLATE.primaryCtaLabel || 'Open Documentation'}
             </Link>
             <Link
-              href={HOME_TEMPLATE.secondaryCtaHref || '#'}
+              href={HOME_TEMPLATE.secondaryCtaHref || 'https://github.com/Alpha-Innovation-Labs/opennexus'}
               className="rounded-md border border-white/15 px-4 py-2 text-sm font-semibold text-zinc-100 transition hover:bg-white/10"
             >
               {HOME_TEMPLATE.secondaryCtaLabel || 'Repository'}

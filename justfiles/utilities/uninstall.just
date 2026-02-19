@@ -4,5 +4,5 @@
 
 uninstall:
     @echo "Uninstalling nexus..."
-    cargo uninstall nex-us
+    cargo uninstall opennexus
     @echo "Uninstall complete!"

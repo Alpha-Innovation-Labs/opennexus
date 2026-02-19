@@ -1,6 +1,15 @@
 import { RootProvider } from 'fumadocs-ui/provider/next';
 import './global.css';
 import { JetBrains_Mono, Space_Grotesk } from 'next/font/google';
+import type { Metadata } from 'next';
+
+export const metadata: Metadata = {
+  icons: {
+    icon: '/icon.svg',
+    shortcut: '/icon.svg',
+    apple: '/icon.svg',
+  },
+};
 
 const spaceGrotesk = Space_Grotesk({
   subsets: ['latin'],

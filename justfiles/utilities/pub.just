@@ -56,5 +56,5 @@ pub:
     fi
 
     echo "Publishing to crates.io..."
-    cargo publish
+    cargo publish --package opennexus
     echo "Published version $NEW_VERSION to crates.io"

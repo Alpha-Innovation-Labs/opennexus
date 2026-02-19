@@ -1,4 +1,4 @@
-//! Uninstall command for removing Nexus via cargo.
+//! Uninstall command for removing OpenNexus via cargo.
 
 use anyhow::{Context, Result};
 use std::process::Command;
@@ -9,13 +9,13 @@ use crate::output::{print_error, print_info, print_success};
 /// Run the uninstall command.
 pub fn run_uninstall(format: OutputFormat) -> Result<()> {
     if format == OutputFormat::Json {
-        println!(r#"{{"status":"starting","command":"cargo uninstall"}}"#);
+        println!(r#"{{"status":"starting","command":"cargo uninstall opennexus"}}"#);
     } else {
-        print_info("Uninstalling Nexus via cargo...");
+        print_info("Uninstalling OpenNexus via cargo...");
     }
 
     let status = Command::new("cargo")
-        .args(["uninstall", "--package", "nex-us", "--bin", "nexus"])
+        .args(["uninstall", "opennexus"])
         .status()
         .context("Failed to run cargo. Is Rust/cargo installed?")?;
 
@@ -23,7 +23,7 @@ pub fn run_uninstall(format: OutputFormat) -> Result<()> {
         if format == OutputFormat::Json {
             println!(r#"{{"status":"completed"}}"#);
         } else {
-            print_success("Nexus uninstalled successfully");
+            print_success("OpenNexus uninstalled successfully");
         }
         Ok(())
     } else {

@@ -1,0 +1,12 @@
+---
+title: nexus-5-llms-txt-generate
+description: Strict orchestrator for full or incremental llms.txt generation
+---
+
+This command generates `llms.txt` through a gated orchestration pipeline with decomposition, assembly, and validation stages.
+
+- Supports full generation and incremental regeneration modes.
+- Enforces quality gates before output is accepted.
+- Tracks run state in `.nexus/llms-state.json` for continuity and auditability.
+
+Use this when project documentation has changed and you need a trustworthy AI-friendly `llms.txt` output.

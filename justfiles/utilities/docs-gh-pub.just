@@ -61,6 +61,7 @@ docs-gh-pub:
 
     rsync -a --delete --exclude=.git docs/out/ "$WORKTREE_DIR"/
     touch "$WORKTREE_DIR/.nojekyll"
+    printf '%s\n' "opennexus.xyz" > "$WORKTREE_DIR/CNAME"
 
     (
         cd "$WORKTREE_DIR"

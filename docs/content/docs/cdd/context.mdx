@@ -1,0 +1,70 @@
+---
+title: Context
+description: Sample context file format for Context Driven Development
+---
+
+## Raw Markdown
+
+```markdown
+---
+context_id: APP_001
+title: User Authentication Flow
+project: app-core
+created: "2026-02-19"
+---
+
+# APP_001: User Authentication Flow
+
+## Desired Outcome
+
+Users can sign in and sign out through the public interface with consistent success and error behavior.
+
+## Reference
+
+| Reference File | Coverage |
+|----------------|----------|
+| `_reference/auth-flow.md` | Login and logout behavior map |
+
+## Next Actions
+
+| Description | Test |
+|-------------|------|
+| Implement sign-in flow that accepts valid credentials and creates an active session | `sign_in_creates_session` |
+| Require invalid credentials to return a user-visible authentication error | `invalid_credentials_show_error` |
+| Create sign-out flow that clears active session state | `sign_out_clears_session` |
+| Add session persistence across restart using configured storage | `session_persists_across_restart` |
+```
+
+## Example Render
+
+### Frontmatter
+
+| Field | Value |
+|-------|-------|
+| `context_id` | `APP_001` |
+| `title` | `User Authentication Flow` |
+| `project` | `app-core` |
+| `created` | `2026-02-19` |
+
+### APP_001: User Authentication Flow
+
+#### Desired Outcome
+
+Users can sign in and sign out through the public interface with consistent success and error behavior.
+
+#### Reference
+
+| Reference File | Coverage |
+|----------------|----------|
+| `_reference/auth-flow.md` | Login and logout behavior map |
+
+#### Next Actions
+
+| Description | Test |
+|-------------|------|
+| Implement sign-in flow that accepts valid credentials and creates an active session | `sign_in_creates_session` |
+| Require invalid credentials to return a user-visible authentication error | `invalid_credentials_show_error` |
+| Create sign-out flow that clears active session state | `sign_out_clears_session` |
+| Add session persistence across restart using configured storage | `session_persists_across_restart` |
+
+Use this as a baseline shape when authoring new context specs.

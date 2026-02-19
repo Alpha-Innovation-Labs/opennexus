@@ -1,31 +1,98 @@
 ---
-title: Nexus Documentation
-description: Install Nexus CLI and initialize a project with one setup command
+title: Quickstart
+description: OpenNexus is a Rust CLI for bootstrapping, updating, and uninstalling context-driven project workflows
 ---
 
-Nexus helps teams initialize context-driven development in one step after installation.
+OpenNexus is a Rust CLI package (`opennexus`) centered on the `nexus` command. It installs governance and workflow assets into your project, keeps command specs in sync, and gives teams a repeatable way to run context-driven development.
 
 ## Start Here
 
 1. Install the CLI:
 
 ```bash
-cargo install nex-us --bin nexus
+cargo install opennexus
 ```
 
-2. Initialize Nexus in your project root:
+2. Initialize OpenNexus in your project root:
 
 ```bash
 nexus setup
 ```
 
-## Navigation
+After install + setup, your repository is prepared with Nexus assets as documented in the README:
 
-- Product and usage pages are authored manually in `docs/content/docs`.
-- Long pages expose a right-rail table of contents to keep orientation while reading.
+```text
+.
+├── .nexus/
+│   ├── .version
+│   ├── commands/
+│   │   ├── nexus-0-prompt.md
+│   │   ├── nexus-1.2-context-create.md
+│   │   └── ...
+│   ├── context/
+│   │   ├── .extract-allowlist
+│   │   ├── nexus/
+│   │   ├── nexus-cli/
+│   │   └── fumadocs/
+│   ├── rules/
+│   │   ├── context.md
+│   │   ├── rs.md
+│   │   └── ...
+│   └── templates/
+│       ├── PROJECT.md
+│       ├── AGENTS.md
+│       └── nexus/
+└── .opencode/
+    └── command/
+        ├── nexus-0-prompt.md -> ../../.nexus/commands/nexus-0-prompt.md
+        ├── nexus-1.2-context-create.md -> ../../.nexus/commands/nexus-1.2-context-create.md
+        └── ...
+```
 
-## Contributing
+If you are new to the workflow, read the [Context Driven Development (CDD) guide](/docs/cdd) for the specification model and project structure.
 
-1. Add or edit MDX pages under `docs/content/docs`.
-2. Keep heading hierarchy (`##`, `###`) to improve TOC quality.
-3. Validate local docs with `just docs` before publishing changes.
+## Core Commands
+
+| Command | What it does |
+|---------|---------------|
+| `nexus setup` | Installs/refreshes `.nexus` assets and `.opencode/command` links in the current repo |
+| `nexus update` | Upgrades the installed `nexus` command to the latest published version |
+| `nexus uninstall` | Removes the globally installed `nexus` command |
+| `nexus --help` | Shows available commands and options |
+
+## Features
+
+### Slash Commands
+
+OpenCode command-form workflows are documented in the [Slash Commands catalog](/docs/commands).
+
+| Slash Command | Purpose |
+|---------------|---------|
+| [`nexus-0-prompt`](/docs/commands/nexus-0-prompt) | Rewrites a user prompt for clarity/structure and returns only the rewritten prompt |
+| [`nexus-1.1-context-search`](/docs/commands/nexus-1-1-context-search) | Finds relevant Desired Outcomes and Next Actions from `.nexus/context/` |
+| [`nexus-1.2-context-create`](/docs/commands/nexus-1-2-context-create) | Creates new context specs from goals with correct IDs/prefixes and E2E-testable actions |
+| [`nexus-1.3-context-sync`](/docs/commands/nexus-1-3-context-sync) | Produces an analysis-only Context Sync Report without editing files |
+| [`nexus-1.4-context-review`](/docs/commands/nexus-1-4-context-review) | Audits context quality, proposes fixes, and can suggest context splitting |
+| [`nexus-1.5-context-from-code`](/docs/commands/nexus-1-5-context-from-code) | Proposes candidate contexts or updates by analyzing code behavior |
+| [`nexus-2-investigate`](/docs/commands/nexus-2-investigate) | Runs 5 parallel analysts and consolidates severity-grouped findings |
+| [`nexus-3-plan`](/docs/commands/nexus-3-plan) | Converts investigation findings into a structured implementation plan |
+| [`nexus-3.5-critique`](/docs/commands/nexus-3-5-critique) | Stress-tests a plan for risks, logic gaps, and edge cases |
+| [`nexus-4-code`](/docs/commands/nexus-4-code) | Orchestrates implementation tracks across parallel workstreams |
+| [`nexus-5-llms-txt-generate`](/docs/commands/nexus-5-llms-txt-generate) | Orchestrates full/incremental `llms.txt` generation with quality gates |
+
+### Skills
+
+OpenNexus ships built-in skills under [Skills -> Rust](/docs/skills/rust).
+
+| Skill | Purpose |
+|-------|---------|
+| [`ratkit`](/docs/skills/rust/ratkit) | Operational guide for the ratkit Rust TUI ecosystem, feature flags, modules, and usage patterns |
+| [`opencode-rs-sdk`](/docs/skills/rust/opencode-rs-sdk) | Operational guide for OpenCode Rust SDK HTTP, SSE streaming, and managed server/client workflows |
+
+### llms.txt Generation
+
+OpenNexus can use AIs to generate a friendly `llms.txt` file that captures project knowledge in an agent-consumable format.
+
+- Generated `llms.txt` content can be converted into reusable skills.
+- This is the same workflow used to create `.nexus/skills/ratkit/SKILL.md` and `.nexus/skills/opencode-rs-sdk/SKILL.md`.
+- Use the slash-command workflow to iterate from project context to `llms.txt`, then from `llms.txt` to skill artifacts.

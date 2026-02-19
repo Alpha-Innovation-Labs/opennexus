@@ -1,4 +1,4 @@
-//! Setup command for initializing Nexus in a project.
+//! Setup command for initializing OpenNexus in a project.
 //!
 //! This is a local operation that extracts the bundled .nexus directory
 //! (containing commands, rules, and templates) to the current working directory.
@@ -24,7 +24,7 @@ pub fn run_setup(format: OutputFormat) -> Result<()> {
     if format == OutputFormat::Json {
         println!(r#"{{"status": "starting"}}"#);
     } else {
-        print_info("Setting up Nexus...");
+        print_info("Setting up OpenNexus...");
     }
 
     // Extract bundled .nexus directory
@@ -37,7 +37,7 @@ pub fn run_setup(format: OutputFormat) -> Result<()> {
         println!(r#"{{"status": "completed"}}"#);
     } else {
         println!();
-        print_success("Nexus setup complete!");
+        print_success("OpenNexus setup complete!");
     }
 
     Ok(())

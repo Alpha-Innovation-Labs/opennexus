@@ -1,4 +1,4 @@
-//! Update command for upgrading Nexus via cargo.
+//! Update command for upgrading OpenNexus via cargo.
 
 use anyhow::{Context, Result};
 use std::process::Command;
@@ -9,13 +9,13 @@ use crate::output::{print_error, print_info, print_success};
 /// Run the update command.
 pub fn run_update(format: OutputFormat) -> Result<()> {
     if format == OutputFormat::Json {
-        println!(r#"{{"status":"starting","command":"cargo install"}}"#);
+        println!(r#"{{"status":"starting","command":"cargo install opennexus"}}"#);
     } else {
-        print_info("Updating Nexus via cargo...");
+        print_info("Updating OpenNexus via cargo...");
     }
 
     let status = Command::new("cargo")
-        .args(["install", "nex-us", "--bin", "nexus", "--force"])
+        .args(["install", "opennexus", "--force"])
         .status()
         .context("Failed to run cargo. Is Rust/cargo installed?")?;
 
@@ -23,7 +23,7 @@ pub fn run_update(format: OutputFormat) -> Result<()> {
         if format == OutputFormat::Json {
             println!(r#"{{"status":"completed"}}"#);
         } else {
-            print_success("Nexus updated successfully");
+            print_success("OpenNexus updated successfully");
         }
         Ok(())
     } else {
