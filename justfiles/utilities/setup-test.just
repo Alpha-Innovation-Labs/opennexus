@@ -9,4 +9,4 @@ setup-test:
     rm -rf tmp
     mkdir tmp
     cd tmp
-    nexus setup
+    opennexus setup

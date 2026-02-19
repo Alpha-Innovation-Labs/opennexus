@@ -1,10 +1,10 @@
-# Install nexus globally
+# Install opennexus globally
 # Usage: just install
 # Example: just install
 
 install:
-    @echo "Installing nexus globally..."
-    cargo install --path . --force
+    @echo "Installing opennexus globally..."
+    cargo install --path . --bin opennexus --force
     @echo "Installation complete!"
-    @echo "  - Run 'nexus --help' for CLI help"
-    @echo "  - Run 'nexus setup' to extract .nexus assets"
+    @echo "  - Run 'opennexus --help' for CLI help"
+    @echo "  - Run 'opennexus setup' to extract .nexus assets"

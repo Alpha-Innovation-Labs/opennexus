@@ -9,13 +9,15 @@ use crate::output::{print_error, print_info, print_success};
 /// Run the uninstall command.
 pub fn run_uninstall(format: OutputFormat) -> Result<()> {
     if format == OutputFormat::Json {
-        println!(r#"{{"status":"starting","command":"cargo uninstall opennexus"}}"#);
+        println!(
+            r#"{{"status":"starting","command":"cargo uninstall --package opennexus --bin opennexus"}}"#
+        );
     } else {
         print_info("Uninstalling OpenNexus via cargo...");
     }
 
     let status = Command::new("cargo")
-        .args(["uninstall", "opennexus"])
+        .args(["uninstall", "--package", "opennexus", "--bin", "opennexus"])
         .status()
         .context("Failed to run cargo. Is Rust/cargo installed?")?;
 

@@ -62,9 +62,9 @@ nexus project create <name>
 nexus project delete <name> [--force]
 
 # Setup (local operation)
-nexus setup
-nexus setup -p opencode
-nexus setup -p claude
+opennexus setup
+opennexus setup -p opencode
+opennexus setup -p claude
 
 # Launch TUI
 nexus tui                # Launch terminal user interface
@@ -110,7 +110,7 @@ All business logic lives in the server and workflows. The CLI is just a terminal
 | nexus CLI | Auto-starts daemon if not running, then executes command |
 | nexus tui | Assumes daemon is running, shows error if not |
 
-When a user runs any `nexus` command:
+When a user runs any `opennexus` command:
 
 1. CLI checks if daemon is running
 2. If not running, CLI spawns daemon as detached background process

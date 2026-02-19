@@ -24,7 +24,7 @@ name = "docs-sync"
 path = "src/bin/docs_sync.rs"
 
 [[bin]]
-name = "nexus"
+name = "opennexus"
 path = "src/main.rs"
 
 [dev-dependencies]

@@ -9,13 +9,13 @@ use crate::output::{print_error, print_info, print_success};
 /// Run the update command.
 pub fn run_update(format: OutputFormat) -> Result<()> {
     if format == OutputFormat::Json {
-        println!(r#"{{"status":"starting","command":"cargo install opennexus"}}"#);
+        println!(r#"{{"status":"starting","command":"cargo install opennexus --bin opennexus"}}"#);
     } else {
         print_info("Updating OpenNexus via cargo...");
     }
 
     let status = Command::new("cargo")
-        .args(["install", "opennexus", "--force"])
+        .args(["install", "opennexus", "--bin", "opennexus", "--force"])
         .status()
         .context("Failed to run cargo. Is Rust/cargo installed?")?;
 

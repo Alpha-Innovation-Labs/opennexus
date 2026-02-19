@@ -3,4 +3,4 @@
 # Example: just setup
 
 setup:
-    cargo run -- setup
+    cargo run --bin opennexus -- setup

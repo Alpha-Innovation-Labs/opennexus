@@ -1,6 +1,6 @@
-# Run Nexus setup flow
+# Run OpenNexus setup flow
 # Usage: just dev
 # Example: just dev
 
 dev:
-    cargo run -- setup
+    cargo run --bin opennexus -- setup

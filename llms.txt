@@ -1,5 +1,5 @@
 # Nexus
-> Nexus is a Rust CLI package (`opennexus`) centered on the `nexus` command for project bootstrap/update/uninstall, plus a `docs-sync` command that generates Rust symbol reference docs into the docs site. It also ships embedded governance assets under `.nexus/` that drive command/rule workflows.
+> Nexus is a Rust CLI package (`opennexus`) centered on the `opennexus` command for project bootstrap/update/uninstall, plus a `docs-sync` command that generates Rust symbol reference docs into the docs site. It also ships embedded governance assets under `.nexus/` that drive command/rule workflows.
 
 Agents should use this file as an operational map: pick the correct domain section first, execute the shortest matching playbook, and only call APIs and paths that are verified here against the current repository.
 
@@ -13,7 +13,7 @@ Agents should use this file as an operational map: pick the correct domain secti
 ## Environment and Version Constraints
 - Rust workspace is single-member (`[workspace] members = ["."]`) in `Cargo.toml`.
 - Package metadata: `opennexus` v`0.1.3`, edition `2021` in `Cargo.toml`.
-- Executables: `nexus` (`src/main.rs`) and `docs-sync` (`src/bin/docs_sync.rs`).
+- Executables: `opennexus` (`src/main.rs`) and `docs-sync` (`src/bin/docs_sync.rs`).
 - Build config in `.cargo/config.toml`: `rustc-wrapper = "sccache"`, incremental disabled for dev/release, macOS ad-hoc codesign rustflags for `aarch64-apple-darwin` and `x86_64-apple-darwin`.
 - Docs app stack in `docs/package.json`: Next `16.1.6`, Fumadocs (`fumadocs-core`, `fumadocs-mdx`, `fumadocs-ui`), Bun used by `just docs`.
 
@@ -37,7 +37,7 @@ Agents should use this file as an operational map: pick the correct domain secti
   2. Run `just docs` and verify `/docs`, `/llms.txt`, `/llms-full.txt`.
 
 ## Getting Started
-- Install dependencies and run local setup flow: `just dev` (runs `cargo run -- setup`).
+- Install dependencies and run local setup flow: `just dev` (runs `cargo run --bin opennexus -- setup`).
 - Build binaries: `just build` (or `just build-release` for release build).
 - Run docs locally: `just docs`.
 - Validate baseline checks before handoff: `just fmt-check`, `just clippy`, `cargo test`, and `just docs-sync-check` when Rust docs changed.
@@ -58,8 +58,8 @@ Agents should use this file as an operational map: pick the correct domain secti
 - Setup logic in `src/commands/setup.rs` extracts embedded `.nexus` assets and creates `.opencode/command` symlinks (or copies on non-Unix).
 - Context extraction is allowlist-based via `.nexus/context/.extract-allowlist`; fallback default is `fumadocs` if allowlist cannot be read/parsed.
 - Update/uninstall shell out to cargo:
-  - update: `cargo install opennexus --force` (`src/commands/update.rs`)
-  - uninstall: `cargo uninstall opennexus` (`src/commands/uninstall.rs`)
+  - update: `cargo install opennexus --bin opennexus --force` (`src/commands/update.rs`)
+  - uninstall: `cargo uninstall --package opennexus --bin opennexus` (`src/commands/uninstall.rs`)
 - Output helpers in `src/output.rs`: `print_success`, `print_info`, `print_error`.
 
 ## Domain: Docs Platform and Docs Sync
@@ -90,39 +90,39 @@ Agents should use this file as an operational map: pick the correct domain secti
 
 ## Usage Cards
 
-### Command Card: `nexus setup`
+### Command Card: `opennexus setup`
 - Use when: initializing or refreshing local Nexus assets in the current project.
-- Enable/Install: install CLI via `just install` or run locally with `cargo run -- setup`.
-- Import/Invoke: `nexus setup --format text` or `nexus setup --format json`.
+- Enable/Install: install CLI via `just install` or run locally with `cargo run --bin opennexus -- setup`.
+- Import/Invoke: `opennexus setup --format text` or `opennexus setup --format json`.
 - Minimal flow:
-  1. Run `nexus setup`.
+  1. Run `opennexus setup`.
   2. Verify `.nexus/.version` exists.
   3. Verify `.opencode/command/*.md` links exist.
 - Key APIs: `run_setup`, `extract_nexus_directory`, `create_command_symlinks`, `context_projects_allowlist`.
 - Pitfalls: editing `.opencode/command` directly; expecting all `.nexus/context/*` projects to extract without allowlist entry.
 - Source: `src/commands/setup.rs`, `.nexus/context/.extract-allowlist`.
 
-### Command Card: `nexus update`
-- Use when: upgrading installed `nexus` command from crates.io.
+### Command Card: `opennexus update`
+- Use when: upgrading installed `opennexus` command from crates.io.
 - Enable/Install: requires working Rust/cargo toolchain in PATH.
-- Import/Invoke: `nexus update --format text|json`.
+- Import/Invoke: `opennexus update --format text|json`.
 - Minimal flow:
-  1. Run `nexus update`.
+  1. Run `opennexus update`.
   2. Confirm cargo install exits successfully.
-  3. Re-run `nexus --version`.
-- Key APIs: `run_update`, `std::process::Command::args(["install","opennexus","--force"])`.
+  3. Re-run `opennexus --version`.
+- Key APIs: `run_update`, `std::process::Command::args(["install","opennexus","--bin","opennexus","--force"])`.
 - Pitfalls: assuming this updates local source checkout; running without cargo installed.
 - Source: `src/commands/update.rs`.
 
-### Command Card: `nexus uninstall`
-- Use when: removing globally installed `nexus` command.
+### Command Card: `opennexus uninstall`
+- Use when: removing globally installed `opennexus` command.
 - Enable/Install: requires cargo installation metadata to include `opennexus`.
-- Import/Invoke: `nexus uninstall --format text|json`.
+- Import/Invoke: `opennexus uninstall --format text|json`.
 - Minimal flow:
-  1. Run `nexus uninstall`.
+  1. Run `opennexus uninstall`.
   2. Confirm cargo uninstall exits successfully.
-  3. Verify `nexus` is no longer available globally.
-- Key APIs: `run_uninstall`, `std::process::Command::args(["uninstall","opennexus"])`.
+  3. Verify `opennexus` is no longer available globally.
+- Key APIs: `run_uninstall`, `std::process::Command::args(["uninstall","--package","opennexus","--bin","opennexus"])`.
 - Pitfalls: expecting local repository files to be removed; uninstalling wrong package name.
 - Source: `src/commands/uninstall.rs`.
 
@@ -162,7 +162,7 @@ Agents should use this file as an operational map: pick the correct domain secti
 ## Common Pitfalls
 - Updating `.opencode/command/*.md` directly instead of `.nexus/commands/*.md` (links are regenerated by setup).
 - Forgetting allowlist behavior in setup; only allowlisted context projects under `.nexus/context/` are extracted.
-- Treating `nexus update`/`nexus uninstall` as repo-mutating commands; they invoke cargo install metadata operations.
+- Treating `opennexus update`/`opennexus uninstall` as repo-mutating commands; they invoke cargo install metadata operations.
 - Skipping `docs-sync` after Rust doc/symbol changes, causing drift in `docs/content/docs/reference/`.
 - Changing docs route behavior without validating `docs/src/lib/source.ts` loader assumptions (`baseUrl: '/docs'` and plugins).
 

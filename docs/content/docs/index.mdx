@@ -3,7 +3,7 @@ title: Quickstart
 description: OpenNexus is a Rust CLI for bootstrapping, updating, and uninstalling context-driven project workflows
 ---
 
-OpenNexus is a Rust CLI package (`opennexus`) centered on the `nexus` command. It installs governance and workflow assets into your project, keeps command specs in sync, and gives teams a repeatable way to run context-driven development.
+OpenNexus is a Rust CLI package (`opennexus`) centered on the `opennexus` command. It installs governance and workflow assets into your project, keeps command specs in sync, and gives teams a repeatable way to run context-driven development.
 
 ## Start Here
 
@@ -16,7 +16,7 @@ cargo install opennexus
 2. Initialize OpenNexus in your project root:
 
 ```bash
-nexus setup
+opennexus setup
 ```
 
 After install + setup, your repository is prepared with Nexus assets as documented in the README:
@@ -55,10 +55,10 @@ If you are new to the workflow, read the [Context Driven Development (CDD) guide
 
 | Command | What it does |
 |---------|---------------|
-| `nexus setup` | Installs/refreshes `.nexus` assets and `.opencode/command` links in the current repo |
-| `nexus update` | Upgrades the installed `nexus` command to the latest published version |
-| `nexus uninstall` | Removes the globally installed `nexus` command |
-| `nexus --help` | Shows available commands and options |
+| `opennexus setup` | Installs/refreshes `.nexus` assets and `.opencode/command` links in the current repo |
+| `opennexus update` | Upgrades the installed `opennexus` command to the latest published version |
+| `opennexus uninstall` | Removes the globally installed `opennexus` command |
+| `opennexus --help` | Shows available commands and options |
 
 ## Features
 
@@ -83,6 +83,8 @@ OpenCode command-form workflows are documented in the [Slash Commands catalog](/
 ### Skills
 
 OpenNexus ships built-in skills under [Skills -> Rust](/docs/skills/rust).
+
+#### Rust
 
 | Skill | Purpose |
 |-------|---------|

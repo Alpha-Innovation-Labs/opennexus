@@ -1,9 +1,9 @@
-//! CLI argument parsing for the Nexus binary.
+//! CLI argument parsing for the OpenNexus binary.
 
 use clap::{Parser, Subcommand, ValueEnum};
 
 #[derive(Debug, Parser)]
-#[command(name = "nexus")]
+#[command(name = "opennexus")]
 #[command(author, version, about, long_about = None)]
 #[command(propagate_version = true)]
 pub struct Cli {

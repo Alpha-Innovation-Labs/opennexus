@@ -73,7 +73,7 @@ CDD improves delivery quality by making work:
 
 ## Nexus Role
 
-The `nexus` CLI operationalizes CDD standards in repositories by installing and maintaining the project assets and conventions that support context-driven work.
+The `opennexus` CLI operationalizes CDD standards in repositories by installing and maintaining the project assets and conventions that support context-driven work.
 
 ## Install and Use
 
@@ -83,22 +83,22 @@ The `nexus` CLI operationalizes CDD standards in repositories by installing and 
 just install
 ```
 
-This installs `nexus` globally from the current source checkout (`cargo install --path . --force`).
+This installs `opennexus` globally from the current source checkout (`cargo install --path . --bin opennexus --force`).
 
 ### Use
 
 ```bash
 # Show commands
-nexus --help
+opennexus --help
 
 # Prepare current project with Nexus assets
-nexus setup
+opennexus setup
 
 # Update installed CLI
-nexus update
+opennexus update
 
 # Remove installed CLI
-nexus uninstall
+opennexus uninstall
 ```
 
 You can also run setup without global install while developing locally:
@@ -107,9 +107,9 @@ You can also run setup without global install while developing locally:
 just setup
 ```
 
-## What `nexus setup` Prepares
+## What `opennexus setup` Prepares
 
-`nexus setup` extracts and wires the Nexus project assets so a repository is ready for context-driven development.
+`opennexus setup` extracts and wires the Nexus project assets so a repository is ready for context-driven development.
 
 ```text
 .
