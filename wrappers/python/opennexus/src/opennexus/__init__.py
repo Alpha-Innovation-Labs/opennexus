@@ -12,7 +12,7 @@ from importlib.metadata import PackageNotFoundError, version as package_version
 try:
     VERSION = package_version("opennexus")
 except PackageNotFoundError:
-    VERSION = "0.1.5"
+    VERSION = "0.1.6"
 RELEASE_BASE_URL = os.environ.get(
     "OPENNEXUS_RELEASE_BASE_URL",
     f"https://github.com/Alpha-Innovation-Labs/opennexus/releases/download/v{VERSION}",

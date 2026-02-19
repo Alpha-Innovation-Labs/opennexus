@@ -4,7 +4,7 @@ resolver = "2"
 
 [package]
 name = "opennexus"
-version = "0.1.5"
+version = "0.1.6"
 edition = "2021"
 description = "Thin CLI client for the Nexus context-driven development system"
 authors = ["Alpha"]
