@@ -164,6 +164,7 @@ jobs:
         with:
           node-version: "20"
           registry-url: "https://registry.npmjs.org"
+          token: ""
 
       - name: Publish opennexus to npm
         working-directory: wrappers/npm/opennexus
