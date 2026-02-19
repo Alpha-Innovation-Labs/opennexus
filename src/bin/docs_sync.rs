@@ -399,30 +399,29 @@ fn render_reference_tree(reference_root: &Path, symbols: &[SymbolDoc]) -> Result
     let mut grouped: BTreeMap<String, Vec<SymbolDoc>> = BTreeMap::new();
     for symbol in symbols {
         grouped
-            .entry(category_for_module(&symbol.module_path).to_string())
+            .entry(section_for_module(&symbol.module_path))
             .or_default()
             .push(symbol.clone());
     }
 
-    let categories = ["core", "primitives", "exchanges"];
-    for category in categories {
-        let category_dir = reference_root.join(category);
-        fs::create_dir_all(&category_dir).map_err(|e| {
+    let mut section_pages = vec!["index".to_string()];
+    for (section, items) in grouped {
+        let section_dir = reference_root.join(&section);
+        fs::create_dir_all(&section_dir).map_err(|e| {
             format!(
-                "failed to create category dir {}: {e}",
-                category_dir.display()
+                "failed to create section dir {}: {e}",
+                section_dir.display()
             )
         })?;
 
-        let items = grouped.get(category).cloned().unwrap_or_default();
         let mut pages = vec!["index".to_string()];
 
-        let category_intro = format!(
+        let section_intro = format!(
             "---\ntitle: {}\ndescription: Generated {} reference\ngenerated: true\n---\n\nThis section is generated from Rust doc comments.",
-            title_case(category),
-            category
+            title_case(&section),
+            section
         );
-        write_file(&category_dir.join("index.mdx"), &category_intro)?;
+        write_file(&section_dir.join("index.mdx"), &section_intro)?;
 
         let related_map = build_related_map(&items);
         for item in items {
@@ -434,25 +433,26 @@ fn render_reference_tree(reference_root: &Path, symbols: &[SymbolDoc]) -> Result
                     .cloned()
                     .unwrap_or_default(),
             );
-            write_file(&category_dir.join(format!("{slug}.mdx")), &doc)?;
+            write_file(&section_dir.join(format!("{slug}.mdx")), &doc)?;
             pages.push(slug);
         }
 
+        section_pages.push(section.clone());
         write_meta_json(
-            &category_dir.join("meta.json"),
-            &title_case(category),
+            &section_dir.join("meta.json"),
+            &title_case(&section),
             &pages,
         )?;
     }
 
     write_file(
         &reference_root.join("index.mdx"),
-        "---\ntitle: Reference\ndescription: Auto-generated API and symbol documentation\ngenerated: true\n---\n\nReference pages are generated from Rust source documentation comments.",
+        "---\ntitle: Reference\ndescription: Auto-generated reference documentation\ngenerated: true\n---\n\nReference pages are generated from Rust source documentation comments.",
     )?;
     write_meta_json(
         &reference_root.join("meta.json"),
         "Reference",
-        &["index", "core", "primitives", "exchanges"],
+        &section_pages,
     )?;
 
     Ok(())
@@ -530,13 +530,29 @@ fn render_symbol_page(item: &SymbolDoc, related: Vec<(String, String)>) -> Strin
     out
 }
 
-fn category_for_module(module_path: &str) -> &'static str {
-    if module_path.contains("exchange") {
-        "exchanges"
-    } else if module_path.starts_with("commands") || module_path.starts_with("bin") {
-        "core"
+fn section_for_module(module_path: &str) -> String {
+    let root = module_path.split("::").next().unwrap_or("reference");
+    slugify(root)
+}
+
+fn slugify(input: &str) -> String {
+    let mut out = String::new();
+    let mut previous_dash = false;
+    for ch in input.chars() {
+        if ch.is_ascii_alphanumeric() {
+            out.push(ch.to_ascii_lowercase());
+            previous_dash = false;
+        } else if !previous_dash {
+            out.push('-');
+            previous_dash = true;
+        }
+    }
+
+    let out = out.trim_matches('-').to_string();
+    if out.is_empty() {
+        "reference".to_string()
     } else {
-        "primitives"
+        out
     }
 }
 

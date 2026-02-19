@@ -1,0 +1,4 @@
+{
+  "title": "Commands",
+  "pages": ["index", "commands--commands", "commands-setup--run_setup", "commands-setup--setup", "commands-uninstall--run_uninstall", "commands-uninstall--uninstall", "commands-update--run_update", "commands-update--update"]
+}

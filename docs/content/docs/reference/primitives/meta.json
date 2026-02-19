@@ -1,4 +1,0 @@
-{
-  "title": "Primitives",
-  "pages": ["index", "cli--commands", "cli--outputformat", "cli--parse_args", "cli--cli", "cli--cli", "crate_root--crate_root", "crate_root--crate_root", "output--print_info", "output--print_success", "output--output"]
-}

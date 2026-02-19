@@ -1,0 +1,4 @@
+{
+  "title": "Output",
+  "pages": ["index", "output--print_error", "output--print_info", "output--print_success", "output--output"]
+}
