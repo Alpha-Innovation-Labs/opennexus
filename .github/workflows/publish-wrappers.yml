@@ -100,10 +100,12 @@ PY
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Setup Rust toolchain
-        uses: dtolnay/rust-toolchain@stable
-        with:
-          targets: ${{ matrix.target }}
+      - name: Setup Rust target
+        shell: bash
+        run: |
+          rustup toolchain install stable --profile minimal
+          rustup default stable
+          rustup target add ${{ matrix.target }}
 
       - name: Build release binary
         shell: bash
@@ -143,14 +145,23 @@ PY
           path: dist
 
       - name: Create release and upload assets
-        uses: softprops/action-gh-release@v2
-        with:
-          tag_name: ${{ github.ref_name }}
-          generate_release_notes: true
-          files: |
-            dist/opennexus-aarch64-apple-darwin/opennexus-aarch64-apple-darwin
-            dist/opennexus-x86_64-unknown-linux-gnu/opennexus-x86_64-unknown-linux-gnu
-            dist/opennexus-x86_64-pc-windows-msvc.exe/opennexus-x86_64-pc-windows-msvc.exe
+        env:
+          GH_TOKEN: ${{ github.token }}
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          FILES=(
+            "dist/opennexus-aarch64-apple-darwin/opennexus-aarch64-apple-darwin"
+            "dist/opennexus-x86_64-unknown-linux-gnu/opennexus-x86_64-unknown-linux-gnu"
+            "dist/opennexus-x86_64-pc-windows-msvc.exe/opennexus-x86_64-pc-windows-msvc.exe"
+          )
+
+          if gh release view "${GITHUB_REF_NAME}" >/dev/null 2>&1; then
+            gh release upload "${GITHUB_REF_NAME}" "${FILES[@]}" --clobber
+          else
+            gh release create "${GITHUB_REF_NAME}" "${FILES[@]}" --generate-notes
+          fi
 
   publish-npm:
     name: Publish npm package
@@ -193,8 +204,8 @@ PY
         with:
           python-version: "3.12"
 
-      - name: Setup uv
-        uses: astral-sh/setup-uv@v6
+      - name: Install uv
+        run: python -m pip install --upgrade uv
 
       - name: Build Python wrapper
         working-directory: wrappers/python/opennexus
