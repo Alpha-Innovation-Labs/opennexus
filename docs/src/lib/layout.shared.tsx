@@ -17,7 +17,7 @@ export function baseOptions(): BaseLayoutProps {
         type: 'button',
         text: 'Docs',
         url: '/docs',
-        on: 'nav',
+        on: 'all',
         secondary: true,
       },
     ],
