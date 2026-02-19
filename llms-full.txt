@@ -83,6 +83,8 @@ Skills [#skills]
 
 OpenNexus ships built-in skills under [Skills -> Rust](/docs/skills/rust).
 
+Rust [#rust]
+
 | Skill                                                  | Purpose                                                                                          |
 | ------------------------------------------------------ | ------------------------------------------------------------------------------------------------ |
 | [`ratkit`](/docs/skills/rust/ratkit)                   | Operational guide for the ratkit Rust TUI ecosystem, feature flags, modules, and usage patterns  |
@@ -177,6 +179,10 @@ What CDD Is [#what-cdd-is]
 Context Driven Development is a specification-first way to build software where project intent lives in context files, not in transient chat state.
 
 The most important principle is reproducibility: a project should be reconstructable from scratch from context files only, with clear outcomes and verifiable actions.
+
+* Code is disposable; the durable IP is the problem-solving knowledge.
+* Context files capture that knowledge as outcomes plus E2E-testable next actions.
+* With strong context files, teams can rewrite code from scratch without losing features.
 
 What a Context File Is [#what-a-context-file-is]
 
@@ -492,6 +498,32 @@ Related Items [#related-items]
 This section is generated from Rust doc comments.
 
 
+# crate_root
+
+
+
+Signature [#signature]
+
+```rust
+mod crate_root
+```
+
+Documentation [#documentation]
+
+Nexus CLI library exports.
+
+Related Items [#related-items]
+
+* No related items in this module yet.
+
+
+# Crate Root
+
+
+
+This section is generated from Rust doc comments.
+
+
 # commands
 
 
@@ -638,30 +670,46 @@ Related Items [#related-items]
 This section is generated from Rust doc comments.
 
 
-# crate_root
+# Rust Skills
 
 
 
-Signature [#signature]
+This section contains Rust-oriented built-in skills.
 
-```rust
-mod crate_root
-```
-
-Documentation [#documentation]
-
-Nexus CLI library exports.
-
-Related Items [#related-items]
-
-* No related items in this module yet.
+| Skill                                  | Focus                                                                   |
+| -------------------------------------- | ----------------------------------------------------------------------- |
+| [`ratkit`](./ratkit)                   | Rust TUI component library patterns, feature flags, and usage playbooks |
+| [`opencode-rs-sdk`](./opencode-rs-sdk) | Rust SDK for OpenCode HTTP + SSE with client/server workflows           |
 
 
-# Crate Root
+# opencode-rs-sdk
 
 
 
-This section is generated from Rust doc comments.
+`opencode-rs-sdk` is a built-in skill for the Rust SDK that wraps OpenCode HTTP APIs and SSE streaming.
+
+Crate reference: [`opencode-sdk` on crates.io](https://crates.io/crates/opencode-sdk).
+
+* Covers client ergonomics, API modules, event streaming, and lifecycle patterns.
+* Documents feature flags (`http`, `sse`, optional `server` and `cli`) and platform constraints.
+* Provides usage cards, endpoint maps, and failure-mode guidance.
+
+Primary source: `.nexus/skills/opencode-rs-sdk/SKILL.md`.
+
+
+# ratkit
+
+
+
+`ratkit` is a comprehensive skill for a feature-gated Rust TUI component library built on ratatui.
+
+Crate reference: [`ratkit` on crates.io](https://crates.io/crates/ratkit).
+
+* Covers 21 modules across primitives, widgets, services, and runtime.
+* Emphasizes feature-flag correctness and stateful widget patterns.
+* Includes task playbooks, usage cards, API references, and common pitfalls.
+
+Primary source: `.nexus/skills/ratkit/SKILL.md`.
 
 
 # Output
@@ -753,45 +801,3 @@ Related Items [#related-items]
 * [output](./output--output)
 * [print\_error](./output--print_error)
 * [print\_info](./output--print_info)
-
-
-# Rust Skills
-
-
-
-This section contains Rust-oriented built-in skills.
-
-| Skill                                  | Focus                                                                   |
-| -------------------------------------- | ----------------------------------------------------------------------- |
-| [`ratkit`](./ratkit)                   | Rust TUI component library patterns, feature flags, and usage playbooks |
-| [`opencode-rs-sdk`](./opencode-rs-sdk) | Rust SDK for OpenCode HTTP + SSE with client/server workflows           |
-
-
-# opencode-rs-sdk
-
-
-
-`opencode-rs-sdk` is a built-in skill for the Rust SDK that wraps OpenCode HTTP APIs and SSE streaming.
-
-Crate reference: [`opencode-sdk` on crates.io](https://crates.io/crates/opencode-sdk).
-
-* Covers client ergonomics, API modules, event streaming, and lifecycle patterns.
-* Documents feature flags (`http`, `sse`, optional `server` and `cli`) and platform constraints.
-* Provides usage cards, endpoint maps, and failure-mode guidance.
-
-Primary source: `.nexus/skills/opencode-rs-sdk/SKILL.md`.
-
-
-# ratkit
-
-
-
-`ratkit` is a comprehensive skill for a feature-gated Rust TUI component library built on ratatui.
-
-Crate reference: [`ratkit` on crates.io](https://crates.io/crates/ratkit).
-
-* Covers 21 modules across primitives, widgets, services, and runtime.
-* Emphasizes feature-flag correctness and stateful widget patterns.
-* Includes task playbooks, usage cards, API references, and common pitfalls.
-
-Primary source: `.nexus/skills/ratkit/SKILL.md`.
