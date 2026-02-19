@@ -4,5 +4,5 @@
 
 uninstall:
     @echo "Uninstalling nexus..."
-    cargo uninstall -p nexus-cli
+    cargo uninstall nex-us
     @echo "Uninstall complete!"

@@ -1,4 +1,4 @@
-//! CLI argument parsing for the setup-only Nexus binary.
+//! CLI argument parsing for the Nexus binary.
 
 use clap::{Parser, Subcommand, ValueEnum};
 
@@ -33,4 +33,10 @@ pub enum OutputFormat {
 pub enum Commands {
     /// Set up Nexus in the current project (extracts .nexus directory).
     Setup,
+
+    /// Update Nexus to the latest published version via cargo.
+    Update,
+
+    /// Uninstall Nexus via cargo.
+    Uninstall,
 }

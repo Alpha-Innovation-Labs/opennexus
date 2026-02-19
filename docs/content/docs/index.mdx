@@ -1,13 +1,31 @@
 ---
-title: Hello World
-description: Your first document
+title: Nexus Documentation
+description: Install Nexus CLI and initialize a project with one setup command
 ---
 
-Welcome to the docs! You can start writing documents in `/content/docs`.
+Nexus helps teams initialize context-driven development in one step after installation.
 
-## What is Next?
+## Start Here
 
-<Cards>
-  <Card title="Learn more about Next.js" href="https://nextjs.org/docs" />
-  <Card title="Learn more about Fumadocs" href="https://fumadocs.dev" />
-</Cards>
+1. Install the CLI:
+
+```bash
+cargo install nex-us
+```
+
+2. Initialize Nexus in your project root:
+
+```bash
+nexus setup
+```
+
+## Navigation
+
+- Product and usage pages are authored manually in `docs/content/docs`.
+- Long pages expose a right-rail table of contents to keep orientation while reading.
+
+## Contributing
+
+1. Add or edit MDX pages under `docs/content/docs`.
+2. Keep heading hierarchy (`##`, `###`) to improve TOC quality.
+3. Validate local docs with `just docs` before publishing changes.
