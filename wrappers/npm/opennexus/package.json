@@ -1,0 +1,17 @@
+{
+  "name": "opennexus",
+  "version": "0.1.4",
+  "description": "Thin CLI client for the Nexus context-driven development system",
+  "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Alpha-Innovation-Labs/opennexus.git"
+  },
+  "bin": {
+    "opennexus": "bin/opennexus.js",
+    "nexus": "bin/nexus.js"
+  },
+  "files": [
+    "bin"
+  ]
+}

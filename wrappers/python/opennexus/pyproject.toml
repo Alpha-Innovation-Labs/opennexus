@@ -1,0 +1,18 @@
+[project]
+name = "opennexus"
+version = "0.1.4"
+description = "Python launcher for the opennexus CLI"
+readme = "README.md"
+authors = [
+    { name = "Piotr Yordanov", email = "piotr@piotryordanov.com" }
+]
+requires-python = ">=3.12"
+dependencies = []
+
+[project.scripts]
+opennexus = "opennexus:main"
+nexus = "opennexus:main"
+
+[build-system]
+requires = ["uv_build>=0.9.26,<0.10.0"]
+build-backend = "uv_build"

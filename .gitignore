@@ -32,3 +32,6 @@ pricing.md
 .osgrep
 playground
 __backup
+wrappers/python/opennexus/src/opennexus/__pycache__
+wrappers/python/opennexus/.venv/
+wrappers/python/opennexus/dist/

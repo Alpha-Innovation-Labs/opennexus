@@ -1,4 +1,4 @@
-# Publish to crates.io (bumps version, creates tag, publishes)
+# Publish release (bumps versions, tags, publishes crates)
 # Usage: just pub
 # Example: just pub
 
@@ -34,11 +34,38 @@ pub:
     fi
     echo "Updated Cargo.toml to version $NEW_VERSION"
 
+    echo "Updating wrapper versions to $NEW_VERSION..."
+    NEW_VERSION="$NEW_VERSION" python3 - <<'PY'
+import os
+import json
+from pathlib import Path
+
+new_version = os.environ['NEW_VERSION']
+
+npm_path = Path('wrappers/npm/opennexus/package.json')
+npm_data = json.loads(npm_path.read_text(encoding='utf-8'))
+npm_data['version'] = new_version
+npm_path.write_text(json.dumps(npm_data, indent=2) + '\n', encoding='utf-8')
+
+py_path = Path('wrappers/python/opennexus/pyproject.toml')
+contents = py_path.read_text(encoding='utf-8')
+lines = contents.splitlines()
+for idx, line in enumerate(lines):
+    if line.startswith('version = "'):
+        lines[idx] = f'version = "{new_version}"'
+        break
+else:
+    raise RuntimeError('version field not found in wrappers/python/opennexus/pyproject.toml')
+
+py_path.write_text('\n'.join(lines) + '\n', encoding='utf-8')
+PY
+    echo "Updated wrapper package versions"
+
     cargo check --quiet
     echo "Updated Cargo.lock"
 
     echo "Committing version bump..."
-    git add Cargo.toml Cargo.lock
+    git add Cargo.toml Cargo.lock wrappers/npm/opennexus/package.json wrappers/python/opennexus/pyproject.toml
     git commit -m "chore: bump version to $NEW_VERSION"
     echo "Committed version bump"
 

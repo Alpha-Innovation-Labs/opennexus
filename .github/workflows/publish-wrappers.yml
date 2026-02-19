@@ -1,0 +1,205 @@
+name: Publish Wrappers
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+
+concurrency:
+  group: publish-wrappers-${{ github.ref }}
+  cancel-in-progress: false
+
+jobs:
+  validate-version:
+    name: Validate Tag and Wrapper Versions
+    runs-on: ubuntu-latest
+    outputs:
+      version: ${{ steps.validate.outputs.version }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate versions match tag
+        id: validate
+        shell: bash
+        run: |
+          set -euo pipefail
+
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+
+          CARGO_VERSION=$(python - <<'PY'
+import tomllib
+with open('Cargo.toml', 'rb') as f:
+    data = tomllib.load(f)
+print(data['package']['version'])
+PY
+)
+
+          NPM_VERSION=$(python - <<'PY'
+import json
+with open('wrappers/npm/opennexus/package.json', 'r', encoding='utf-8') as f:
+    data = json.load(f)
+print(data['version'])
+PY
+)
+
+          PYTHON_VERSION=$(python - <<'PY'
+import tomllib
+with open('wrappers/python/opennexus/pyproject.toml', 'rb') as f:
+    data = tomllib.load(f)
+print(data['project']['version'])
+PY
+)
+
+          echo "Tag:    ${TAG_VERSION}"
+          echo "Cargo:  ${CARGO_VERSION}"
+          echo "npm:    ${NPM_VERSION}"
+          echo "PyPI:   ${PYTHON_VERSION}"
+
+          [[ "${CARGO_VERSION}" == "${TAG_VERSION}" ]] || {
+            echo "Cargo version does not match tag" >&2
+            exit 1
+          }
+
+          [[ "${NPM_VERSION}" == "${TAG_VERSION}" ]] || {
+            echo "npm wrapper version does not match tag" >&2
+            exit 1
+          }
+
+          [[ "${PYTHON_VERSION}" == "${TAG_VERSION}" ]] || {
+            echo "Python wrapper version does not match tag" >&2
+            exit 1
+          }
+
+          echo "version=${TAG_VERSION}" >> "$GITHUB_OUTPUT"
+
+  build-binaries:
+    name: Build opennexus binary (${{ matrix.target }})
+    runs-on: ${{ matrix.os }}
+    needs: validate-version
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: macos-14
+            target: aarch64-apple-darwin
+            artifact_name: opennexus-aarch64-apple-darwin
+            binary_path: target/release/opennexus
+          - os: ubuntu-latest
+            target: x86_64-unknown-linux-gnu
+            artifact_name: opennexus-x86_64-unknown-linux-gnu
+            binary_path: target/release/opennexus
+          - os: windows-latest
+            target: x86_64-pc-windows-msvc
+            artifact_name: opennexus-x86_64-pc-windows-msvc.exe
+            binary_path: target/release/opennexus.exe
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Rust toolchain
+        uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: ${{ matrix.target }}
+
+      - name: Build release binary
+        shell: bash
+        run: cargo build --release --bin opennexus --target ${{ matrix.target }}
+
+      - name: Stage binary asset (Unix)
+        if: runner.os != 'Windows'
+        shell: bash
+        run: |
+          cp "target/${{ matrix.target }}/release/opennexus" "${{ matrix.artifact_name }}"
+          chmod +x "${{ matrix.artifact_name }}"
+
+      - name: Stage binary asset (Windows)
+        if: runner.os == 'Windows'
+        shell: pwsh
+        run: |
+          Copy-Item -Path "target/${{ matrix.target }}/release/opennexus.exe" -Destination "${{ matrix.artifact_name }}"
+
+      - name: Upload binary artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.artifact_name }}
+          path: ${{ matrix.artifact_name }}
+
+  create-release:
+    name: Create GitHub release with binaries
+    runs-on: ubuntu-latest
+    needs:
+      - validate-version
+      - build-binaries
+    permissions:
+      contents: write
+    steps:
+      - name: Download binary artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+
+      - name: Create release and upload assets
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          generate_release_notes: true
+          files: |
+            dist/opennexus-aarch64-apple-darwin/opennexus-aarch64-apple-darwin
+            dist/opennexus-x86_64-unknown-linux-gnu/opennexus-x86_64-unknown-linux-gnu
+            dist/opennexus-x86_64-pc-windows-msvc.exe/opennexus-x86_64-pc-windows-msvc.exe
+
+  publish-npm:
+    name: Publish npm package
+    runs-on: ubuntu-latest
+    needs:
+      - validate-version
+      - create-release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: "20"
+          registry-url: "https://registry.npmjs.org"
+
+      - name: Publish opennexus to npm
+        working-directory: wrappers/npm/opennexus
+        run: npm publish --access public --provenance
+
+  publish-pypi:
+    name: Publish PyPI package
+    runs-on: ubuntu-latest
+    needs:
+      - validate-version
+      - create-release
+    permissions:
+      contents: read
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+
+      - name: Setup uv
+        uses: astral-sh/setup-uv@v6
+
+      - name: Build Python wrapper
+        working-directory: wrappers/python/opennexus
+        run: uv build
+
+      - name: Publish opennexus to PyPI
+        working-directory: wrappers/python/opennexus
+        run: uv publish
