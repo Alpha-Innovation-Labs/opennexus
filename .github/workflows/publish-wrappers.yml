@@ -30,29 +30,9 @@ jobs:
 
           TAG_VERSION="${GITHUB_REF_NAME#v}"
 
-          CARGO_VERSION=$(python - <<'PY'
-import tomllib
-with open('Cargo.toml', 'rb') as f:
-    data = tomllib.load(f)
-print(data['package']['version'])
-PY
-)
-
-          NPM_VERSION=$(python - <<'PY'
-import json
-with open('wrappers/npm/opennexus/package.json', 'r', encoding='utf-8') as f:
-    data = json.load(f)
-print(data['version'])
-PY
-)
-
-          PYTHON_VERSION=$(python - <<'PY'
-import tomllib
-with open('wrappers/python/opennexus/pyproject.toml', 'rb') as f:
-    data = tomllib.load(f)
-print(data['project']['version'])
-PY
-)
+          CARGO_VERSION=$(grep '^version = ' Cargo.toml | head -1 | sed -E 's/version = "([^"]+)"/\1/')
+          NPM_VERSION=$(node -p "require('./wrappers/npm/opennexus/package.json').version")
+          PYTHON_VERSION=$(grep '^version = ' wrappers/python/opennexus/pyproject.toml | head -1 | sed -E 's/version = "([^"]+)"/\1/')
 
           echo "Tag:    ${TAG_VERSION}"
           echo "Cargo:  ${CARGO_VERSION}"
