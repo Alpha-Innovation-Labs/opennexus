@@ -1,0 +1,18 @@
+#!/bin/sh
+
+# Run on pre-push: fmt, clippy, and test
+
+set -e
+
+echo "🚀 Running pre-push checks..."
+
+echo "📝 Formatting code..."
+cargo fmt --all -- --check
+
+echo "🔍 Running clippy..."
+cargo clippy --all-targets --all-features -- -D warnings
+
+echo "🧪 Running tests..."
+cargo test
+
+echo "✅ Pre-push checks passed!"

@@ -1,0 +1,34 @@
+target
+logs/
+
+# Directories created by cdd install
+.claude/
+# .opencode/ is tracked - contains custom agents and commands
+
+# Demo recordings (keep scripts, ignore media files)
+demo/*.cast
+demo/*.gif
+demo/*.mp4
+
+# Serena tool directory (local configuration)
+.serena/
+
+
+# Added by cargo
+
+/target
+# CDD Discussions JSON files (auto-generated metadata)
+.cdd/discussions/**/*.json
+
+# RAG database and embedding model cache
+.rag/
+.fastembed_cache/
+
+# Work-in-progress crates (not ready for tracking)
+crates/knowledge-harvester/
+
+# Business planning documents
+pricing.md
+.osgrep
+playground
+__backup

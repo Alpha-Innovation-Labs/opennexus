@@ -1,0 +1,15 @@
+[build]
+rustc-wrapper = "sccache"
+
+[profile.dev]
+incremental = false
+
+[profile.release]
+incremental = false
+
+# Ad-hoc codesign to skip Gatekeeper verification on macOS
+[target.aarch64-apple-darwin]
+rustflags = ["-C", "link-arg=-Wl,-adhoc_codesign"]
+
+[target.x86_64-apple-darwin]
+rustflags = ["-C", "link-arg=-Wl,-adhoc_codesign"]
