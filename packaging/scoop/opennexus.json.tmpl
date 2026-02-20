@@ -1,0 +1,25 @@
+{
+  "version": "__VERSION__",
+  "description": "Thin CLI client for the Nexus context-driven development system",
+  "homepage": "https://github.com/Alpha-Innovation-Labs/opennexus",
+  "license": "MIT",
+  "architecture": {
+    "64bit": {
+      "url": "__WINDOWS_X64_URL__",
+      "hash": "__WINDOWS_X64_SHA256__"
+    },
+    "arm64": {
+      "url": "__WINDOWS_X64_URL__",
+      "hash": "__WINDOWS_X64_SHA256__"
+    }
+  },
+  "bin": [
+    [
+      "opennexus-x86_64-pc-windows-msvc.exe",
+      "opennexus"
+    ]
+  ],
+  "checkver": {
+    "github": "https://github.com/Alpha-Innovation-Labs/opennexus"
+  }
+}

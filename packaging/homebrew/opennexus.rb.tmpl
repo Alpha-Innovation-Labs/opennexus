@@ -1,0 +1,36 @@
+class Opennexus < Formula
+  desc "Thin CLI client for the Nexus context-driven development system"
+  homepage "https://github.com/Alpha-Innovation-Labs/opennexus"
+  version "__VERSION__"
+  license "MIT"
+
+  on_macos do
+    if Hardware::CPU.arm?
+      url "__MACOS_ARM64_URL__"
+      sha256 "__MACOS_ARM64_SHA256__"
+    else
+      odie "No Homebrew binary is published for macOS Intel yet."
+    end
+  end
+
+  on_linux do
+    if Hardware::CPU.intel?
+      url "__LINUX_X64_URL__"
+      sha256 "__LINUX_X64_SHA256__"
+    else
+      odie "No Homebrew binary is published for Linux ARM yet."
+    end
+  end
+
+  def install
+    if OS.mac?
+      bin.install "opennexus-aarch64-apple-darwin" => "opennexus"
+    elsif OS.linux?
+      bin.install "opennexus-x86_64-unknown-linux-gnu" => "opennexus"
+    end
+  end
+
+  test do
+    assert_match "opennexus", shell_output("#{bin}/opennexus --version")
+  end
+end

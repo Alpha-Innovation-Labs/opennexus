@@ -1,0 +1,177 @@
+name: Publish Homebrew and Scoop
+
+on:
+  push:
+    tags:
+      - "v*"
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Tag name to publish (for example v0.1.7)"
+        required: true
+
+permissions:
+  contents: read
+
+jobs:
+  publish-homebrew:
+    name: Update Homebrew tap formula
+    runs-on: ubuntu-latest
+    env:
+      TAP_REPO: Alpha-Innovation-Labs/homebrew-tap
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+
+      - name: Resolve release metadata
+        id: meta
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+
+          VERSION="${TAG#v}"
+          BASE_URL="https://github.com/Alpha-Innovation-Labs/opennexus/releases/download/${TAG}"
+          RELEASE_JSON=$(gh release view "$TAG" --repo Alpha-Innovation-Labs/opennexus --json assets)
+
+          mac_sha=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name=="opennexus-aarch64-apple-darwin") | .digest' | sed 's/^sha256://')
+          linux_sha=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name=="opennexus-x86_64-unknown-linux-gnu") | .digest' | sed 's/^sha256://')
+
+          if [[ -z "$mac_sha" || "$mac_sha" == "null" ]]; then
+            echo "Missing macOS arm64 release asset digest" >&2
+            exit 1
+          fi
+
+          if [[ -z "$linux_sha" || "$linux_sha" == "null" ]]; then
+            echo "Missing Linux x64 release asset digest" >&2
+            exit 1
+          fi
+
+          {
+            echo "tag=$TAG"
+            echo "version=$VERSION"
+            echo "base_url=$BASE_URL"
+            echo "mac_sha=$mac_sha"
+            echo "linux_sha=$linux_sha"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Checkout tap repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.TAP_REPO }}
+          token: ${{ secrets.HOMEBREW_TAP_TOKEN }}
+          path: tap
+
+      - name: Render formula
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p tap/Formula
+
+          sed \
+            -e 's|__VERSION__|${{ steps.meta.outputs.version }}|g' \
+            -e 's|__MACOS_ARM64_URL__|${{ steps.meta.outputs.base_url }}/opennexus-aarch64-apple-darwin|g' \
+            -e 's|__MACOS_ARM64_SHA256__|${{ steps.meta.outputs.mac_sha }}|g' \
+            -e 's|__LINUX_X64_URL__|${{ steps.meta.outputs.base_url }}/opennexus-x86_64-unknown-linux-gnu|g' \
+            -e 's|__LINUX_X64_SHA256__|${{ steps.meta.outputs.linux_sha }}|g' \
+            packaging/homebrew/opennexus.rb.tmpl > tap/Formula/opennexus.rb
+
+      - name: Commit and push formula update
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd tap
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- Formula/opennexus.rb; then
+            echo "No Homebrew formula changes"
+            exit 0
+          fi
+
+          git add Formula/opennexus.rb
+          git commit -m "opennexus ${{ steps.meta.outputs.version }}"
+          git push
+
+  publish-scoop:
+    name: Update Scoop bucket manifest
+    runs-on: ubuntu-latest
+    env:
+      BUCKET_REPO: Alpha-Innovation-Labs/scoop-bucket
+    steps:
+      - name: Checkout source repository
+        uses: actions/checkout@v4
+
+      - name: Resolve release metadata
+        id: meta
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          set -euo pipefail
+
+          if [[ "${{ github.event_name }}" == "workflow_dispatch" ]]; then
+            TAG="${{ inputs.tag }}"
+          else
+            TAG="${GITHUB_REF_NAME}"
+          fi
+
+          VERSION="${TAG#v}"
+          BASE_URL="https://github.com/Alpha-Innovation-Labs/opennexus/releases/download/${TAG}"
+          RELEASE_JSON=$(gh release view "$TAG" --repo Alpha-Innovation-Labs/opennexus --json assets)
+
+          win_sha=$(echo "$RELEASE_JSON" | jq -r '.assets[] | select(.name=="opennexus-x86_64-pc-windows-msvc.exe") | .digest' | sed 's/^sha256://')
+
+          if [[ -z "$win_sha" || "$win_sha" == "null" ]]; then
+            echo "Missing Windows x64 release asset digest" >&2
+            exit 1
+          fi
+
+          {
+            echo "version=$VERSION"
+            echo "base_url=$BASE_URL"
+            echo "win_sha=$win_sha"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Checkout scoop bucket repository
+        uses: actions/checkout@v4
+        with:
+          repository: ${{ env.BUCKET_REPO }}
+          token: ${{ secrets.SCOOP_BUCKET_TOKEN }}
+          path: bucket
+
+      - name: Render scoop manifest
+        shell: bash
+        run: |
+          set -euo pipefail
+          mkdir -p bucket/bucket
+
+          sed \
+            -e 's|__VERSION__|${{ steps.meta.outputs.version }}|g' \
+            -e 's|__WINDOWS_X64_URL__|${{ steps.meta.outputs.base_url }}/opennexus-x86_64-pc-windows-msvc.exe|g' \
+            -e 's|__WINDOWS_X64_SHA256__|${{ steps.meta.outputs.win_sha }}|g' \
+            packaging/scoop/opennexus.json.tmpl > bucket/bucket/opennexus.json
+
+      - name: Commit and push scoop update
+        shell: bash
+        run: |
+          set -euo pipefail
+          cd bucket
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+
+          if git diff --quiet -- bucket/opennexus.json; then
+            echo "No Scoop manifest changes"
+            exit 0
+          fi
+
+          git add bucket/opennexus.json
+          git commit -m "opennexus ${{ steps.meta.outputs.version }}"
+          git push
