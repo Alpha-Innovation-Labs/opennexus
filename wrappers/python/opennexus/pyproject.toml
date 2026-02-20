@@ -1,6 +1,6 @@
 [project]
 name = "opennexus"
-version = "0.1.6"
+version = "0.1.7"
 description = "Python launcher for the opennexus CLI"
 readme = "README.md"
 authors = [

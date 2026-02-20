@@ -38,6 +38,10 @@ function resolveTarget() {
       triple: "x86_64-pc-windows-msvc",
       binaryName: "opennexus.exe",
     },
+    "win32:arm64": {
+      triple: "x86_64-pc-windows-msvc",
+      binaryName: "opennexus.exe",
+    },
   };
 
   return map[key] || null;
