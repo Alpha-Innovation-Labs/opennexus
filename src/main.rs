@@ -8,7 +8,8 @@ mod output;
 
 use cli::{Cli, Commands, MarketplaceCommands};
 use commands::{
-    run_marketplace_install, run_marketplace_search, run_setup, run_uninstall, run_update,
+    run_marketplace_install, run_marketplace_search, run_ralph, run_setup, run_uninstall,
+    run_update,
 };
 
 fn main() -> Result<()> {
@@ -28,6 +29,7 @@ fn main() -> Result<()> {
                 run_marketplace_install(&target, package.as_deref(), format)
             }
         },
+        Some(Commands::Ralph(command)) => run_ralph(&command.args),
     };
 
     result

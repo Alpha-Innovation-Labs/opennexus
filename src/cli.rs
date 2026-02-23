@@ -1,6 +1,6 @@
 //! CLI argument parsing for the OpenNexus binary.
 
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 
 #[derive(Debug, Parser)]
 #[command(name = "opennexus")]
@@ -49,6 +49,17 @@ pub enum Commands {
         #[command(subcommand)]
         command: MarketplaceCommands,
     },
+
+    /// Run Ralph CLI with passthrough arguments.
+    Ralph(RalphCommand),
+}
+
+#[derive(Debug, Clone, Args)]
+#[command(disable_help_flag = true, disable_version_flag = true)]
+pub struct RalphCommand {
+    /// Arguments forwarded to the Ralph binary.
+    #[arg(trailing_var_arg = true, allow_hyphen_values = true, num_args = 0..)]
+    pub args: Vec<String>,
 }
 
 #[derive(Debug, Clone, Subcommand)]
@@ -132,6 +143,35 @@ mod tests {
         match cli.command {
             Some(Commands::Setup { harness }) => assert_eq!(harness, "opencode"),
             _ => panic!("expected setup command"),
+        }
+    }
+
+    #[test]
+    fn parses_ralph_passthrough_args() {
+        let cli = Cli::parse_from([
+            "opennexus",
+            "ralph",
+            "build login flow",
+            "--max-iterations",
+            "5",
+            "--agent",
+            "codex",
+        ]);
+
+        match cli.command {
+            Some(Commands::Ralph(command)) => {
+                assert_eq!(
+                    command.args,
+                    vec![
+                        "build login flow",
+                        "--max-iterations",
+                        "5",
+                        "--agent",
+                        "codex",
+                    ]
+                );
+            }
+            _ => panic!("expected ralph command"),
         }
     }
 }
