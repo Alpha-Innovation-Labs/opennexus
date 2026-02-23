@@ -151,12 +151,11 @@ just setup
 
 `opennexus setup` extracts and wires the Nexus project assets so a repository is ready for context-driven development.
 
-It also writes `.nexus/config.json` with the selected harness (`opencode` by default).
+It also writes `.nexus/config.json` with the selected harness (`opencode` by default), current CLI version (`opennexus --version`), and docs-sync state.
 
 ```text
 .
 ├── .nexus/
-│   ├── .version
 │   ├── ai_harness/
 │   │   ├── commands/
 │   │   │   ├── nexus-context-create.md
@@ -170,11 +169,10 @@ It also writes `.nexus/config.json` with the selected harness (`opencode` by def
 │   │   ├── rules/
 │   │   │   └── ...
 │   ├── context/
-│   │   ├── .extract-allowlist
 │   │   ├── nexus/
 │   │   ├── nexus-cli/
 │   │   └── ... (installed via marketplace)
-├── .nexus/config.json          # Harness selection (default: opencode)
+├── .nexus/config.json          # Harness + docs sync state
 └── .opencode/                  # Created when harness=opencode
     ├── command/
     │   ├── nexus-context-create.md -> ../../.nexus/ai_harness/commands/nexus-context-create.md
