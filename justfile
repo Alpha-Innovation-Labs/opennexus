@@ -49,6 +49,7 @@ help:
     @echo "  just \033[0;33mpub\033[0m                      \033[0;32mBump, tag, and publish crate\033[0m"
     @echo "  just \033[0;33msetup\033[0m                    \033[0;32mRun setup with local binary\033[0m"
     @echo "  just \033[0;33msetup-test\033[0m               \033[0;32mRun setup in fresh tmp dir\033[0m"
+    @echo "  just \033[0;33msetup-verify\033[0m             \033[0;32mRun setup and verify links\033[0m"
     @echo ""
     @echo ""
     @echo ""
@@ -88,3 +89,4 @@ import 'justfiles/utilities/docs-gh-pub.just'
 import 'justfiles/utilities/pub.just'
 import 'justfiles/utilities/setup.just'
 import 'justfiles/utilities/setup-test.just'
+import 'justfiles/utilities/setup-verify.just'

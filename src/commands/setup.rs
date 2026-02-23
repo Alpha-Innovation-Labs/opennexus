@@ -1,7 +1,7 @@
 //! Setup command for initializing OpenNexus in a project.
 //!
 //! This is a local operation that extracts the bundled .nexus directory
-//! (containing commands, skills, context, and templates) to the current working directory.
+//! (containing commands, skills, rules, and context) to the current working directory.
 
 use anyhow::{Context, Result};
 use include_dir::{include_dir, Dir};
@@ -14,7 +14,7 @@ use std::path::Path;
 use crate::cli::OutputFormat;
 use crate::output::{print_info, print_success};
 
-/// Embedded .nexus directory with commands, skills, and templates.
+/// Embedded .nexus directory with commands, skills, rules, and context.
 static NEXUS_ASSETS: Dir = include_dir!("$CARGO_MANIFEST_DIR/.nexus");
 
 /// Run the setup command.
@@ -107,7 +107,7 @@ fn prune_stale_command_files(format: OutputFormat) -> Result<(usize, usize)> {
             continue;
         };
 
-        if !is_tool_entry_file(&file_name) {
+        if !is_command_entry_file(&file_name) {
             continue;
         }
 
@@ -335,8 +335,8 @@ fn create_command_symlinks(format: OutputFormat) -> Result<(usize, usize)> {
 
         let symlink_path = opencode_command_dir.join(file_name);
 
-        if symlink_path.exists() {
-            fs::remove_file(&symlink_path)?;
+        if path_exists_or_symlink(&symlink_path) {
+            remove_path(&symlink_path)?;
             symlinks_replaced += 1;
         }
 
@@ -487,8 +487,8 @@ fn create_tool_symlinks(format: OutputFormat) -> Result<(usize, usize)> {
 
         let symlink_path = opencode_tools_dir.join(file_name);
 
-        if symlink_path.exists() {
-            fs::remove_file(&symlink_path)?;
+        if path_exists_or_symlink(&symlink_path) {
+            remove_path(&symlink_path)?;
             symlinks_replaced += 1;
         }
 
@@ -535,6 +535,22 @@ fn is_tool_entry_file(file_name: &str) -> bool {
     }
 
     true
+}
+
+fn is_command_entry_file(file_name: &str) -> bool {
+    if !file_name.ends_with(".md") {
+        return false;
+    }
+
+    if file_name.starts_with('_') {
+        return false;
+    }
+
+    true
+}
+
+fn path_exists_or_symlink(path: &Path) -> bool {
+    path.exists() || fs::symlink_metadata(path).is_ok()
 }
 
 /// Remove legacy top-level .nexus/rules directory.
@@ -681,7 +697,7 @@ fn create_skill_symlinks(format: OutputFormat) -> Result<(usize, usize)> {
 
         let symlink_path = opencode_skills_dir.join(skill_name);
 
-        if symlink_path.exists() {
+        if path_exists_or_symlink(&symlink_path) {
             remove_path(&symlink_path)?;
             symlinks_replaced += 1;
         }
@@ -749,7 +765,7 @@ fn create_rule_symlinks(format: OutputFormat) -> Result<(usize, usize)> {
 
         let symlink_path = opencode_rules_dir.join(rule_name);
 
-        if symlink_path.exists() {
+        if path_exists_or_symlink(&symlink_path) {
             remove_path(&symlink_path)?;
             symlinks_replaced += 1;
         }

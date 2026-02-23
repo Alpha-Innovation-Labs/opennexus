@@ -27,28 +27,28 @@ After collecting all findings, analyze and present using numbered lists (not bul
    1. **Critical**
    2. **Minor**
 
-For each recommendation, use the `question` tool:
+Only use the `question` tool when a concrete user decision is required (for example, mutually exclusive options or unresolved blockers). Do not force one question per recommendation.
+
+When a decision is required, use this format:
 
 ```json
 {
   "questions": [{
-    "question": "Recommendation [N/TOTAL]: <severity> - <problem statement>\n\nRecommended: <recommended solution>\n\nAlternative: <alternative solution>",
+    "question": "Decision needed: <problem statement>\n\nRecommended: <recommended option>\n\nAlternative: <alternative option>",
     "header": "Investigation",
     "options": [
       {"label": "Accept recommended", "description": "Proceed with the recommended solution"},
       {"label": "Choose alternative", "description": "Use the alternative solution"},
-      {"label": "Provide different", "description": "I'll specify a different approach"}
+      {"label": "Provide different", "description": "Specify a different approach"}
     ]
   }]
 }
 ```
 
-Provide one question per recommendation, grouped under **Critical** and **Minor** headings, and number each recommendation item.
-
 Formatting requirements:
 1. Use numbered lists for all major sections and recommendation items
 2. Do not use bullet lists for findings or recommendations
-3. Use the `question` tool for user interaction instead of markdown tables
+3. Use the `question` tool only for decisions that must be resolved to proceed
 
 After presenting the findings, use the `reporting` tool with:
 - input: the full investigation summary

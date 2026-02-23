@@ -1,1 +1,1 @@
-../../.nexus/commands/nexus-git-commit.md
+../../.nexus/ai_harness/commands/nexus-git-commit.md

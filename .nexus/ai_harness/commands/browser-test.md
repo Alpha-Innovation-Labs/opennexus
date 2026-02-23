@@ -1,3 +1,7 @@
+---
+description: Run isolated browser tests against the Pulse web app without managing server lifecycle
+---
+
 # Command: Browser Test
 
 You are running agent-browser skill end-to-end tests for the Pulse web application.
