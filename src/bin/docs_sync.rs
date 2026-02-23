@@ -1,6 +1,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::fs;
+use std::hash::{Hash, Hasher};
 use std::path::{Path, PathBuf};
 use std::process::Command;
 
@@ -21,6 +22,7 @@ struct SymbolDoc {
 enum Mode {
     Sync,
     Check,
+    Guard,
 }
 
 const DOCS_SYNC_STATE_PATH: &str = ".nexus/docs-sync-state.json";
@@ -30,6 +32,8 @@ struct DocsSyncState {
     docs_path: String,
     last_generated_commit: String,
     generated_at: String,
+    #[serde(default)]
+    last_harness_input_hash: Option<String>,
 }
 
 fn main() {
@@ -46,10 +50,11 @@ fn run() -> Result<(), String> {
         match arg.as_str() {
             "sync" => mode = Mode::Sync,
             "check" => mode = Mode::Check,
+            "guard" => mode = Mode::Guard,
             "--no-llm" => llm_enabled = false,
             other => {
                 return Err(format!(
-                    "unknown argument '{other}'. use: docs-sync [sync|check] [--no-llm]"
+                    "unknown argument '{other}'. use: docs-sync [sync|check|guard] [--no-llm]"
                 ));
             }
         }
@@ -149,7 +154,76 @@ fn run() -> Result<(), String> {
                 Err("run `just docs-sync` to refresh generated docs".to_string())
             }
         }
+        Mode::Guard => {
+            fs::remove_dir_all(&temp_root).map_err(|e| {
+                format!(
+                    "failed to remove temp dir after guard {}: {e}",
+                    temp_root.display()
+                )
+            })?;
+
+            docs_sync_guard(&repo_root)
+        }
     }
+}
+
+fn docs_sync_guard(repo_root: &Path) -> Result<(), String> {
+    let state = load_docs_sync_state(repo_root)?;
+    let changed_paths = staged_and_committed_paths(
+        repo_root,
+        state
+            .as_ref()
+            .map(|value| value.last_generated_commit.as_str()),
+    )?;
+
+    let harness_paths = harness_paths_from_changed(&changed_paths);
+    if harness_paths.is_empty() {
+        println!("docs-sync guard: no ai_harness changes detected");
+        return Ok(());
+    }
+
+    let current_hash = hash_paths(&harness_paths);
+    let Some(saved_hash) = state
+        .as_ref()
+        .and_then(|value| value.last_harness_input_hash.clone())
+    else {
+        return Err(
+            "docs-sync guard: harness changes detected and docs were never synced for this change set. Run `just docs-sync` and re-stage documentation updates.".to_string(),
+        );
+    };
+
+    if saved_hash != current_hash {
+        return Err(
+            "docs-sync guard: harness changes differ from last docs-sync run. Run `just docs-sync` and re-stage documentation updates.".to_string(),
+        );
+    }
+
+    println!("docs-sync guard: harness docs are up to date");
+    Ok(())
+}
+
+fn harness_paths_from_changed(changed_paths: &[String]) -> Vec<String> {
+    changed_paths
+        .iter()
+        .filter(|path| {
+            path.starts_with(".nexus/ai_harness/commands/")
+                || path.starts_with(".nexus/ai_harness/skills/")
+                || path.starts_with(".nexus/ai_harness/rules/")
+        })
+        .cloned()
+        .collect()
+}
+
+fn hash_paths(paths: &[String]) -> String {
+    let mut sorted = paths.to_vec();
+    sorted.sort();
+
+    let mut hasher = std::collections::hash_map::DefaultHasher::new();
+    for path in sorted {
+        path.hash(&mut hasher);
+    }
+
+    format!("{:016x}", hasher.finish())
 }
 
 fn maybe_run_llm_docs_update(repo_root: &Path) -> Result<(), String> {
@@ -174,11 +248,8 @@ fn maybe_run_llm_docs_update(repo_root: &Path) -> Result<(), String> {
         return Ok(());
     }
 
-    let harness_changed = changed_paths.iter().any(|path| {
-        path.starts_with(".nexus/ai_harness/commands/")
-            || path.starts_with(".nexus/ai_harness/skills/")
-            || path.starts_with(".nexus/ai_harness/rules/")
-    });
+    let harness_paths = harness_paths_from_changed(&changed_paths);
+    let harness_changed = !harness_paths.is_empty();
 
     if !harness_changed {
         println!("docs-sync: no ai_harness changes detected; skipping LLM docs update");
@@ -205,35 +276,27 @@ fn maybe_run_llm_docs_update(repo_root: &Path) -> Result<(), String> {
         "You are updating repository docs after harness changes.\n\nUse ONLY these staged and committed paths as source-of-truth input. Ignore any unstaged workspace edits:\n{changed_list}\n\nTasks:\n1) Update docs that describe harness structure and behavior.\n2) Keep edits concise and factual; do not invent files or features.\n3) Update only these documentation targets when needed:\n   - README.md\n   - docs/content/docs/index.mdx\n   - llms.txt\n   - .nexus/context/nexus-cli/**/*.md\n4) Do not modify code files.\n\nAfter editing, stop."
     );
 
-    println!("docs-sync: running opencode LLM docs updater...");
-    println!("docs-sync: prompt sent to opencode:\n{prompt}");
+    let harness = read_nexus_harness(repo_root)?;
+    println!("docs-sync: running '{}' LLM docs updater...", harness);
+    println!("docs-sync: prompt sent to {}:\n{prompt}", harness);
 
-    let output = Command::new("opencode")
-        .arg("run")
-        .arg("--agent")
-        .arg("general")
-        .arg("--dir")
-        .arg(repo_root)
-        .arg(prompt)
-        .output()
-        .map_err(|e| format!("failed to run 'opencode run': {e}"))?;
+    let status = Command::new(&harness)
+        .arg("--prompt")
+        .arg(&prompt)
+        .current_dir(repo_root)
+        .status()
+        .map_err(|e| format!("failed to run '{} --prompt': {e}", harness))?;
 
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
+    if !status.success() {
         return Err(format!(
-            "opencode docs update failed with status {}: {}",
-            output
-                .status
+            "opencode docs update failed with status {}",
+            status
                 .code()
-                .map_or("unknown".to_string(), |code| code.to_string()),
-            stderr.trim()
+                .map_or("unknown".to_string(), |code| code.to_string())
         ));
     }
 
-    let stdout = String::from_utf8_lossy(&output.stdout);
-    if !stdout.trim().is_empty() {
-        println!("{stdout}");
-    }
+    let harness_input_hash = hash_paths(&harness_paths);
 
     let head_commit = git_single_line(repo_root, ["rev-parse", "HEAD"])?;
     let generated_at = utc_now_string(repo_root)?;
@@ -244,10 +307,33 @@ fn maybe_run_llm_docs_update(repo_root: &Path) -> Result<(), String> {
             docs_path: "docs/content/docs".to_string(),
             last_generated_commit: head_commit,
             generated_at,
+            last_harness_input_hash: Some(harness_input_hash),
         },
     )?;
 
     Ok(())
+}
+
+fn read_nexus_harness(repo_root: &Path) -> Result<String, String> {
+    let config_path = repo_root.join(".nexus/config.json");
+    if !config_path.exists() {
+        return Ok("opencode".to_string());
+    }
+
+    let content = fs::read_to_string(&config_path)
+        .map_err(|e| format!("failed to read {}: {e}", config_path.display()))?;
+
+    let parsed = serde_json::from_str::<serde_json::Value>(&content)
+        .map_err(|e| format!("failed to parse {}: {e}", config_path.display()))?;
+
+    let harness = parsed
+        .get("harness")
+        .and_then(|value| value.as_str())
+        .map(str::trim)
+        .filter(|value| !value.is_empty())
+        .unwrap_or("opencode");
+
+    Ok(harness.to_string())
 }
 
 fn staged_and_committed_paths(

@@ -6,6 +6,9 @@ set -e
 
 echo "🔍 Running pre-commit checks..."
 
+echo "📚 Checking docs sync guard..."
+cargo run --quiet --bin docs-sync -- guard
+
 echo "📝 Formatting code..."
 cargo fmt --all -- --check
 

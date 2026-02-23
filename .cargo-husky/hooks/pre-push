@@ -6,8 +6,9 @@ set -e
 
 echo "🚀 Running pre-push checks..."
 
-echo "📚 Syncing docs (includes LLM-assisted harness docs updates)..."
-just docs-sync
+echo "📚 Verifying docs sync state..."
+cargo run --quiet --bin docs-sync -- guard
+cargo run --quiet --bin docs-sync -- check
 
 echo "📝 Formatting code..."
 cargo fmt --all -- --check
