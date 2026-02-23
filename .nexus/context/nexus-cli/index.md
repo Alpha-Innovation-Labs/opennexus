@@ -9,14 +9,23 @@ dependencies:
 
 # nexus-cli
 
+## Features
+
+| Feature | Path | Purpose |
+|---------|------|---------|
+| `core` | `.nexus/context/nexus-cli/` | CLI-wide setup, command system, and shared behavior |
+| `marketplace` | `.nexus/context/nexus-cli/marketplace/` | Marketplace search/install workflows and package sources |
+
 ## Context Files
 
-| ID | Title | Status |
-|----|-------|--------|
-| CLI_001 | Baseline CLI | Completed |
-| CLI_003 | Clap Migration | Completed |
-| CLI_005 | Project Commands | Active |
-| CLI_006 | Context Commands | Active |
+| ID | Feature | Title | Status |
+|----|---------|-------|--------|
+| CLI_001 | core | Baseline CLI | Completed |
+| CLI_003 | core | Clap Migration | Completed |
+| CLI_005 | core | Project Commands | Active |
+| CLI_006 | core | Context Commands | Active |
+| CLI_007 | marketplace | Marketplace Search Command | Active |
+| CLI_008 | marketplace | Marketplace Install Command | Active |
 
 ## Overview
 
