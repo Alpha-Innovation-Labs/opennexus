@@ -13,7 +13,7 @@ Given a file or folder, analyze the code and recommend context files to create. 
 ## Usage
 
 ```bash
-/context-from-code <path>
+/nexus-context-from-code <path>
 ```
 
 If no path is provided, ask the user for a file or folder.
@@ -105,7 +105,7 @@ If any item should update an existing context instead of creating a new one, cle
 After presenting the list, ask:
 
 ```
-Would you like me to create these contexts now with /context-create, or refine the recommendations?
+Would you like me to create these contexts now with /nexus-context-create, or refine the recommendations?
 ```
 
 ## Rules to Enforce
@@ -123,9 +123,9 @@ Would you like me to create these contexts now with /context-create, or refine t
 
 Found 2 recommended context(s):
 
-### 1. CLI_012: Context Discovery
+### 1. PRJ_NNN: Context Discovery
 **Project:** nexus-cli
-**Proposed File:** `.nexus/context/nexus-cli/CLI_012-context-discovery.md`
+**Proposed File:** `.nexus/context/nexus-cli/PRJ_NNN-context-discovery.md`
 
 **Desired Outcome:**
 Users can discover existing contexts by keyword or ID, understand their scope, and select one to proceed without ambiguity.

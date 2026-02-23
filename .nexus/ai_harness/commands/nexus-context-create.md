@@ -144,9 +144,9 @@ created: "YYYY-MM-DD"
 SOURCE OF TRUTH: .nexus/ai_harness/skills/context-driven-development/SKILL.md
 
 FILE NAMING: PRJ_NNN-brief-description.md
-- PRJ = 3-letter project prefix (e.g., KNO for knowledge-harvester)
+- PRJ = 3-letter project prefix placeholder
 - NNN = zero-padded sequence number
-- Example: KNO_001-project-scaffold.md
+- Example: PRJ_NNN-project-scaffold.md
 
 CRITICAL RULES:
 - NO code at all - code belongs in the codebase
@@ -186,7 +186,7 @@ CRITICAL RULES:
 ### 8. Save Location
 
 - Pattern: `.nexus/context/<project>/<feature>/PRJ_NNN-brief-description.md`
-- Example: `.nexus/context/nexus-cli/marketplace/CLI_007-marketplace-search.md`
+- Example: `.nexus/context/nexus-cli/marketplace/PRJ_NNN-marketplace-search.md`
 - If new project, create `.nexus/context/<project>/` first
 - If new feature, create `.nexus/context/<project>/<feature>/` first
 

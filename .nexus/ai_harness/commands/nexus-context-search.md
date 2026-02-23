@@ -77,7 +77,7 @@ No contexts found matching "<query>".
 **Suggestions:**
 - Try different keywords
 - Check `.nexus/context/_reference/` for background information
-- Create a new context with `@nexus-create-context`
+- Create a new context with `/nexus-context-create`
 ```
 
 ### 5. Provide Insights

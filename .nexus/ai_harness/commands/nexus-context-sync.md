@@ -15,7 +15,7 @@ Its job is to read the current conversation, analyze existing context files, and
 ## Usage
 
 ```bash
-/sync-context
+/nexus-context-sync
 ```
 
 No parameters required.
@@ -23,10 +23,10 @@ No parameters required.
 ## Hard Rules
 
 1. Do not call other slash commands.
-2. Do not use interactive flows (`question` tool).
-3. Do not spawn subagents.
-4. Do not modify files automatically.
-5. Do not remove existing Next Actions; only propose additions/edits.
+2. Do not spawn subagents.
+3. Do not modify files automatically.
+4. Do not remove existing Next Actions; only propose additions/edits.
+5. Use exactly one `question` tool call at the end to present recommended follow-up choices.
 
 ## Inputs To Analyze
 
@@ -105,6 +105,23 @@ Return a concise report in this structure:
 
 - <context_id>: already aligned with conversation
 ```
+
+### Phase 6: Present Follow-Up Choices With `question`
+
+After the report, call the `question` tool with one question that offers next-step options.
+
+Requirements:
+- Put the recommended next step as the first option and label it with `(Recommended)`.
+- Keep options concise and actionable.
+- Keep `custom` enabled so the user can type their own response.
+- Use `multiple: false`.
+
+Suggested options:
+1. Apply the proposed Next Action and project doc edits (Recommended)
+2. Apply only context Next Action updates
+3. Apply only project index.md updates
+4. Create new context file(s) for candidates only
+5. Show a patch preview first
 
 ## Important Notes
 
