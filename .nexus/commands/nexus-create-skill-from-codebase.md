@@ -40,7 +40,7 @@ Produce an `llms.txt` that helps coding agents:
 
 ## Orchestration Workflow
 
-Before spawning any subagent, read and treat `.nexus/rules/llms-txt.md` as the source of truth for generation and validation rules.
+Before spawning any subagent, read and treat `.nexus/skills/llms-txt/SKILL.md` as the source of truth for generation and validation rules.
 
 ### Phase 0: Mode selection and baseline
 
@@ -104,7 +104,7 @@ Each subagent must:
   - mode context (`full` or `incremental`)
   - the current `llms.txt` content (incremental mode)
   - required document shape and usage-card requirements
-  - explicit instruction to comply with `.nexus/rules/llms-txt.md`
+  - explicit instruction to comply with `.nexus/skills/llms-txt/SKILL.md`
   - **Must read the actual version from the project's manifest file** (e.g., Cargo.toml, package.json, pyproject.toml) and use it in the generated file
 - Assembly subagent responsibilities:
   - In full mode: consolidate all domain drafts into one unified `llms.txt` draft.
@@ -121,9 +121,9 @@ Each subagent must:
   - proposed `llms.txt` content from assembly subagent
   - repository state and relevant source files
   - quality gate and constraints from this command
-  - `.nexus/rules/llms-txt.md` as mandatory validation baseline
+  - `.nexus/skills/llms-txt/SKILL.md` as mandatory validation baseline
 - Validator subagent responsibilities:
-  - first check conformance against `.nexus/rules/llms-txt.md`
+  - first check conformance against `.nexus/skills/llms-txt/SKILL.md`
   - verify every quality-gate rule
   - verify links, counts, and referenced paths
   - verify usage-card API names against real code symbols

@@ -1,3 +1,9 @@
+---
+name: justfile
+description: This skill should be used every time you work on justfile projects or just command changes in this repository.
+compatibility: opencode
+---
+
 # Justfile Structure
 
 ## Architecture Overview

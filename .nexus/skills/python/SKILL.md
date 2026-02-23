@@ -1,3 +1,9 @@
+---
+name: python
+description: This skill should be used every time you work on Python projects or Python code changes in this repository.
+compatibility: opencode
+---
+
 # Python Project Rules (uv + msgspec)
 
 This file defines the preferred Python project organization for this repo.

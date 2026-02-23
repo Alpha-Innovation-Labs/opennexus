@@ -1,3 +1,9 @@
+---
+name: rust
+description: This skill should be used every time you work on Rust projects or Rust code changes in this repository.
+compatibility: opencode
+---
+
 # Rust Project Structure Rules
 
 This file defines the preferred Rust project organization for this repo.

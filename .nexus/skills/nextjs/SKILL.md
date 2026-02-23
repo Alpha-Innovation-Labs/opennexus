@@ -1,3 +1,9 @@
+---
+name: nextjs
+description: This skill should be used every time you work on Next.js projects or Next.js app code changes in this repository.
+compatibility: opencode
+---
+
 # Next.js Project Structure Rules
 
 This file defines the preferred Next.js project organization for this repo.

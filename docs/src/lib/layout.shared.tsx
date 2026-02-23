@@ -4,6 +4,7 @@ import { Orbit } from 'lucide-react';
 // fill this with your actual GitHub info, for example:
 export function baseOptions(): BaseLayoutProps {
   return {
+    githubUrl: 'https://github.com/Alpha-Innovation-Labs/opennexus',
     nav: {
       title: (
         <span className="inline-flex items-center gap-2">

@@ -1,3 +1,9 @@
+---
+name: ratkit
+description: This skill should be used every time you work on Ratkit projects or Ratkit feature development in this repository.
+compatibility: opencode
+---
+
 # ratkit
 
 > Comprehensive Rust TUI component library built on ratatui 0.29, providing 21 feature-gated modules (primitives, widgets, services) for building rich terminal applications.

@@ -7,7 +7,7 @@ dependencies: []  # List of project_ids this depends on
 ---
 
 <!-- 
-SOURCE OF TRUTH: .nexus/rules/context.md
+SOURCE OF TRUTH: .nexus/skills/context/SKILL.md
 
 PROJECT INDEX: .context/<project-name>/index.md
 This file provides operational knowledge for a project (crate, package, module).

@@ -25,7 +25,7 @@ The implementation details stay in code and engineering decisions. The context s
 
 CDD in Nexus is anchored by two key files:
 
-- `.nexus/rules/context.md`: the canonical CDD specification. It defines context purpose, naming, required frontmatter, required sections, E2E testability rules, anti-patterns, and how numbered context files differ from project knowledge.
+- `.nexus/skills/context/SKILL.md`: the canonical CDD specification. It defines context purpose, naming, required frontmatter, required sections, E2E testability rules, anti-patterns, and how numbered context files differ from project knowledge.
 - `.nexus/templates/PROJECT.md`: the template for `.context/<project>/index.md`. It defines the operational knowledge format for a project (overview, architecture, CLI usage, dependencies, environment variables, troubleshooting) and keeps that documentation separate from numbered context specs.
 
 Together they enforce the core split in CDD: `PRJ_NNN-*.md` files specify outcomes, while `index.md` documents how to operate the project.
@@ -79,6 +79,19 @@ The `opennexus` CLI operationalizes CDD standards in repositories by installing 
 
 ### Install
 
+OpenNexus is published through multiple package ecosystems.
+
+| Ecosystem | Install Command |
+|-----------|------------------|
+| Cargo (crates.io) | `cargo install opennexus --bin opennexus` |
+| npm | `npm install -g opennexus` |
+| uv / PyPI | `uv tool install opennexus` |
+| Homebrew | `brew tap Alpha-Innovation-Labs/tap && brew install opennexus` |
+| Scoop | `scoop bucket add alpha-innovation-labs https://github.com/Alpha-Innovation-Labs/scoop-bucket && scoop install opennexus` |
+| AUR | In progress (not published yet) |
+
+If you are contributing from source, use the local install recipe:
+
 ```bash
 just install
 ```
@@ -93,6 +106,15 @@ opennexus --help
 
 # Prepare current project with Nexus assets
 opennexus setup
+
+# Search marketplace packages
+opennexus marketplace search "fumadocs"
+
+# Install a package from marketplace registry
+opennexus marketplace install fumadocs
+
+# Install directly from a GitHub repository package
+opennexus marketplace install github.com/<owner>/<repo>
 
 # Update installed CLI
 opennexus update
@@ -123,7 +145,7 @@ just setup
 │   │   ├── .extract-allowlist
 │   │   ├── nexus/
 │   │   ├── nexus-cli/
-│   │   └── fumadocs/
+│   │   └── ... (installed via marketplace)
 │   ├── rules/
 │   │   ├── context.md
 │   │   ├── rs.md
@@ -141,4 +163,4 @@ just setup
 
 Important: `.nexus/**` is the source of truth. `.opencode/command/**` is generated linkage created by setup.
 
-For authoritative rules, see `.nexus/rules/context.md`.
+For authoritative rules, see `.nexus/skills/context/SKILL.md`.

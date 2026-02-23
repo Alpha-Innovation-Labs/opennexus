@@ -6,7 +6,7 @@ description: Generate context recommendations from code paths
 
 ## Description
 
-Given a file or folder, analyze the code and recommend context files to create. Spawn 3 subagents to independently review the functionality and propose context specs that follow `.nexus/rules/context.md`.
+Given a file or folder, analyze the code and recommend context files to create. Spawn 3 subagents to independently review the functionality and propose context specs that follow `.nexus/skills/context/SKILL.md`.
 
 ## Usage
 
@@ -56,7 +56,7 @@ If no path is provided, ask the user for a file or folder.
 Spawn 3 Task subagents (use the `explore` agent type) with the same prompt:
 
 ```
-Analyze the provided code path and identify user-visible functionality. Propose context files to create that follow .nexus/rules/context.md. Do not write code or modify files. Provide:
+Analyze the provided code path and identify user-visible functionality. Propose context files to create that follow .nexus/skills/context/SKILL.md. Do not write code or modify files. Provide:
 
 1) Proposed context list with 1 outcome per context
 2) For each context: project, short title, brief desired outcome, and 3-7 Next Actions (E2E testable)
@@ -108,7 +108,7 @@ Would you like me to create these contexts now with /context-create, or refine t
 
 ## Rules to Enforce
 
-- Follow `.nexus/rules/context.md` for format and content
+- Follow `.nexus/skills/context/SKILL.md` for format and content
 - One outcome per context
 - No implementation details or code
 - Next Actions must be E2E testable and user-visible

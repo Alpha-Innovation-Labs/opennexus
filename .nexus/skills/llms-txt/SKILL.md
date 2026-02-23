@@ -1,3 +1,9 @@
+---
+name: llms-txt
+description: This skill should be used every time you generate, refresh, or validate llms.txt for this repository.
+compatibility: opencode
+---
+
 # llms.txt Generation Rules
 
 ## Purpose

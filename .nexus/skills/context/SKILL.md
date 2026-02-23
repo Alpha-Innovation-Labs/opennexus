@@ -1,3 +1,9 @@
+---
+name: context
+description: This skill should be used every time you work on context files, context planning, or context updates in this repository.
+compatibility: opencode
+---
+
 # Context File Standards
 
 ## Purpose

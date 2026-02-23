@@ -1,3 +1,9 @@
+---
+name: opencode-rs-sdk
+description: This skill should be used every time you work on the OpenCode Rust SDK in this repository.
+compatibility: opencode
+---
+
 # opencode-sdk
 
 > Rust SDK for OpenCode HTTP API with SSE streaming support. Provides ergonomic async client, 15 REST API modules, 40+ event types, and managed server lifecycle.

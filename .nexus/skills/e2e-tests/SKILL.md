@@ -1,3 +1,9 @@
+---
+name: e2e-tests
+description: This skill should be used every time you create, update, or review end-to-end tests in this repository.
+compatibility: opencode
+---
+
 # E2E Test Standards
 
 ## Purpose

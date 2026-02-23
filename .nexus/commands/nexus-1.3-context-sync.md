@@ -31,7 +31,7 @@ No parameters required.
 1. Current conversation (source of new requirements/constraints/decisions)
 2. `.nexus/context/**/PRJ_NNN-*.md` context files
 3. `.nexus/context/**/index.md` project operational docs
-4. `.nexus/rules/CONTEXT.md` format requirements
+4. `.nexus/skills/context/SKILL.md` format requirements
 
 ## Workflow
 
@@ -61,7 +61,7 @@ For each matched context:
 Formatting rules for each proposal:
 - `Description`: human-readable, starts with a verb.
 - `Test`: snake_case without `test_` prefix.
-- Keep actions E2E-observable per `.nexus/rules/CONTEXT.md`.
+- Keep actions E2E-observable per `.nexus/skills/context/SKILL.md`.
 
 ### Phase 4: Propose Project-Level Knowledge Updates
 

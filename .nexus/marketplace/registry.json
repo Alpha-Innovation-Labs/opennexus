@@ -1,0 +1,11 @@
+[
+  {
+    "id": "fumadocs",
+    "name": "Fumadocs",
+    "description": "Fumadocs context starter package",
+    "source": "github.com/Alpha-Innovation-Labs/nexus",
+    "kind": "context",
+    "path": ".nexus/context/fumadocs",
+    "install_name": "fumadocs"
+  }
+]
