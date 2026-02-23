@@ -1,3 +1,13 @@
 {
-  "harness": "opencode"
+  "harness": "opencode",
+  "version": "0.1.7",
+  "marketplace": {
+    "fumadocs": {
+      "sync_state": {
+        "docs_path": "docs/content/docs",
+        "last_synced_commit": "542fdbd806033c5b0d7b6a6c1cc395b50c443fc8",
+        "synced_at": "2026-02-23T10:32:46Z"
+      }
+    }
+  }
 }
