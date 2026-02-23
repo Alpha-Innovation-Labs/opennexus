@@ -93,11 +93,11 @@ If splitting is needed:
 - Find the highest NNN number
 - Use the next number for new context(s)
 
-**Maintain logical ordering:**
-- If new context logically comes before existing ones, renumber existing files to maintain order
-- If there are gaps in numbering, renumber all contexts to be sequential
-- Update any cross-references when renumbering
-- If existing context names don't match their outcomes well, rename them
+**ID stability rules:**
+- Never renumber existing context IDs automatically.
+- Never rename existing context files for ordering cleanup.
+- Keep existing gaps in numbering; append new contexts using next available NNN.
+- If the user explicitly requests renumbering or mass renaming, propose a separate maintenance operation and require explicit confirmation first.
 
 **Overlap check priority:**
 1. Same feature (`.nexus/context/<project>/<feature>/`)
@@ -201,66 +201,3 @@ After creating the context file(s), read any relevant skill/rule guidance for im
 - `.nexus/ai_harness/skills/context-driven-development/SKILL.md` - Context file standards
 - Any language-specific rules (e.g., `rs.md` for Rust)
 - Any tool-specific rules (e.g., `justfiles.md`)
-
----
-
-## Appendix A: Question Tool Examples
-
-**Example: Goal Discovery**
-```json
-{
-  "questions": [{
-    "question": "What are you trying to accomplish?",
-    "header": "User Goal",
-    "options": []
-  }]
-}
-```
-
-**Example: Context Overlap**
-```json
-{
-  "questions": [{
-    "question": "I found an existing context that seems related. What would you like to do?",
-    "header": "Context Overlap",
-    "options": [
-      {"label": "Update existing", "description": "Update the existing context file with new requirements"},
-      {"label": "Create new", "description": "Create a new separate context file"},
-      {"label": "Explain difference", "description": "Help me understand the difference"}
-    ]
-  }]
-}
-```
-
-**Example: Confirmation**
-```json
-{
-  "questions": [{
-    "question": "Ready to proceed?",
-    "header": "Confirm",
-    "options": [
-      {"label": "Yes, proceed", "description": "Create the context as proposed"},
-      {"label": "Make changes", "description": "Let me adjust something first"}
-    ]
-  }]
-}
-```
-
-## Appendix B: Splitting Examples
-
-**User says:** "I want to add user authentication with OAuth and also set up email notifications"
-
-**Response:** "This looks like 2 separate outcomes:
-1. **User Authentication** - Users can log in via OAuth
-2. **Email Notifications** - System sends email notifications
-
-Use the `question` tool to confirm the split.
-
-**User says:** "Build the entire payment system"
-
-**Response:** "A payment system has multiple outcomes. Let me break this down:
-1. **Payment Processing** - Accept payments via Stripe
-2. **Invoice Generation** - Generate and store invoices
-3. **Refund Handling** - Process refunds and credits
-
-Use the `question` tool to confirm the breakdown.
