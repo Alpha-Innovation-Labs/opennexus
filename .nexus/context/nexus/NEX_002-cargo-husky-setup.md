@@ -2,38 +2,25 @@
 context_id: NEX_002
 title: Cargo-Husky Git Hooks Setup
 project: nexus
+feature: workflow
 created: "2026-01-08"
 ---
-
-<!-- 
-SOURCE OF TRUTH: .cdd/rules/context.md
-
-FILE NAMING: PRJ_NNN-brief-description.md
-- PRJ = 3-letter project prefix (e.g., KNO for knowledge-harvester)
-- NNN = zero-padded sequence number
-- Example: KNO_001-project-scaffold.md
-
-CRITICAL RULES:
-- NO code at all - code belongs in the codebase
-- NO implementation details - describe WHAT, not HOW
-- Only E2E tests matter - no unit or integration tests
--->
 
 # NEX_002: Cargo-Husky Git Hooks Setup
 
 ## Desired Outcome
 
-Running `git commit` triggers pre-commit hooks that validate code quality via `cargo fmt`, `cargo clippy`, and `cargo test`. The commit-msg hook validates that commit messages follow conventional commit format (type(scope): description). Invalid commit messages are rejected with clear error messages. All hooks are managed by cargo-husky and can be skipped with `--no-verify` when needed.
+Running `git commit` and `git push` consistently enforces repository quality gates through cargo-husky hooks. Pre-commit and pre-push validate docs-sync guard, formatting, linting, and tests, and commit messages are validated against conventional commit format via a `commit-msg` hook so invalid messages are rejected before history is updated.
 
 ## Next Actions
 
 | Description | Test |
 |-------------|------|
-| Install and configure cargo-husky in Cargo.toml | `cargo_husky_configured` |
-| Set up pre-commit hook to run cargo fmt | `pre_commit_fmt_hook` |
-| Set up pre-commit hook to run cargo clippy | `pre_commit_clippy_hook` |
-| Set up pre-commit hook to run cargo test | `pre_commit_test_hook` |
-| Implement commit-msg hook to validate conventional commit format | `commit_msg_validates_format` |
-| Commit message with valid format succeeds | `valid_commit_accepted` |
-| Commit message with invalid format is rejected | `invalid_commit_rejected` |
-| Hooks can be bypassed with git commit --no-verify | `hooks_bypassable` |
+| Configure cargo-husky hooks for pre-commit and pre-push workflows | `cargo_husky_hooks_configured` |
+| Run docs-sync guard from pre-commit before code quality checks | `pre_commit_runs_docs_sync_guard` |
+| Run `cargo fmt --check`, `cargo clippy`, and `cargo test` from pre-commit | `pre_commit_runs_fmt_clippy_test` |
+| Run docs-sync guard and docs-sync check from pre-push | `pre_push_runs_docs_sync_guard_and_check` |
+| Run `cargo fmt --check`, `cargo clippy`, and `cargo test` from pre-push | `pre_push_runs_fmt_clippy_test` |
+| Validate conventional commit message format from a commit-msg hook | `commit_msg_validates_conventional_format` |
+| Accept valid conventional commit messages and reject invalid ones | `commit_msg_accepts_and_rejects_correctly` |
+| Allow explicit hook bypass only when `--no-verify` is used | `hooks_bypassable_with_no_verify` |

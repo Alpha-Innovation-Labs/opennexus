@@ -2,22 +2,9 @@
 context_id: NEX_003
 title: Build Optimization with sccache
 project: nexus
+feature: build
 created: "2026-01-09"
 ---
-
-<!-- 
-SOURCE OF TRUTH: .cdd/rules/context.md
-
-FILE NAMING: PRJ_NNN-brief-description.md
-- PRJ = 3-letter project prefix (e.g., KNO for knowledge-harvester)
-- NNN = zero-padded sequence number
-- Example: KNO_001-project-scaffold.md
-
-CRITICAL RULES:
-- NO code at all - code belongs in the codebase
-- NO implementation details - describe WHAT, not HOW
-- Only E2E tests matter - no unit or integration tests
--->
 
 # NEX_003: Build Optimization with sccache
 

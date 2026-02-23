@@ -2,6 +2,7 @@
 context_id: NEX_004
 title: Shared Test Utilities Crate
 project: nexus
+feature: testing
 created: "2026-01-09"
 ---
 
