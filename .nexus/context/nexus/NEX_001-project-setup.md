@@ -2,6 +2,7 @@
 context_id: NEX_001
 title: Crate Test Infrastructure Setup
 project: nexus
+feature: testing
 created: "2026-01-08"
 ---
 
