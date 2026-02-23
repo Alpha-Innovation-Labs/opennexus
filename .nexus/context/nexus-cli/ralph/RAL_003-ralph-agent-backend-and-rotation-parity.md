@@ -1,12 +1,12 @@
 ---
-context_id: CLI_011
+context_id: RAL_003
 title: Ralph Agent Backend and Rotation Parity
 project: nexus-cli
 feature: ralph
 created: "2026-02-23"
 ---
 
-# CLI_011: Ralph Agent Backend and Rotation Parity
+# RAL_003: Ralph Agent Backend and Rotation Parity
 
 ## Desired Outcome
 

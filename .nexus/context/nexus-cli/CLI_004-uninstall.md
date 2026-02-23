@@ -1,12 +1,12 @@
 ---
-context_id: CLI_005
+context_id: CLI_004
 title: Uninstall Command
 project: nexus-cli
 feature: core
 created: "2025-01-04"
 ---
 
-# CLI_005: Uninstall Command
+# CLI_004: Uninstall Command
 
 ## Desired Outcome
 

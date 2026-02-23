@@ -1,12 +1,12 @@
 ---
-context_id: CLI_002
+context_id: CLI_001
 title: Setup Command
 project: nexus-cli
 feature: core
 created: "2025-01-04"
 ---
 
-# CLI_002: Setup Command
+# CLI_001: Setup Command
 
 ## Desired Outcome
 

@@ -1,12 +1,12 @@
 ---
-context_id: CLI_010
+context_id: RAL_002
 title: Ralph Loop State Lifecycle
 project: nexus-cli
 feature: ralph
 created: "2026-02-23"
 ---
 
-# CLI_010: Ralph Loop State Lifecycle
+# RAL_002: Ralph Loop State Lifecycle
 
 ## Desired Outcome
 

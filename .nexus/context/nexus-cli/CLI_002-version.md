@@ -1,12 +1,12 @@
 ---
-context_id: CLI_003
+context_id: CLI_002
 title: Version Command
 project: nexus-cli
 feature: core
 created: "2025-01-04"
 ---
 
-# CLI_003: Version Command
+# CLI_002: Version Command
 
 ## Desired Outcome
 

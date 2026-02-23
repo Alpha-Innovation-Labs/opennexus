@@ -1,12 +1,12 @@
 ---
-context_id: CLI_004
+context_id: CLI_003
 title: Help Command
 project: nexus-cli
 feature: core
 created: "2025-01-04"
 ---
 
-# CLI_004: Help Command
+# CLI_003: Help Command
 
 ## Desired Outcome
 
