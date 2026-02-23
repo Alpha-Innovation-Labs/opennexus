@@ -86,7 +86,7 @@ opennexus uninstall
 
 `opennexus setup` manages both source assets and generated links:
 
-- Extracts embedded `.nexus` assets and updates `.nexus/.version`.
+- Extracts embedded `.nexus` assets and updates `.nexus/config.json` (including harness + CLI version).
 - Prunes stale generated files from `.opencode/command`, `.opencode/skills`, and `.opencode/rules`.
 - Recreates `.opencode` links to `.nexus/ai_harness/commands`, `.nexus/ai_harness/skills`, and `.nexus/ai_harness/rules`.
 - Removes legacy top-level `.nexus/rules` when present.

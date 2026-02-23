@@ -14,23 +14,31 @@ Use this command to keep Fumadocs documentation aligned with repository changes.
 
 ## State File
 
-Use this checkpoint file:
+Use checkpoint state inside:
 
-- `.nexus/marketplace/fumadocs/.sync-state.json`
+- `.nexus/config.json`
+- key path: `marketplace.fumadocs.sync_state`
 
 Expected shape:
 
 ```json
 {
-  "last_synced_commit": "<git-sha>",
-  "synced_at": "<utc-iso8601>"
+  "marketplace": {
+    "fumadocs": {
+      "sync_state": {
+        "docs_path": "docs/content/docs",
+        "last_synced_commit": "<git-sha>",
+        "synced_at": "<utc-iso8601>"
+      }
+    }
+  }
 }
 ```
 
 ## Workflow
 
 1. Determine change range:
-   - If `.nexus/marketplace/fumadocs/.sync-state.json` exists and commit is valid, use `<last_synced_commit>..HEAD`.
+   - If `.nexus/config.json` has `marketplace.fumadocs.sync_state.last_synced_commit` and commit is valid, use `<last_synced_commit>..HEAD`.
    - Otherwise, use `@{upstream}...HEAD` when upstream exists.
    - If no upstream exists, use `HEAD` (latest commit only).
 2. Collect changed paths from that range plus staged changes:
@@ -60,7 +68,7 @@ Expected shape:
 <harness> --prompt "<assembled prompt>"
 ```
 
-8. After successful update, write/update `.nexus/marketplace/fumadocs/.sync-state.json` with current `HEAD` and UTC timestamp.
+8. After successful update, write/update `.nexus/config.json` at `marketplace.fumadocs.sync_state` with `docs_path`, current `HEAD`, and UTC timestamp.
 
 ## Hard Rules
 

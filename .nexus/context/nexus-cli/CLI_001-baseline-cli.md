@@ -26,7 +26,7 @@ All tests use `just run` to ensure the local project binary is tested, not a glo
 | Create `.context/` directory structure | `setup_creates_context_dir` |
 | Copy AGENTS.md template to project root if not exists | `setup_creates_agents_md` |
 | Skip AGENTS.md if already exists | `setup_skips_existing_agents_md` |
-| Write version file to `.context/.version` | `version_file_written` |
+| Persist CLI version in `.nexus/config.json` | `version_persisted_in_config` |
 | Implement `opennexus --version` to show version | `version_flag` |
 | Implement `opennexus --help` to show usage | `help_flag` |
 | Create `just install` recipe for global installation (`cargo install --path .`) | `install_recipe_exists` |
