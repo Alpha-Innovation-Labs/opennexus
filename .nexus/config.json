@@ -1,6 +1,5 @@
 {
   "harness": "opencode",
-  "version": "0.1.7",
   "marketplace": {
     "fumadocs": {
       "sync_state": {
@@ -9,5 +8,6 @@
         "synced_at": "2026-02-23T10:32:46Z"
       }
     }
-  }
+  },
+  "version": "0.1.7"
 }
