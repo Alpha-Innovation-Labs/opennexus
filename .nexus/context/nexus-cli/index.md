@@ -17,14 +17,27 @@ dependencies:
 |---------|------|---------|
 | `core` | `.nexus/context/nexus-cli/` | CLI-wide setup, command system, and shared behavior |
 | `marketplace` | `.nexus/context/nexus-cli/marketplace/` | Marketplace search/install workflows and package sources |
+| `ralph` | `.nexus/context/nexus-cli/ralph/` | Rust `opennexus ralph` command parity with the current Ralph CLI API |
 
 ## Context Files
 
 | ID | Feature | Title | Status |
 |----|---------|-------|--------|
-| CLI_001 | core | Baseline CLI | Completed |
+| CLI_002 | core | Setup Command | Active |
+| CLI_003 | core | Version Command | Active |
+| CLI_004 | core | Help Command | Active |
+| CLI_005 | core | Uninstall Command | Active |
+| CLI_006 | core | Update Command | Active |
 | CLI_007 | marketplace | Marketplace Search Command | Active |
 | CLI_008 | marketplace | Marketplace Install Command | Active |
+| CLI_009 | ralph | Ralph Command Surface Parity | Planned |
+| CLI_010 | ralph | Ralph Loop State Lifecycle | Planned |
+| CLI_011 | ralph | Ralph Agent Backend and Rotation Parity | Planned |
+| CLI_012 | ralph | Ralph Context and Tasks Command Parity | Planned |
+| CLI_013 | ralph | Ralph Promise and Iteration Control Parity | Planned |
+| CLI_014 | ralph | Ralph Iteration Telemetry and Auto-Commit Parity | Planned |
+| CLI_015 | ralph | Ralph Prompt Construction and Template Parity | Planned |
+| CLI_016 | ralph | Ralph Diagnostics and Recovery Parity | Planned |
 
 ## Overview
 
@@ -47,9 +60,15 @@ nexus-cli
 ## CLI Usage
 
 ```bash
-# Setup (default command when no subcommand is provided)
-opennexus setup
+# Help (default when no subcommand is provided)
 opennexus
+opennexus --help
+
+# Setup command
+opennexus setup
+opennexus setup --harness opencode
+opennexus setup --harness claude
+opennexus setup --force
 
 # Marketplace discovery/install
 opennexus marketplace search "fumadocs"
