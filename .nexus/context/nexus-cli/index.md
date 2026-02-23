@@ -1,10 +1,12 @@
 ---
 project_id: nexus-cli
-title: Nexus CLI - Thin Client
+title: OpenNexus CLI
 created: "2024-12-01"
 status: active
 dependencies:
-  - nexus-client
+  - clap
+  - include_dir
+  - reqwest
 ---
 
 # nexus-cli
@@ -29,103 +31,68 @@ dependencies:
 
 ## Overview
 
-Nexus CLI is a thin client that communicates with the Nexus server via nexus-client. It provides command-line access to all Nexus functionality including workflow execution, context management, and project management. The CLI parses arguments, delegates to the server, and displays streaming output.
+OpenNexus is a local Rust CLI (`opennexus`) for setting up and maintaining Nexus project assets. It handles local harness extraction/sync, marketplace search/install, and global install lifecycle helpers (update/uninstall).
 
 ## Architecture
 
 ```
 nexus-cli
 └── Binary (src/main.rs)
-    ├── cli.rs         → Clap definitions
+    ├── cli.rs               → Clap definitions and subcommands
     ├── commands/
-    │   ├── server.rs  → start, stop, status
-    │   ├── workflow.rs → gen-tests, manage-context, gen-code
-    │   ├── context.rs → list, show, create, update, delete
-    │   └── project.rs → list, create, delete
-    └── output.rs      → Streaming output formatting
+    │   ├── setup.rs         → Extract .nexus and sync .opencode links
+    │   ├── marketplace.rs   → Search/install context, skill, and rule packages
+    │   ├── update.rs        → Update published CLI install
+    │   └── uninstall.rs     → Remove published CLI install
+    └── output.rs            → Human-readable status output
 ```
 
 ## CLI Usage
 
 ```bash
-# Server management
-nexus server start       # Start server daemon
-nexus server stop        # Stop server
-nexus server status      # Check server status
-
-# Workflow commands (delegated to server)
-nexus gen-tests --context CLI_013 --action spawns_write_agent
-nexus context manage --project nexus-cli
-nexus gen-code --context CLI_013 --action spawns_write_agent
-
-# Context management (can be local or delegated)
-nexus context list [<project>] [--json]
-nexus context show <id>
-nexus context create <project>
-nexus context update <id>
-nexus context delete <id>
-
-# Project management
-nexus project list [--json]
-nexus project create <name>
-nexus project delete <name> [--force]
-
-# Setup (local operation)
+# Setup (default command when no subcommand is provided)
 opennexus setup
-opennexus setup -p opencode
-opennexus setup -p claude
+opennexus
 
-# Launch TUI
-nexus tui                # Launch terminal user interface
+# Marketplace discovery/install
+opennexus marketplace search "fumadocs"
+opennexus marketplace install fumadocs
+opennexus marketplace install github.com/<owner>/<repo>
+
+# Output mode for scripting
+opennexus --format json marketplace search "rust"
+
+# Install lifecycle helpers
+opennexus update
+opennexus uninstall
 ```
 
 ## Key Dependencies
 
 | Crate | Purpose |
 |-------|---------|
-| clap | CLI argument parsing with derive |
-| nexus-client | Server communication |
-| tokio | Async runtime |
-| serde_json | JSON output formatting |
+| clap | CLI parsing and command tree |
+| include_dir | Embeds `.nexus` assets in the binary for setup extraction |
+| reqwest | Fetches marketplace registry data |
+| serde_json | JSON output payloads (`--format json`) |
 
 ## Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| NEXUS_SERVER_URL | unix:~/.local/nexus/nexus.sock | Server connection |
+| NEXUS_MARKETPLACE_REGISTRY_URL | Built-in GitHub raw URL | Overrides marketplace registry source (`file://...` or HTTP URL) |
 
-## Server Logging
+## Harness Behavior
 
-The Nexus server writes logs to `~/.local/share/nexus/logs/nexus.log`. Use `nexus server logs` to view them.
+`opennexus setup` manages both source assets and generated links:
 
-## Thin Client Behavior
+- Extracts embedded `.nexus` assets and updates `.nexus/.version`.
+- Prunes stale generated files from `.opencode/command`, `.opencode/skills`, and `.opencode/rules`.
+- Recreates `.opencode` links to `.nexus/ai_harness/commands`, `.nexus/ai_harness/skills`, and `.nexus/ai_harness/rules`.
+- Removes legacy top-level `.nexus/rules` when present.
 
-The CLI is intentionally minimal:
+## Troubleshooting
 
-1. **Parse arguments** - Clap handles all argument parsing
-2. **Connect to server** - Via nexus-client
-3. **Send request** - Workflow or query
-4. **Stream output** - Display events as they arrive
-5. **Exit** - With appropriate exit code
-
-All business logic lives in the server and workflows. The CLI is just a terminal interface.
-
-## Daemon Lifecycle Responsibility
-
-**IMPORTANT**: The CLI (not the TUI) is responsible for daemon auto-start.
-
-| Component | Daemon Responsibility |
-|-----------|----------------------|
-| nexus CLI | Auto-starts daemon if not running, then executes command |
-| nexus tui | Assumes daemon is running, shows error if not |
-
-When a user runs any `opennexus` command:
-
-1. CLI checks if daemon is running
-2. If not running, CLI spawns daemon as detached background process
-3. CLI waits for daemon to be ready
-4. CLI proceeds with the requested operation
-
-This ensures:
-- `nexus tui` can assume the daemon is running (launched via CLI)
-- Single point of daemon lifecycle management
+- If marketplace search/install fails, verify network access or set `NEXUS_MARKETPLACE_REGISTRY_URL=file://<local-registry.json>`.
+- If setup link creation fails on restricted filesystems, check directory permissions for `.opencode/` and `.nexus/`.
+- If expected commands/skills/rules are missing after setup, rerun `opennexus setup` to re-extract embedded assets and regenerate links.

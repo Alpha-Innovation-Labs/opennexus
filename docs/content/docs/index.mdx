@@ -42,28 +42,31 @@ After install + setup, your repository is prepared with Nexus assets as document
 │   │   │   ├── nexus-context-review.md
 │   │   │   └── ...
 │   │   ├── skills/
-│   │   │   ├── context/
-│   │   │   ├── llms-txt/
+│   │   │   ├── context-driven-development/
 │   │   │   ├── opencode-rs-sdk/
 │   │   │   └── ratkit/
 │   │   ├── rules/
 │   │   │   └── ...
-│   │   └── templates/
-│   │       ├── PROJECT.md
-│   │       ├── AGENTS.md
-│   │       └── nexus/
 │   ├── context/
 │   │   ├── .extract-allowlist
 │   │   ├── nexus/
 │   │   ├── nexus-cli/
 │   │   └── fumadocs/
 └── .opencode/
-    └── command/
-        ├── nexus-context-create.md -> ../../.nexus/ai_harness/commands/nexus-context-create.md
-        ├── nexus-context-sync.md -> ../../.nexus/ai_harness/commands/nexus-context-sync.md
-        ├── nexus-context-review.md -> ../../.nexus/ai_harness/commands/nexus-context-review.md
+    ├── command/
+    │   ├── nexus-context-create.md -> ../../.nexus/ai_harness/commands/nexus-context-create.md
+    │   ├── nexus-context-sync.md -> ../../.nexus/ai_harness/commands/nexus-context-sync.md
+    │   ├── nexus-context-review.md -> ../../.nexus/ai_harness/commands/nexus-context-review.md
+    │   └── ...
+    ├── skills/
+    │   ├── context-driven-development/ -> ../../.nexus/ai_harness/skills/context-driven-development
+    │   └── ...
+    └── rules/
+        ├── rust/ -> ../../.nexus/ai_harness/rules/rust
         └── ...
 ```
+
+`opennexus setup` prunes stale generated entries in `.opencode/command`, `.opencode/skills`, and `.opencode/rules` before recreating links.
 
 If you are new to the workflow, read the [Context Driven Development (CDD) guide](/docs/cdd) for the specification model and project structure.
 
@@ -71,7 +74,7 @@ If you are new to the workflow, read the [Context Driven Development (CDD) guide
 
 | Command | What it does |
 |---------|---------------|
-| `opennexus setup` | Installs/refreshes `.nexus` assets and `.opencode/command` links in the current repo |
+| `opennexus setup` | Installs/refreshes `.nexus` assets and `.opencode/{command,skills,rules}` links in the current repo |
 | `opennexus update` | Upgrades the installed `opennexus` command to the latest published version |
 | `opennexus uninstall` | Removes the globally installed `opennexus` command |
 | `opennexus --help` | Shows available commands and options |
@@ -94,8 +97,11 @@ OpenCode command-form workflows are documented in the [Slash Commands catalog](/
 |---------------|---------|
 | `nexus` | Opens context selection workflow (fuzzy context picker) |
 | `nexus-context-create` | Scans for overlap, splits distinct outcomes, and creates context specs with project-scoped IDs |
+| `nexus-context-update` | Applies targeted updates to existing context files and project/feature indexes |
 | `nexus-context-sync` | Syncs context updates from completed implementation work |
 | `nexus-context-review` | Audits context quality and coverage before execution |
+| `nexus-context-search` | Searches context files by desired outcomes and next actions |
+| `nexus-context-from-code` | Recommends context updates from code-scope findings |
 
 ### Skills
 

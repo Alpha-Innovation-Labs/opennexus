@@ -25,10 +25,10 @@ The implementation details stay in code and engineering decisions. The context s
 
 CDD in Nexus is anchored by harness source files:
 
-- `.nexus/ai_harness/skills/context/SKILL.md`: the canonical CDD specification. It defines context purpose, naming, required frontmatter, required sections, E2E testability rules, anti-patterns, and project/feature index expectations.
+- `.nexus/ai_harness/skills/context-driven-development/SKILL.md`: the canonical CDD specification. It defines context purpose, naming, required frontmatter, required sections, E2E testability rules, anti-patterns, and project/feature index expectations.
 - `.nexus/ai_harness/commands/nexus-context-create.md`: the workflow spec for creating context files from user goals.
-- `.nexus/ai_harness/templates/AGENTS.md`: the feature-first harness structure reference.
-- `.nexus/ai_harness/templates/PROJECT.md`: the project index template used under `.nexus/context/<project>/index.md`.
+- `.nexus/ai_harness/commands/nexus-context-update.md`: the workflow spec for updating existing context and index docs.
+- `.nexus/ai_harness/commands/nexus-context-sync.md`: the analysis-only workflow for proposing context/index updates from conversation evidence.
 
 Together they enforce the core split in CDD: `PRJ_NNN-*.md` files specify outcomes, while `index.md` documents how to operate the project.
 
@@ -122,6 +122,9 @@ opennexus --help
 # Prepare current project with Nexus assets
 opennexus setup
 
+# Prepare current project with an explicit harness
+opennexus setup --harness opencode
+
 # Search marketplace packages
 opennexus marketplace search "fumadocs"
 
@@ -148,6 +151,8 @@ just setup
 
 `opennexus setup` extracts and wires the Nexus project assets so a repository is ready for context-driven development.
 
+It also writes `.nexus/config.json` with the selected harness (`opencode` by default).
+
 ```text
 .
 ├── .nexus/
@@ -159,29 +164,35 @@ just setup
 │   │   │   ├── nexus-context-review.md
 │   │   │   └── ...
 │   │   ├── skills/
-│   │   │   ├── context/
-│   │   │   ├── llms-txt/
+│   │   │   ├── context-driven-development/
 │   │   │   ├── opencode-rs-sdk/
 │   │   │   └── ratkit/
 │   │   ├── rules/
 │   │   │   └── ...
-│   │   └── templates/
-│   │       ├── PROJECT.md
-│   │       ├── AGENTS.md
-│   │       └── nexus/
 │   ├── context/
 │   │   ├── .extract-allowlist
 │   │   ├── nexus/
 │   │   ├── nexus-cli/
 │   │   └── ... (installed via marketplace)
-└── .opencode/
-    └── command/
-        ├── nexus-context-create.md -> ../../.nexus/ai_harness/commands/nexus-context-create.md
-        ├── nexus-context-sync.md -> ../../.nexus/ai_harness/commands/nexus-context-sync.md
-        ├── nexus-context-review.md -> ../../.nexus/ai_harness/commands/nexus-context-review.md
+├── .nexus/config.json          # Harness selection (default: opencode)
+└── .opencode/                  # Created when harness=opencode
+    ├── command/
+    │   ├── nexus-context-create.md -> ../../.nexus/ai_harness/commands/nexus-context-create.md
+    │   ├── nexus-context-sync.md -> ../../.nexus/ai_harness/commands/nexus-context-sync.md
+    │   ├── nexus-context-review.md -> ../../.nexus/ai_harness/commands/nexus-context-review.md
+    │   └── ...
+    ├── skills/
+    │   ├── context-driven-development/ -> ../../.nexus/ai_harness/skills/context-driven-development
+    │   ├── opencode-rs-sdk/ -> ../../.nexus/ai_harness/skills/opencode-rs-sdk
+    │   └── ...
+    └── rules/
+        ├── rust/ -> ../../.nexus/ai_harness/rules/rust
+        ├── python/ -> ../../.nexus/ai_harness/rules/python
         └── ...
 ```
 
+When harness is `opencode`, `opennexus setup` also removes stale generated entries under `.opencode/command`, `.opencode/skills`, and `.opencode/rules` before recreating links, and removes the legacy `.nexus/rules` directory.
+
 Important: `.nexus/**` is the source of truth. `.opencode/**` entries are generated linkage created by setup.
 
-For authoritative rules, see `.nexus/ai_harness/skills/context/SKILL.md`.
+For authoritative CDD rules, see `.nexus/ai_harness/skills/context-driven-development/SKILL.md`.
