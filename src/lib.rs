@@ -1,8 +1,15 @@
 //! Nexus CLI library exports.
 
+pub mod adapters;
+pub mod app;
 pub mod cli;
 pub mod commands;
+pub mod config;
+pub mod core;
+pub mod features;
 pub mod output;
+pub mod services;
+pub mod utils;
 
 pub use cli::{Cli, Commands, MarketplaceCommands, OutputFormat, RalphCommand};
 pub use commands::{

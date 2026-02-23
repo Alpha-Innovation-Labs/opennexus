@@ -2,9 +2,16 @@
 
 use anyhow::Result;
 
+mod adapters;
+mod app;
 mod cli;
 mod commands;
+mod config;
+mod core;
+mod features;
 mod output;
+mod services;
+mod utils;
 
 use cli::{Cli, Commands, MarketplaceCommands};
 use commands::{
