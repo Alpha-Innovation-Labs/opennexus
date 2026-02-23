@@ -37,7 +37,8 @@ After install + setup, your repository is prepared with Nexus assets as document
 │   ├── ai_harness/
 │   │   ├── commands/
 │   │   │   ├── nexus-context-create.md
-│   │   │   ├── nexus-context-sync.md
+│   │   │   ├── nexus-context-sync-from-chat.md
+│   │   │   ├── nexus-context-sync-with-code.md
 │   │   │   ├── nexus-context-review.md
 │   │   │   └── ...
 │   │   ├── skills/
@@ -53,7 +54,8 @@ After install + setup, your repository is prepared with Nexus assets as document
 └── .opencode/
     ├── command/
     │   ├── nexus-context-create.md -> ../../.nexus/ai_harness/commands/nexus-context-create.md
-    │   ├── nexus-context-sync.md -> ../../.nexus/ai_harness/commands/nexus-context-sync.md
+    │   ├── nexus-context-sync-from-chat.md -> ../../.nexus/ai_harness/commands/nexus-context-sync-from-chat.md
+    │   ├── nexus-context-sync-with-code.md -> ../../.nexus/ai_harness/commands/nexus-context-sync-with-code.md
     │   ├── nexus-context-review.md -> ../../.nexus/ai_harness/commands/nexus-context-review.md
     │   └── ...
     ├── skills/
@@ -96,7 +98,8 @@ OpenCode command-form workflows are documented in the [Slash Commands catalog](/
 | `nexus` | Opens context selection workflow (fuzzy context picker) |
 | `nexus-context-create` | Scans for overlap, splits distinct outcomes, and creates context specs with project-scoped IDs |
 | `nexus-context-update` | Applies targeted updates to existing context files and project/feature indexes |
-| `nexus-context-sync` | Syncs context updates from completed implementation work |
+| `nexus-context-sync-from-chat` | Syncs context recommendations from conversation evidence |
+| `nexus-context-sync-with-code` | Syncs context recommendations from git/code changes since last checkpoint |
 | `nexus-context-review` | Audits context quality and coverage before execution |
 | `nexus-context-search` | Searches context files by desired outcomes and next actions |
 | `nexus-context-from-code` | Recommends context updates from code-scope findings |

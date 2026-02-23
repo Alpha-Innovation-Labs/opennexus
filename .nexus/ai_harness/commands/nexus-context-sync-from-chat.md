@@ -1,8 +1,8 @@
 ---
-description: Analyze conversation and recommend context/project updates
+description: Analyze conversation and recommend context/project updates from chat
 ---
 
-# Command: Context Sync
+# Command: Context Sync From Chat
 
 This command is analysis-only.
 
@@ -15,7 +15,7 @@ Its job is to read the current conversation, analyze existing context files, and
 ## Usage
 
 ```bash
-/nexus-context-sync
+/nexus-context-sync-from-chat
 ```
 
 No parameters required.
@@ -82,7 +82,7 @@ Only propose changes supported by conversation evidence.
 Return a concise report in this structure:
 
 ```markdown
-# Context Sync Report
+# Context Sync From Chat Report
 
 ## Context Updates
 

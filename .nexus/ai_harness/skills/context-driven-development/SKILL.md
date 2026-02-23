@@ -33,18 +33,24 @@ Mapping:
 
 Rules:
 - Every context file must live under `.nexus/context/<project>/<feature>/`.
-- Context IDs are project-scoped and increment across all features in a project.
+- Context IDs use a 3-letter prefix from either the **project** or the **feature**.
+- Choose one approach per project and be consistent.
 
 ## Context File Naming
 
-- Pattern: `PRJ_NNN-brief-description.md`
-- `PRJ`: 3-letter uppercase project prefix
-- `NNN`: zero-padded number shared across project features
+- Pattern: `PRJ_NNN-brief-description.md` or `FTR_NNN-brief-description.md`
+- `PRJ` or `FTR`: 3-letter uppercase prefix from **project** or **feature** name
+- `NNN`: zero-padded sequence number (scoped to the chosen prefix)
 - `brief-description`: kebab-case, concise
 
+Prefix choice:
+- **Project-scoped** (e.g., `CLI_001`, `CLI_002`): Use when contexts span multiple features
+- **Feature-scoped** (e.g., `RAL_001`, `MKT_002`): Use when each feature has independent context tracking
+
 Examples:
-- `CLI_007-marketplace-search.md`
-- `KNO_012-sync-workflow.md`
+- `CLI_007-marketplace-search.md` (project-scoped)
+- `RAL_001-ralph-command-surface.md` (feature-scoped)
+- `KNO_012-sync-workflow.md` (project-scoped)
 
 ## Context Frontmatter
 
@@ -137,7 +143,8 @@ Do not put these in numbered context specs:
 - `nexus` -> select context
 - `/nexus-context-create` -> create context specs
 - `/nexus-context-update` -> update context/index docs
-- `/nexus-context-sync` -> propose updates from conversation
+- `/nexus-context-sync-from-chat` -> propose updates from conversation
+- `/nexus-context-sync-with-code` -> propose updates from git/code changes
 - `/nexus-context-review` -> audit CDD compliance
 - `/nexus-context-search` -> search contexts by outcome/actions
 - `/nexus-context-from-code` -> recommend contexts from code scope

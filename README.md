@@ -28,7 +28,8 @@ CDD in Nexus is anchored by harness source files:
 - `.nexus/ai_harness/skills/context-driven-development/SKILL.md`: the canonical CDD specification. It defines context purpose, naming, required frontmatter, required sections, E2E testability rules, anti-patterns, and project/feature index expectations.
 - `.nexus/ai_harness/commands/nexus-context-create.md`: the workflow spec for creating context files from user goals.
 - `.nexus/ai_harness/commands/nexus-context-update.md`: the workflow spec for updating existing context and index docs.
-- `.nexus/ai_harness/commands/nexus-context-sync.md`: the analysis-only workflow for proposing context/index updates from conversation evidence.
+- `.nexus/ai_harness/commands/nexus-context-sync-from-chat.md`: the analysis-only workflow for proposing context/index updates from conversation evidence.
+- `.nexus/ai_harness/commands/nexus-context-sync-with-code.md`: the implementation-alignment workflow that compares git changes to context coverage.
 
 Together they enforce the core split in CDD: `PRJ_NNN-*.md` files specify outcomes, while `index.md` documents how to operate the project.
 
@@ -159,7 +160,8 @@ It also writes `.nexus/config.json` with the selected harness (`opencode` by def
 │   ├── ai_harness/
 │   │   ├── commands/
 │   │   │   ├── nexus-context-create.md
-│   │   │   ├── nexus-context-sync.md
+│   │   │   ├── nexus-context-sync-from-chat.md
+│   │   │   ├── nexus-context-sync-with-code.md
 │   │   │   ├── nexus-context-review.md
 │   │   │   └── ...
 │   │   ├── skills/
@@ -176,7 +178,8 @@ It also writes `.nexus/config.json` with the selected harness (`opencode` by def
 └── .opencode/                  # Created when harness=opencode
     ├── command/
     │   ├── nexus-context-create.md -> ../../.nexus/ai_harness/commands/nexus-context-create.md
-    │   ├── nexus-context-sync.md -> ../../.nexus/ai_harness/commands/nexus-context-sync.md
+    │   ├── nexus-context-sync-from-chat.md -> ../../.nexus/ai_harness/commands/nexus-context-sync-from-chat.md
+    │   ├── nexus-context-sync-with-code.md -> ../../.nexus/ai_harness/commands/nexus-context-sync-with-code.md
     │   ├── nexus-context-review.md -> ../../.nexus/ai_harness/commands/nexus-context-review.md
     │   └── ...
     ├── skills/
