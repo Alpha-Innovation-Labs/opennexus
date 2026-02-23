@@ -32,7 +32,11 @@ pub enum OutputFormat {
 #[derive(Debug, Clone, Subcommand)]
 pub enum Commands {
     /// Set up Nexus in the current project (extracts .nexus directory).
-    Setup,
+    Setup {
+        /// Harness to configure in .nexus/config.json (default: opencode).
+        #[arg(long, default_value = "opencode")]
+        harness: String,
+    },
 
     /// Update Nexus to the latest published version via cargo.
     Update,
@@ -94,6 +98,15 @@ mod tests {
                 _ => panic!("expected marketplace install command"),
             },
             _ => panic!("expected marketplace command"),
+        }
+    }
+
+    #[test]
+    fn parses_setup_with_harness() {
+        let cli = Cli::parse_from(["opennexus", "setup", "--harness", "opencode"]);
+        match cli.command {
+            Some(Commands::Setup { harness }) => assert_eq!(harness, "opencode"),
+            _ => panic!("expected setup command"),
         }
     }
 }

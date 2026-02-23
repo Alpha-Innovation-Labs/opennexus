@@ -5,6 +5,7 @@
 
 use anyhow::{Context, Result};
 use include_dir::{include_dir, Dir};
+use serde_json::{Map, Value};
 use std::collections::HashSet;
 use std::fs;
 #[cfg(unix)]
@@ -21,43 +22,62 @@ static NEXUS_ASSETS: Dir = include_dir!("$CARGO_MANIFEST_DIR/.nexus");
 ///
 /// This extracts the bundled .nexus directory to the current working directory.
 /// Existing files are overwritten to keep assets up to date.
-pub fn run_setup(format: OutputFormat) -> Result<()> {
+pub fn run_setup(format: OutputFormat, harness: &str) -> Result<()> {
     if format == OutputFormat::Json {
         println!(r#"{{"status": "starting"}}"#);
     } else {
-        print_info("Setting up OpenNexus...");
+        print_info(&format!("Setting up OpenNexus (harness: {})...", harness));
     }
 
     // Extract bundled .nexus directory
     extract_nexus_directory(format)?;
 
-    // Remove stale command files that no longer exist in embedded assets
-    let (_nexus_removed, _opencode_removed) = prune_stale_command_files(format)?;
+    // Persist selected harness configuration
+    write_nexus_config(format, harness)?;
 
-    // Create symlinks in .opencode/command/ for all nexus commands
-    let (_symlinks_created, _symlinks_skipped) = create_command_symlinks(format)?;
+    // Sync local marketplace assets into active nexus paths via symlinks
+    let (_marketplace_context_links, _marketplace_command_links) =
+        sync_local_marketplace_assets(format)?;
 
-    // Remove stale tool files that no longer exist in embedded assets
-    let (_nexus_tools_removed, _opencode_tools_removed) = prune_stale_tool_files(format)?;
+    let is_opencode_harness = harness.eq_ignore_ascii_case("opencode");
 
-    // Create symlinks in .opencode/tools/ for all nexus tools
-    let (_tool_symlinks_created, _tool_symlinks_replaced) = create_tool_symlinks(format)?;
+    if is_opencode_harness {
+        // Remove stale command files that no longer exist in embedded assets
+        let (_nexus_removed, _opencode_removed) = prune_stale_command_files(format)?;
+
+        // Create symlinks in .opencode/command/ for all nexus commands
+        let (_symlinks_created, _symlinks_skipped) = create_command_symlinks(format)?;
+
+        // Remove stale tool files that no longer exist in embedded assets
+        let (_nexus_tools_removed, _opencode_tools_removed) = prune_stale_tool_files(format)?;
+
+        // Create symlinks in .opencode/tools/ for all nexus tools
+        let (_tool_symlinks_created, _tool_symlinks_replaced) = create_tool_symlinks(format)?;
+
+        // Remove stale skill entries in .opencode/skills
+        let (_stale_skill_entries_removed, _missing_embedded_skills) =
+            prune_stale_skill_entries(format)?;
+
+        // Create symlinks in .opencode/skills/ for all nexus skills
+        let (_skill_symlinks_created, _skill_symlinks_replaced) = create_skill_symlinks(format)?;
+
+        // Remove stale rule entries in .opencode/rules
+        let (_stale_rule_entries_removed, _missing_embedded_rules) =
+            prune_stale_rule_entries(format)?;
+
+        // Create symlinks in .opencode/rules/ for all nexus rules
+        let (_rule_symlinks_created, _rule_symlinks_replaced) = create_rule_symlinks(format)?;
+    } else if harness.eq_ignore_ascii_case("claude") {
+        let (_created, _replaced) = create_claude_command_symlinks(format)?;
+    } else if format != OutputFormat::Json {
+        print_info(&format!(
+            "Harness '{}' selected: skipped .opencode command/skill/rule linkage",
+            harness
+        ));
+    }
 
     // Remove legacy .nexus/rules directory if present
     remove_legacy_rules_directory(format)?;
-
-    // Remove stale skill entries in .opencode/skills
-    let (_stale_skill_entries_removed, _missing_embedded_skills) =
-        prune_stale_skill_entries(format)?;
-
-    // Create symlinks in .opencode/skills/ for all nexus skills
-    let (_skill_symlinks_created, _skill_symlinks_replaced) = create_skill_symlinks(format)?;
-
-    // Remove stale rule entries in .opencode/rules
-    let (_stale_rule_entries_removed, _missing_embedded_rules) = prune_stale_rule_entries(format)?;
-
-    // Create symlinks in .opencode/rules/ for all nexus rules
-    let (_rule_symlinks_created, _rule_symlinks_replaced) = create_rule_symlinks(format)?;
 
     if format == OutputFormat::Json {
         println!(r#"{{"status": "completed"}}"#);
@@ -67,6 +87,144 @@ pub fn run_setup(format: OutputFormat) -> Result<()> {
     }
 
     Ok(())
+}
+
+fn write_nexus_config(format: OutputFormat, harness: &str) -> Result<()> {
+    let config_path = Path::new(".nexus/config.json");
+
+    let mut config = if config_path.exists() {
+        let content = fs::read_to_string(config_path)
+            .with_context(|| format!("Failed to read '{}'.", config_path.display()))?;
+        serde_json::from_str::<Value>(&content).unwrap_or_else(|_| Value::Object(Map::new()))
+    } else {
+        Value::Object(Map::new())
+    };
+
+    if !config.is_object() {
+        config = Value::Object(Map::new());
+    }
+
+    let obj = config
+        .as_object_mut()
+        .expect("config object should exist after reset");
+
+    obj.insert("harness".to_string(), Value::String(harness.to_string()));
+
+    let serialized = serde_json::to_string_pretty(&config).context("Failed to serialize config")?;
+    fs::write(config_path, format!("{serialized}\n"))
+        .with_context(|| format!("Failed to write '{}'.", config_path.display()))?;
+
+    if format != OutputFormat::Json {
+        print_success(&format!(
+            "Configured harness '{}' in .nexus/config.json",
+            harness
+        ));
+    }
+
+    Ok(())
+}
+
+fn sync_local_marketplace_assets(format: OutputFormat) -> Result<(usize, usize)> {
+    let marketplace_root = Path::new(".nexus/marketplace");
+    if !marketplace_root.exists() {
+        return Ok((0, 0));
+    }
+
+    let mut context_links = 0;
+    let mut command_links = 0;
+
+    let nexus_context_dir = Path::new(".nexus/context");
+    let nexus_commands_dir = Path::new(".nexus/ai_harness/commands");
+    if !nexus_context_dir.exists() {
+        fs::create_dir_all(nexus_context_dir)?;
+    }
+    if !nexus_commands_dir.exists() {
+        fs::create_dir_all(nexus_commands_dir)?;
+    }
+
+    for entry in fs::read_dir(marketplace_root)? {
+        let entry = entry?;
+        let package_path = entry.path();
+        if !package_path.is_dir() {
+            continue;
+        }
+
+        let package_name = match package_path.file_name() {
+            Some(name) => name.to_string_lossy().to_string(),
+            None => continue,
+        };
+
+        let package_context_dir = package_path.join("context");
+        if package_context_dir.is_dir() {
+            let target = nexus_context_dir.join(&package_name);
+            if path_exists_or_symlink(&target) {
+                remove_path(&target)?;
+            }
+
+            #[cfg(unix)]
+            {
+                let link_target = format!("../marketplace/{}/context", package_name);
+                symlink(&link_target, &target)?;
+            }
+
+            #[cfg(not(unix))]
+            {
+                copy_dir_recursive(&package_context_dir, &target)?;
+            }
+
+            context_links += 1;
+        }
+
+        let package_commands_dir = package_path.join("commands");
+        if package_commands_dir.is_dir() {
+            for command_entry in fs::read_dir(&package_commands_dir)? {
+                let command_entry = command_entry?;
+                let command_source = command_entry.path();
+                if !command_source.is_file() {
+                    continue;
+                }
+
+                let Some(file_name) = command_source
+                    .file_name()
+                    .map(|name| name.to_string_lossy().to_string())
+                else {
+                    continue;
+                };
+
+                if !is_command_entry_file(&file_name) {
+                    continue;
+                }
+
+                let command_target = nexus_commands_dir.join(&file_name);
+                if path_exists_or_symlink(&command_target) {
+                    remove_path(&command_target)?;
+                }
+
+                #[cfg(unix)]
+                {
+                    let link_target =
+                        format!("../../marketplace/{}/commands/{}", package_name, file_name);
+                    symlink(&link_target, &command_target)?;
+                }
+
+                #[cfg(not(unix))]
+                {
+                    fs::copy(&command_source, &command_target)?;
+                }
+
+                command_links += 1;
+            }
+        }
+    }
+
+    if format != OutputFormat::Json && (context_links > 0 || command_links > 0) {
+        print_success(&format!(
+            "Linked marketplace assets ({} context packages, {} commands)",
+            context_links, command_links
+        ));
+    }
+
+    Ok((context_links, command_links))
 }
 
 /// Remove stale command files from .nexus/ai_harness/commands and .opencode/command.
@@ -84,11 +242,13 @@ fn prune_stale_command_files(format: OutputFormat) -> Result<(usize, usize)> {
         return Ok((0, 0));
     };
 
-    let allowed_files: HashSet<String> = embedded_commands_dir
+    let mut allowed_files: HashSet<String> = embedded_commands_dir
         .files()
         .filter_map(|file| file.path().file_name())
         .map(|name| name.to_string_lossy().to_string())
         .collect();
+
+    allowed_files.extend(marketplace_command_file_names()?);
 
     let mut nexus_removed = 0;
     for entry in fs::read_dir(nexus_commands_dir)? {
@@ -150,6 +310,108 @@ fn prune_stale_command_files(format: OutputFormat) -> Result<(usize, usize)> {
     }
 
     Ok((nexus_removed, opencode_removed))
+}
+
+fn marketplace_command_file_names() -> Result<HashSet<String>> {
+    let mut names = HashSet::new();
+    let marketplace_root = Path::new(".nexus/marketplace");
+    if !marketplace_root.exists() {
+        return Ok(names);
+    }
+
+    for entry in fs::read_dir(marketplace_root)? {
+        let entry = entry?;
+        let package_path = entry.path();
+        if !package_path.is_dir() {
+            continue;
+        }
+
+        let commands_dir = package_path.join("commands");
+        if !commands_dir.is_dir() {
+            continue;
+        }
+
+        for command_entry in fs::read_dir(commands_dir)? {
+            let command_entry = command_entry?;
+            let command_path = command_entry.path();
+            if !command_path.is_file() {
+                continue;
+            }
+
+            let Some(file_name) = command_path
+                .file_name()
+                .map(|name| name.to_string_lossy().to_string())
+            else {
+                continue;
+            };
+
+            if is_command_entry_file(&file_name) {
+                names.insert(file_name);
+            }
+        }
+    }
+
+    Ok(names)
+}
+
+fn create_claude_command_symlinks(format: OutputFormat) -> Result<(usize, usize)> {
+    let claude_command_dir = Path::new(".claude/commands");
+    let nexus_commands_dir = Path::new(".nexus/ai_harness/commands");
+
+    if !nexus_commands_dir.exists() {
+        return Ok((0, 0));
+    }
+
+    if !claude_command_dir.exists() {
+        fs::create_dir_all(claude_command_dir)?;
+    }
+
+    let mut symlinks_created = 0;
+    let mut symlinks_replaced = 0;
+
+    for entry in fs::read_dir(nexus_commands_dir)? {
+        let entry = entry?;
+        let source_path = entry.path();
+
+        if !source_path.is_file() {
+            continue;
+        }
+
+        let file_name = match source_path.file_name() {
+            Some(name) => name,
+            None => continue,
+        };
+
+        let file_name_str = file_name.to_string_lossy().to_string();
+        if !is_command_entry_file(&file_name_str) {
+            continue;
+        }
+
+        let symlink_path = claude_command_dir.join(file_name);
+
+        if path_exists_or_symlink(&symlink_path) {
+            remove_path(&symlink_path)?;
+            symlinks_replaced += 1;
+        }
+
+        let target = format!("../../.nexus/ai_harness/commands/{}", file_name_str);
+
+        #[cfg(unix)]
+        symlink(&target, &symlink_path)?;
+        #[cfg(not(unix))]
+        fs::copy(&source_path, &symlink_path)?;
+
+        symlinks_created += 1;
+    }
+
+    if format != OutputFormat::Json && (symlinks_created > 0 || symlinks_replaced > 0) {
+        print_success(&format!(
+            "Created {} symlinks in .claude/commands/ ({} replaced)",
+            symlinks_created, symlinks_replaced
+        ));
+    }
+
+    Ok((symlinks_created, symlinks_replaced))
 }
 
 /// Extract the bundled .nexus directory to the current working directory.

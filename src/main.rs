@@ -18,7 +18,8 @@ fn main() -> Result<()> {
 
     // Route to appropriate command handler
     let result = match cli.command {
-        None | Some(Commands::Setup) => run_setup(format),
+        None => run_setup(format, "opencode"),
+        Some(Commands::Setup { harness }) => run_setup(format, &harness),
         Some(Commands::Update) => run_update(format),
         Some(Commands::Uninstall) => run_uninstall(format),
         Some(Commands::Marketplace { command }) => match command {

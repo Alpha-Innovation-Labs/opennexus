@@ -1,6 +1,7 @@
 # Run setup with local binary
-# Usage: just setup
+# Usage: just setup [harness]
 # Example: just setup
+# Example: just setup opencode
 
-setup:
-    cargo run --bin opennexus -- setup
+setup harness="opencode":
+    cargo run --bin opennexus -- setup --harness {{harness}}
