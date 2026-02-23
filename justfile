@@ -16,15 +16,19 @@ help:
     @echo ""
     @echo "\033[1;35m  Most Common Commands:\033[0m"
     @echo "  just \033[0;33mdev\033[0m                      \033[0;32mRun opennexus setup flow\033[0m"
+    @echo "  just \033[0;33mrun\033[0m                      \033[0;32mRun local opennexus with args\033[0m"
     @echo "  just \033[0;33mdocs\033[0m                     \033[0;32mRun local docs server\033[0m"
-    @echo "  just \033[0;33mdocs-sync\033[0m                \033[0;32mGenerate reference docs\033[0m"
+    @echo "  just \033[0;33mdocs-sync\033[0m                \033[0;32mGenerate docs + LLM updates\033[0m"
     @echo "  just \033[0;33mbuild\033[0m                    \033[0;32mBuild development binary\033[0m"
     @echo "  just \033[0;33mtest\033[0m                     \033[0;32mRun all tests\033[0m"
     @echo ""
     @echo "\033[1;35m  Development:\033[0m"
     @echo "  just \033[0;33mdev\033[0m                      \033[0;32mRun opennexus setup flow\033[0m"
+    @echo "  just \033[0;33mrun\033[0m                      \033[0;32mRun local opennexus with args\033[0m"
+    @echo "  just \033[0;33mmarketplace-search\033[0m       \033[0;32mSearch marketplace locally\033[0m"
+    @echo "  just \033[0;33mmarketplace-install\033[0m      \033[0;32mInstall marketplace target locally\033[0m"
     @echo "  just \033[0;33mdocs\033[0m                     \033[0;32mRun local docs server\033[0m"
-    @echo "  just \033[0;33mdocs-sync\033[0m                \033[0;32mGenerate reference docs\033[0m"
+    @echo "  just \033[0;33mdocs-sync\033[0m                \033[0;32mGenerate docs + LLM updates\033[0m"
     @echo ""
     @echo "\033[1;35m  Building:\033[0m"
     @echo "  just \033[0;33mbuild\033[0m                    \033[0;32mBuild development binary\033[0m"
@@ -54,6 +58,9 @@ help:
 # Development Commands
 # ============================================================================
 import 'justfiles/development/dev.just'
+import 'justfiles/development/run.just'
+import 'justfiles/development/marketplace-search.just'
+import 'justfiles/development/marketplace-install.just'
 import 'justfiles/development/docs.just'
 
 # ============================================================================

@@ -8,8 +8,7 @@
     "url": "git+https://github.com/Alpha-Innovation-Labs/opennexus.git"
   },
   "bin": {
-    "opennexus": "bin/opennexus.js",
-    "nexus": "bin/nexus.js"
+    "opennexus": "bin/opennexus.js"
   },
   "files": [
     "bin"
