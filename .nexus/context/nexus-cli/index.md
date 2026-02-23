@@ -23,9 +23,6 @@ dependencies:
 | ID | Feature | Title | Status |
 |----|---------|-------|--------|
 | CLI_001 | core | Baseline CLI | Completed |
-| CLI_003 | core | Clap Migration | Completed |
-| CLI_005 | core | Project Commands | Active |
-| CLI_006 | core | Context Commands | Active |
 | CLI_007 | marketplace | Marketplace Search Command | Active |
 | CLI_008 | marketplace | Marketplace Install Command | Active |
 
@@ -86,9 +83,10 @@ opennexus uninstall
 
 `opennexus setup` manages both source assets and generated links:
 
-- Extracts embedded `.nexus` assets and updates `.nexus/config.json` (including harness + CLI version).
-- Prunes stale generated files from `.opencode/command`, `.opencode/skills`, and `.opencode/rules`.
-- Recreates `.opencode` links to `.nexus/ai_harness/commands`, `.nexus/ai_harness/skills`, and `.nexus/ai_harness/rules`.
+- Extracts embedded `.nexus` assets, updates `.nexus/.version`, and writes harness config in `.nexus/config.json`.
+- Prunes stale generated files from `.opencode/command`, `.opencode/tools`, `.opencode/skills`, and `.opencode/rules`.
+- Recreates `.opencode` links to `.nexus/ai_harness/commands`, `.nexus/tools`, `.nexus/ai_harness/skills`, and `.nexus/ai_harness/rules`.
+- Creates `.claude/commands` links when `--harness claude` is selected.
 - Removes legacy top-level `.nexus/rules` when present.
 
 ## Troubleshooting
