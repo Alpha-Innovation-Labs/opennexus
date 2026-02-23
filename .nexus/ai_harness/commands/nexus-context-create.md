@@ -4,7 +4,9 @@ description: Create new context specifications from user goals
 
 # Command: Create Context
 
-You are creating context specification(s) following `.nexus/ai_harness/skills/context/SKILL.md`.
+You are creating context specification(s) following `.nexus/ai_harness/skills/context-driven-development/SKILL.md`.
+
+Read that skill first and treat it as the only CDD source of truth.
 
 ## Workflow
 
@@ -139,7 +141,7 @@ created: "YYYY-MM-DD"
 ---
 
 <!-- 
-SOURCE OF TRUTH: .nexus/ai_harness/skills/context/SKILL.md
+SOURCE OF TRUTH: .nexus/ai_harness/skills/context-driven-development/SKILL.md
 
 FILE NAMING: PRJ_NNN-brief-description.md
 - PRJ = 3-letter project prefix (e.g., KNO for knowledge-harvester)
@@ -190,13 +192,13 @@ CRITICAL RULES:
 
 ### 9. Create index.md Files If Needed
 
-- If this is the first context in a new project directory, create `.nexus/context/<project>/index.md` from `.nexus/ai_harness/templates/PROJECT.md`.
+- If this is the first context in a new project directory, create `.nexus/context/<project>/index.md` following the project index requirements in `.nexus/ai_harness/skills/context-driven-development/SKILL.md`.
 - If this is the first context in a new feature directory, create `.nexus/context/<project>/<feature>/index.md` with sections: Scope, Context Files, Interfaces, Dependencies, Troubleshooting.
 
 ### 10. Read Applicable Rules
 
 After creating the context file(s), read any relevant skill/rule guidance for implementation. Common source:
-- `.nexus/ai_harness/skills/context/SKILL.md` - Context file standards
+- `.nexus/ai_harness/skills/context-driven-development/SKILL.md` - Context file standards
 - Any language-specific rules (e.g., `rs.md` for Rust)
 - Any tool-specific rules (e.g., `justfiles.md`)
 
