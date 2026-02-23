@@ -9,7 +9,7 @@ created: "2025-01-04"
 
 ## Desired Outcome
 
-The CLI uses clap for argument parsing with derive macros, replacing the manual argument matching. The code is restructured following `.nexus/skills/rust/SKILL.md` with one item per file and structs using directory structure.
+The CLI uses clap for argument parsing with derive macros, replacing the manual argument matching. The code is restructured following `.nexus/ai_harness/rules/rust/SKILL.md` with one item per file and structs using directory structure.
 
 ## Next Actions
 

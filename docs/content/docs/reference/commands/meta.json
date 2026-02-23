@@ -1,4 +1,4 @@
 {
   "title": "Commands",
-  "pages": ["index", "commands--commands", "commands-setup--run_setup", "commands-setup--setup", "commands-uninstall--run_uninstall", "commands-uninstall--uninstall", "commands-update--run_update", "commands-update--update"]
+  "pages": ["index", "commands--commands", "commands-marketplace--run_marketplace_install", "commands-marketplace--run_marketplace_search", "commands-marketplace--marketplace", "commands-setup--run_setup", "commands-setup--setup", "commands-uninstall--run_uninstall", "commands-uninstall--uninstall", "commands-update--run_update", "commands-update--update"]
 }

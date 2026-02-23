@@ -23,37 +23,52 @@ The implementation details stay in code and engineering decisions. The context s
 
 ## CDD Source Files
 
-CDD in Nexus is anchored by two key files:
+CDD in Nexus is anchored by harness source files:
 
-- `.nexus/skills/context/SKILL.md`: the canonical CDD specification. It defines context purpose, naming, required frontmatter, required sections, E2E testability rules, anti-patterns, and how numbered context files differ from project knowledge.
-- `.nexus/templates/PROJECT.md`: the template for `.context/<project>/index.md`. It defines the operational knowledge format for a project (overview, architecture, CLI usage, dependencies, environment variables, troubleshooting) and keeps that documentation separate from numbered context specs.
+- `.nexus/ai_harness/skills/context/SKILL.md`: the canonical CDD specification. It defines context purpose, naming, required frontmatter, required sections, E2E testability rules, anti-patterns, and project/feature index expectations.
+- `.nexus/ai_harness/commands/nexus-context-create.md`: the workflow spec for creating context files from user goals.
+- `.nexus/ai_harness/templates/AGENTS.md`: the feature-first harness structure reference.
+- `.nexus/ai_harness/templates/PROJECT.md`: the project index template used under `.nexus/context/<project>/index.md`.
 
 Together they enforce the core split in CDD: `PRJ_NNN-*.md` files specify outcomes, while `index.md` documents how to operate the project.
 
+## Harness Behavior
+
+`/nexus-context-create` follows the context skill and applies a fixed workflow:
+
+- scan `.nexus/context/` for overlap before creating new context files,
+- confirm whether to update existing context files or create new ones,
+- split user goals into multiple context files when outcomes are distinct,
+- assign the next project-scoped context ID across all feature folders,
+- create missing project/feature `index.md` files when a new directory is introduced.
+
 ## Context Structure
 
-Contexts live under `.context/<project>/` and follow strict naming and format conventions.
+Contexts live under `.nexus/context/<project>/<feature>/` and follow strict naming and format conventions.
 
 Example:
 
 ```text
-.context/
+.nexus/context/
   <project>/
     index.md
-    PRJ_001-short-description.md
-    PRJ_002-another-outcome.md
+    <feature>/
+      index.md
+      PRJ_001-short-description.md
+      PRJ_002-another-outcome.md
     _reference/
 ```
 
-- `PRJ_NNN-*.md` files are the outcome specifications.
-- `index.md` is project operational knowledge (architecture, usage, troubleshooting), not a numbered context.
+- `PRJ_NNN-*.md` files are outcome specifications and belong to a feature folder.
+- project `index.md` stores project-level operational knowledge.
+- feature `index.md` stores feature-level operational knowledge.
 - `_reference/` stores background research/design material.
 
 ## What Goes in a Context File
 
 Each numbered context includes:
 
-- YAML frontmatter (`context_id`, `title`, `project`, `created`)
+- YAML frontmatter (`context_id`, `title`, `project`, `feature`, `created`)
 - `Desired Outcome` section (end-state only)
 - optional `Reference` section (diagrams/links)
 - `Next Actions` table with:
@@ -137,30 +152,36 @@ just setup
 .
 ├── .nexus/
 │   ├── .version
-│   ├── commands/
-│   │   ├── nexus-0-prompt.md
-│   │   ├── nexus-1.2-context-create.md
-│   │   └── ...
+│   ├── ai_harness/
+│   │   ├── commands/
+│   │   │   ├── nexus-context-create.md
+│   │   │   ├── nexus-context-sync.md
+│   │   │   ├── nexus-context-review.md
+│   │   │   └── ...
+│   │   ├── skills/
+│   │   │   ├── context/
+│   │   │   ├── llms-txt/
+│   │   │   ├── opencode-rs-sdk/
+│   │   │   └── ratkit/
+│   │   ├── rules/
+│   │   │   └── ...
+│   │   └── templates/
+│   │       ├── PROJECT.md
+│   │       ├── AGENTS.md
+│   │       └── nexus/
 │   ├── context/
 │   │   ├── .extract-allowlist
 │   │   ├── nexus/
 │   │   ├── nexus-cli/
 │   │   └── ... (installed via marketplace)
-│   ├── rules/
-│   │   ├── context.md
-│   │   ├── rs.md
-│   │   └── ...
-│   └── templates/
-│       ├── PROJECT.md
-│       ├── AGENTS.md
-│       └── nexus/
 └── .opencode/
     └── command/
-        ├── nexus-0-prompt.md -> ../../.nexus/commands/nexus-0-prompt.md
-        ├── nexus-1.2-context-create.md -> ../../.nexus/commands/nexus-1.2-context-create.md
+        ├── nexus-context-create.md -> ../../.nexus/ai_harness/commands/nexus-context-create.md
+        ├── nexus-context-sync.md -> ../../.nexus/ai_harness/commands/nexus-context-sync.md
+        ├── nexus-context-review.md -> ../../.nexus/ai_harness/commands/nexus-context-review.md
         └── ...
 ```
 
-Important: `.nexus/**` is the source of truth. `.opencode/command/**` is generated linkage created by setup.
+Important: `.nexus/**` is the source of truth. `.opencode/**` entries are generated linkage created by setup.
 
-For authoritative rules, see `.nexus/skills/context/SKILL.md`.
+For authoritative rules, see `.nexus/ai_harness/skills/context/SKILL.md`.

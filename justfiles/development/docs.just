@@ -7,7 +7,7 @@ docs:
     rm -f docs/.next/dev/lock
     cd docs && bun install && bun run dev 2>&1 | tee ../logs/docs.log
 
-# Generate reference docs from Rust doc comments
+# Generate reference docs and run LLM docs updater
 # Usage: just docs-sync
 # Example: just docs-sync
 

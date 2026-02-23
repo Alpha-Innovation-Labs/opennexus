@@ -35,27 +35,33 @@ After install + setup, your repository is prepared with Nexus assets as document
 .
 ├── .nexus/
 │   ├── .version
-│   ├── commands/
-│   │   ├── nexus-0-prompt.md
-│   │   ├── nexus-1.2-context-create.md
-│   │   └── ...
+│   ├── ai_harness/
+│   │   ├── commands/
+│   │   │   ├── nexus-context-create.md
+│   │   │   ├── nexus-context-sync.md
+│   │   │   ├── nexus-context-review.md
+│   │   │   └── ...
+│   │   ├── skills/
+│   │   │   ├── context/
+│   │   │   ├── llms-txt/
+│   │   │   ├── opencode-rs-sdk/
+│   │   │   └── ratkit/
+│   │   ├── rules/
+│   │   │   └── ...
+│   │   └── templates/
+│   │       ├── PROJECT.md
+│   │       ├── AGENTS.md
+│   │       └── nexus/
 │   ├── context/
 │   │   ├── .extract-allowlist
 │   │   ├── nexus/
 │   │   ├── nexus-cli/
 │   │   └── fumadocs/
-│   ├── rules/
-│   │   ├── context.md
-│   │   ├── rs.md
-│   │   └── ...
-│   └── templates/
-│       ├── PROJECT.md
-│       ├── AGENTS.md
-│       └── nexus/
 └── .opencode/
     └── command/
-        ├── nexus-0-prompt.md -> ../../.nexus/commands/nexus-0-prompt.md
-        ├── nexus-1.2-context-create.md -> ../../.nexus/commands/nexus-1.2-context-create.md
+        ├── nexus-context-create.md -> ../../.nexus/ai_harness/commands/nexus-context-create.md
+        ├── nexus-context-sync.md -> ../../.nexus/ai_harness/commands/nexus-context-sync.md
+        ├── nexus-context-review.md -> ../../.nexus/ai_harness/commands/nexus-context-review.md
         └── ...
 ```
 
@@ -70,6 +76,14 @@ If you are new to the workflow, read the [Context Driven Development (CDD) guide
 | `opennexus uninstall` | Removes the globally installed `opennexus` command |
 | `opennexus --help` | Shows available commands and options |
 
+## Harness Structure
+
+OpenNexus ships context governance assets in a feature-first layout under `.nexus/context/<project>/<feature>/`.
+
+- Numbered context files (`PRJ_NNN-*.md`) define desired outcomes and E2E-observable next actions.
+- `index.md` files at project and feature levels store operational knowledge.
+- Context IDs are project-scoped and increment across all feature folders in that project.
+
 ## Features
 
 ### Slash Commands
@@ -78,16 +92,10 @@ OpenCode command-form workflows are documented in the [Slash Commands catalog](/
 
 | Slash Command | Purpose |
 |---------------|---------|
-| [`nexus-0-prompt`](/docs/commands/nexus-0-prompt) | Rewrites a user prompt for clarity/structure and returns only the rewritten prompt |
-| [`nexus-1.1-context-search`](/docs/commands/nexus-1-1-context-search) | Finds relevant Desired Outcomes and Next Actions from `.nexus/context/` |
-| [`nexus-1.2-context-create`](/docs/commands/nexus-1-2-context-create) | Creates new context specs from goals with correct IDs/prefixes and E2E-testable actions |
-| [`nexus-1.3-context-sync`](/docs/commands/nexus-1-3-context-sync) | Produces an analysis-only Context Sync Report without editing files |
-| [`nexus-1.4-context-review`](/docs/commands/nexus-1-4-context-review) | Audits context quality, proposes fixes, and can suggest context splitting |
-| [`nexus-1.5-context-from-code`](/docs/commands/nexus-1-5-context-from-code) | Proposes candidate contexts or updates by analyzing code behavior |
-| [`nexus-2-investigate`](/docs/commands/nexus-2-investigate) | Runs 5 parallel analysts and consolidates severity-grouped findings |
-| [`nexus-3.5-critique`](/docs/commands/nexus-3-5-critique) | Stress-tests a plan for risks, logic gaps, and edge cases |
-| [`nexus-4-code`](/docs/commands/nexus-4-code) | Orchestrates implementation tracks across parallel workstreams |
-| [`nexus-create-skill-from-codebase`](/docs/commands/nexus-create-skill-from-codebase) | Orchestrates full/incremental `llms.txt` generation with quality gates |
+| `nexus` | Opens context selection workflow (fuzzy context picker) |
+| `nexus-context-create` | Scans for overlap, splits distinct outcomes, and creates context specs with project-scoped IDs |
+| `nexus-context-sync` | Syncs context updates from completed implementation work |
+| `nexus-context-review` | Audits context quality and coverage before execution |
 
 ### Skills
 
@@ -105,5 +113,5 @@ OpenNexus ships built-in skills under [Skills -> Rust](/docs/skills/rust).
 OpenNexus can use AIs to generate a friendly `llms.txt` file that captures project knowledge in an agent-consumable format.
 
 - Generated `llms.txt` content can be converted into reusable skills.
-- This is the same workflow used to create `.nexus/skills/ratkit/SKILL.md` and `.nexus/skills/opencode-rs-sdk/SKILL.md`.
+- Built-in skill artifacts are stored under `.nexus/ai_harness/skills/`.
 - Use the slash-command workflow to iterate from project context to `llms.txt`, then from `llms.txt` to skill artifacts.

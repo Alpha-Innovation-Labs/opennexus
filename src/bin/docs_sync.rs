@@ -2,6 +2,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::env;
 use std::fs;
 use std::path::{Path, PathBuf};
+use std::process::Command;
+
+use serde::{Deserialize, Serialize};
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 struct SymbolDoc {
@@ -20,6 +23,15 @@ enum Mode {
     Check,
 }
 
+const DOCS_SYNC_STATE_PATH: &str = ".nexus/docs-sync-state.json";
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+struct DocsSyncState {
+    docs_path: String,
+    last_generated_commit: String,
+    generated_at: String,
+}
+
 fn main() {
     if let Err(err) = run() {
         eprintln!("docs-sync error: {err}");
@@ -28,15 +40,20 @@ fn main() {
 }
 
 fn run() -> Result<(), String> {
-    let mode = match env::args().nth(1).as_deref() {
-        None | Some("sync") => Mode::Sync,
-        Some("check") => Mode::Check,
-        Some(other) => {
-            return Err(format!(
-                "unknown mode '{other}'. use: docs-sync [sync|check]"
-            ));
+    let mut mode = Mode::Sync;
+    let mut llm_enabled = true;
+    for arg in env::args().skip(1) {
+        match arg.as_str() {
+            "sync" => mode = Mode::Sync,
+            "check" => mode = Mode::Check,
+            "--no-llm" => llm_enabled = false,
+            other => {
+                return Err(format!(
+                    "unknown argument '{other}'. use: docs-sync [sync|check] [--no-llm]"
+                ));
+            }
         }
-    };
+    }
 
     let repo_root = env::current_dir().map_err(|e| format!("failed to read current dir: {e}"))?;
     let src_root = repo_root.join("src");
@@ -105,6 +122,11 @@ fn run() -> Result<(), String> {
                 symbols.len(),
                 reference_root.display()
             );
+
+            if llm_enabled {
+                maybe_run_llm_docs_update(&repo_root)?;
+            }
+
             Ok(())
         }
         Mode::Check => {
@@ -128,6 +150,267 @@ fn run() -> Result<(), String> {
             }
         }
     }
+}
+
+fn maybe_run_llm_docs_update(repo_root: &Path) -> Result<(), String> {
+    let state = load_docs_sync_state(repo_root)?;
+    if let Some(existing_state) = state.as_ref() {
+        println!(
+            "docs-sync: last LLM checkpoint: {} @ {}",
+            existing_state.last_generated_commit, existing_state.generated_at
+        );
+    } else {
+        println!("docs-sync: last LLM checkpoint: none");
+    }
+
+    let changed_paths = staged_and_committed_paths(
+        repo_root,
+        state
+            .as_ref()
+            .map(|value| value.last_generated_commit.as_str()),
+    )?;
+    if changed_paths.is_empty() {
+        println!("docs-sync: no staged or committed changes; skipping LLM docs update");
+        return Ok(());
+    }
+
+    let harness_changed = changed_paths.iter().any(|path| {
+        path.starts_with(".nexus/ai_harness/commands/")
+            || path.starts_with(".nexus/ai_harness/skills/")
+            || path.starts_with(".nexus/ai_harness/rules/")
+    });
+
+    if !harness_changed {
+        println!("docs-sync: no ai_harness changes detected; skipping LLM docs update");
+        return Ok(());
+    }
+
+    let mut changed = changed_paths;
+    changed.sort();
+    println!(
+        "docs-sync: files considered from staged + committed history ({}):",
+        changed.len()
+    );
+    for path in &changed {
+        println!("  - {path}");
+    }
+
+    let changed_list = changed
+        .iter()
+        .map(|p| format!("- {p}"))
+        .collect::<Vec<_>>()
+        .join("\n");
+
+    let prompt = format!(
+        "You are updating repository docs after harness changes.\n\nUse ONLY these staged and committed paths as source-of-truth input. Ignore any unstaged workspace edits:\n{changed_list}\n\nTasks:\n1) Update docs that describe harness structure and behavior.\n2) Keep edits concise and factual; do not invent files or features.\n3) Update only these documentation targets when needed:\n   - README.md\n   - docs/content/docs/index.mdx\n   - llms.txt\n   - .nexus/context/nexus-cli/**/*.md\n4) Do not modify code files.\n\nAfter editing, stop."
+    );
+
+    println!("docs-sync: running opencode LLM docs updater...");
+    println!("docs-sync: prompt sent to opencode:\n{prompt}");
+
+    let output = Command::new("opencode")
+        .arg("run")
+        .arg("--agent")
+        .arg("general")
+        .arg("--dir")
+        .arg(repo_root)
+        .arg(prompt)
+        .output()
+        .map_err(|e| format!("failed to run 'opencode run': {e}"))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!(
+            "opencode docs update failed with status {}: {}",
+            output
+                .status
+                .code()
+                .map_or("unknown".to_string(), |code| code.to_string()),
+            stderr.trim()
+        ));
+    }
+
+    let stdout = String::from_utf8_lossy(&output.stdout);
+    if !stdout.trim().is_empty() {
+        println!("{stdout}");
+    }
+
+    let head_commit = git_single_line(repo_root, ["rev-parse", "HEAD"])?;
+    let generated_at = utc_now_string(repo_root)?;
+
+    save_docs_sync_state(
+        repo_root,
+        &DocsSyncState {
+            docs_path: "docs/content/docs".to_string(),
+            last_generated_commit: head_commit,
+            generated_at,
+        },
+    )?;
+
+    Ok(())
+}
+
+fn staged_and_committed_paths(
+    repo_root: &Path,
+    last_generated_commit: Option<&str>,
+) -> Result<Vec<String>, String> {
+    let mut all_paths = BTreeSet::new();
+
+    for path in git_changed_paths(
+        repo_root,
+        ["diff", "--cached", "--name-only", "--diff-filter=ACMRTUXB"],
+    )? {
+        all_paths.insert(path);
+    }
+
+    let head_commit = git_single_line(repo_root, ["rev-parse", "HEAD"])?;
+
+    if let Some(last_commit) = last_generated_commit {
+        let last_commit_exists = Command::new("git")
+            .args([
+                "rev-parse",
+                "--verify",
+                &format!("{last_commit}^{{commit}}"),
+            ])
+            .current_dir(repo_root)
+            .output()
+            .map_err(|e| format!("failed to run git command: {e}"))?
+            .status
+            .success();
+
+        if last_commit_exists && last_commit != head_commit {
+            for path in git_changed_paths(
+                repo_root,
+                [
+                    "diff",
+                    "--name-only",
+                    "--diff-filter=ACMRTUXB",
+                    &format!("{last_commit}..HEAD"),
+                ],
+            )? {
+                all_paths.insert(path);
+            }
+
+            return Ok(all_paths.into_iter().collect());
+        }
+    }
+
+    let upstream_ref = git_single_line(
+        repo_root,
+        [
+            "rev-parse",
+            "--abbrev-ref",
+            "--symbolic-full-name",
+            "@{upstream}",
+        ],
+    )
+    .ok();
+
+    if let Some(upstream) = upstream_ref {
+        for path in git_changed_paths(
+            repo_root,
+            [
+                "diff",
+                "--name-only",
+                "--diff-filter=ACMRTUXB",
+                &format!("{upstream}...HEAD"),
+            ],
+        )? {
+            all_paths.insert(path);
+        }
+    } else {
+        for path in git_changed_paths(
+            repo_root,
+            ["show", "--pretty=format:", "--name-only", "HEAD"],
+        )? {
+            all_paths.insert(path);
+        }
+    }
+
+    Ok(all_paths.into_iter().collect())
+}
+
+fn git_changed_paths<const N: usize>(
+    repo_root: &Path,
+    args: [&str; N],
+) -> Result<Vec<String>, String> {
+    let output = Command::new("git")
+        .args(args)
+        .current_dir(repo_root)
+        .output()
+        .map_err(|e| format!("failed to run git command: {e}"))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("git command failed: {}", stderr.trim()));
+    }
+
+    Ok(String::from_utf8_lossy(&output.stdout)
+        .lines()
+        .map(str::trim)
+        .filter(|line| !line.is_empty())
+        .map(ToOwned::to_owned)
+        .collect())
+}
+
+fn git_single_line<const N: usize>(repo_root: &Path, args: [&str; N]) -> Result<String, String> {
+    let output = Command::new("git")
+        .args(args)
+        .current_dir(repo_root)
+        .output()
+        .map_err(|e| format!("failed to run git command: {e}"))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("git command failed: {}", stderr.trim()));
+    }
+
+    Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
+}
+
+fn load_docs_sync_state(repo_root: &Path) -> Result<Option<DocsSyncState>, String> {
+    let state_path = repo_root.join(DOCS_SYNC_STATE_PATH);
+    if !state_path.exists() {
+        return Ok(None);
+    }
+
+    let content = fs::read_to_string(&state_path)
+        .map_err(|e| format!("failed to read state file {}: {e}", state_path.display()))?;
+    let parsed = serde_json::from_str::<DocsSyncState>(&content).map_err(|e| {
+        format!(
+            "failed to parse docs-sync state {}: {e}",
+            state_path.display()
+        )
+    })?;
+    Ok(Some(parsed))
+}
+
+fn save_docs_sync_state(repo_root: &Path, state: &DocsSyncState) -> Result<(), String> {
+    let state_path = repo_root.join(DOCS_SYNC_STATE_PATH);
+    if let Some(parent) = state_path.parent() {
+        fs::create_dir_all(parent)
+            .map_err(|e| format!("failed to create state directory {}: {e}", parent.display()))?;
+    }
+
+    let serialized = serde_json::to_string_pretty(state)
+        .map_err(|e| format!("failed to serialize docs-sync state: {e}"))?;
+    fs::write(&state_path, format!("{serialized}\n"))
+        .map_err(|e| format!("failed to write state file {}: {e}", state_path.display()))
+}
+
+fn utc_now_string(repo_root: &Path) -> Result<String, String> {
+    let output = Command::new("date")
+        .args(["-u", "+%Y-%m-%dT%H:%M:%SZ"])
+        .current_dir(repo_root)
+        .output()
+        .map_err(|e| format!("failed to run date command: {e}"))?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(format!("date command failed: {}", stderr.trim()));
+    }
+
+    Ok(String::from_utf8_lossy(&output.stdout).trim().to_string())
 }
 
 fn collect_rs_files(src_root: &Path) -> Result<Vec<PathBuf>, String> {
