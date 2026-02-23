@@ -24,7 +24,9 @@ fn main() -> Result<()> {
         Some(Commands::Uninstall) => run_uninstall(format),
         Some(Commands::Marketplace { command }) => match command {
             MarketplaceCommands::Search { query } => run_marketplace_search(&query, format),
-            MarketplaceCommands::Install { target } => run_marketplace_install(&target, format),
+            MarketplaceCommands::Install { target, package } => {
+                run_marketplace_install(&target, package.as_deref(), format)
+            }
         },
     };
 

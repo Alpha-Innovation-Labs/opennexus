@@ -61,8 +61,11 @@ pub enum MarketplaceCommands {
 
     /// Install a marketplace entry or a GitHub source.
     Install {
-        /// Marketplace id/name (e.g., fumadocs) or github.com/<owner>/<repo>.
+        /// Marketplace id/name (e.g., fumadocs) or GitHub repo (owner/repo or github.com/owner/repo).
         target: String,
+
+        /// Optional marketplace package name under .nexus/marketplace/<package> when target is a GitHub repo.
+        package: Option<String>,
     },
 }
 
@@ -92,8 +95,30 @@ mod tests {
         ]);
         match cli.command {
             Some(Commands::Marketplace { command }) => match command {
-                MarketplaceCommands::Install { target } => {
-                    assert_eq!(target, "github.com/owner/repo")
+                MarketplaceCommands::Install { target, package } => {
+                    assert_eq!(target, "github.com/owner/repo");
+                    assert!(package.is_none());
+                }
+                _ => panic!("expected marketplace install command"),
+            },
+            _ => panic!("expected marketplace command"),
+        }
+    }
+
+    #[test]
+    fn parses_marketplace_install_command_with_package() {
+        let cli = Cli::parse_from([
+            "opennexus",
+            "marketplace",
+            "install",
+            "Alpha-Innovation-Labs/opennexus",
+            "fumadocs",
+        ]);
+        match cli.command {
+            Some(Commands::Marketplace { command }) => match command {
+                MarketplaceCommands::Install { target, package } => {
+                    assert_eq!(target, "Alpha-Innovation-Labs/opennexus");
+                    assert_eq!(package.as_deref(), Some("fumadocs"));
                 }
                 _ => panic!("expected marketplace install command"),
             },

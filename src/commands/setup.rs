@@ -35,10 +35,6 @@ pub fn run_setup(format: OutputFormat, harness: &str) -> Result<()> {
     // Persist selected harness configuration
     write_nexus_config(format, harness)?;
 
-    // Sync local marketplace assets into active nexus paths via symlinks
-    let (_marketplace_context_links, _marketplace_command_links) =
-        sync_local_marketplace_assets(format)?;
-
     let is_opencode_harness = harness.eq_ignore_ascii_case("opencode");
 
     if is_opencode_harness {
@@ -91,6 +87,7 @@ pub fn run_setup(format: OutputFormat, harness: &str) -> Result<()> {
 
 fn write_nexus_config(format: OutputFormat, harness: &str) -> Result<()> {
     let config_path = Path::new(".nexus/config.json");
+    let docs_sync_state_path = Path::new(".nexus/docs-sync-state.json");
 
     let mut config = if config_path.exists() {
         let content = fs::read_to_string(config_path)
@@ -109,11 +106,60 @@ fn write_nexus_config(format: OutputFormat, harness: &str) -> Result<()> {
         .expect("config object should exist after reset");
 
     obj.insert("harness".to_string(), Value::String(harness.to_string()));
+    obj.insert(
+        "version".to_string(),
+        Value::String(env!("CARGO_PKG_VERSION").to_string()),
+    );
+
+    let mut legacy_state: Option<Value> = obj.get("docs_sync_state").cloned();
+
+    if legacy_state.is_none() && docs_sync_state_path.exists() {
+        if let Ok(content) = fs::read_to_string(docs_sync_state_path) {
+            if let Ok(state) = serde_json::from_str::<Value>(&content) {
+                if state.is_object() {
+                    legacy_state = Some(state);
+                }
+            }
+        }
+    }
+
+    if let Some(state) = legacy_state {
+        let marketplace = obj
+            .entry("marketplace".to_string())
+            .or_insert_with(|| Value::Object(Map::new()));
+        if !marketplace.is_object() {
+            *marketplace = Value::Object(Map::new());
+        }
+
+        let marketplace_obj = marketplace
+            .as_object_mut()
+            .expect("marketplace should be object after reset");
+
+        let fumadocs = marketplace_obj
+            .entry("fumadocs".to_string())
+            .or_insert_with(|| Value::Object(Map::new()));
+        if !fumadocs.is_object() {
+            *fumadocs = Value::Object(Map::new());
+        }
+
+        let fumadocs_obj = fumadocs
+            .as_object_mut()
+            .expect("fumadocs should be object after reset");
+
+        if !fumadocs_obj.contains_key("sync_state") {
+            fumadocs_obj.insert("sync_state".to_string(), state);
+        }
+    }
+
+    obj.remove("docs_sync_state");
 
     let serialized = serde_json::to_string_pretty(&config).context("Failed to serialize config")?;
     fs::write(config_path, format!("{serialized}\n"))
         .with_context(|| format!("Failed to write '{}'.", config_path.display()))?;
 
+    if docs_sync_state_path.exists() {
+        let _ = fs::remove_file(docs_sync_state_path);
+    }
     if format != OutputFormat::Json {
         print_success(&format!(
             "Configured harness '{}' in .nexus/config.json",
@@ -122,109 +168,6 @@ fn write_nexus_config(format: OutputFormat, harness: &str) -> Result<()> {
     }
 
     Ok(())
-}
-
-fn sync_local_marketplace_assets(format: OutputFormat) -> Result<(usize, usize)> {
-    let marketplace_root = Path::new(".nexus/marketplace");
-    if !marketplace_root.exists() {
-        return Ok((0, 0));
-    }
-
-    let mut context_links = 0;
-    let mut command_links = 0;
-
-    let nexus_context_dir = Path::new(".nexus/context");
-    let nexus_commands_dir = Path::new(".nexus/ai_harness/commands");
-    if !nexus_context_dir.exists() {
-        fs::create_dir_all(nexus_context_dir)?;
-    }
-    if !nexus_commands_dir.exists() {
-        fs::create_dir_all(nexus_commands_dir)?;
-    }
-
-    for entry in fs::read_dir(marketplace_root)? {
-        let entry = entry?;
-        let package_path = entry.path();
-        if !package_path.is_dir() {
-            continue;
-        }
-
-        let package_name = match package_path.file_name() {
-            Some(name) => name.to_string_lossy().to_string(),
-            None => continue,
-        };
-
-        let package_context_dir = package_path.join("context");
-        if package_context_dir.is_dir() {
-            let target = nexus_context_dir.join(&package_name);
-            if path_exists_or_symlink(&target) {
-                remove_path(&target)?;
-            }
-
-            #[cfg(unix)]
-            {
-                let link_target = format!("../marketplace/{}/context", package_name);
-                symlink(&link_target, &target)?;
-            }
-
-            #[cfg(not(unix))]
-            {
-                copy_dir_recursive(&package_context_dir, &target)?;
-            }
-
-            context_links += 1;
-        }
-
-        let package_commands_dir = package_path.join("commands");
-        if package_commands_dir.is_dir() {
-            for command_entry in fs::read_dir(&package_commands_dir)? {
-                let command_entry = command_entry?;
-                let command_source = command_entry.path();
-                if !command_source.is_file() {
-                    continue;
-                }
-
-                let Some(file_name) = command_source
-                    .file_name()
-                    .map(|name| name.to_string_lossy().to_string())
-                else {
-                    continue;
-                };
-
-                if !is_command_entry_file(&file_name) {
-                    continue;
-                }
-
-                let command_target = nexus_commands_dir.join(&file_name);
-                if path_exists_or_symlink(&command_target) {
-                    remove_path(&command_target)?;
-                }
-
-                #[cfg(unix)]
-                {
-                    let link_target =
-                        format!("../../marketplace/{}/commands/{}", package_name, file_name);
-                    symlink(&link_target, &command_target)?;
-                }
-
-                #[cfg(not(unix))]
-                {
-                    fs::copy(&command_source, &command_target)?;
-                }
-
-                command_links += 1;
-            }
-        }
-    }
-
-    if format != OutputFormat::Json && (context_links > 0 || command_links > 0) {
-        print_success(&format!(
-            "Linked marketplace assets ({} context packages, {} commands)",
-            context_links, command_links
-        ));
-    }
-
-    Ok((context_links, command_links))
 }
 
 /// Remove stale command files from .nexus/ai_harness/commands and .opencode/command.
@@ -242,13 +185,11 @@ fn prune_stale_command_files(format: OutputFormat) -> Result<(usize, usize)> {
         return Ok((0, 0));
     };
 
-    let mut allowed_files: HashSet<String> = embedded_commands_dir
+    let allowed_files: HashSet<String> = embedded_commands_dir
         .files()
         .filter_map(|file| file.path().file_name())
         .map(|name| name.to_string_lossy().to_string())
         .collect();
-
-    allowed_files.extend(marketplace_command_file_names()?);
 
     let mut nexus_removed = 0;
     for entry in fs::read_dir(nexus_commands_dir)? {
@@ -268,6 +209,10 @@ fn prune_stale_command_files(format: OutputFormat) -> Result<(usize, usize)> {
         };
 
         if !is_command_entry_file(&file_name) {
+            continue;
+        }
+
+        if file_name.starts_with("nexus-marketplace-") {
             continue;
         }
 
@@ -310,48 +255,6 @@ fn prune_stale_command_files(format: OutputFormat) -> Result<(usize, usize)> {
     }
 
     Ok((nexus_removed, opencode_removed))
-}
-
-fn marketplace_command_file_names() -> Result<HashSet<String>> {
-    let mut names = HashSet::new();
-    let marketplace_root = Path::new(".nexus/marketplace");
-    if !marketplace_root.exists() {
-        return Ok(names);
-    }
-
-    for entry in fs::read_dir(marketplace_root)? {
-        let entry = entry?;
-        let package_path = entry.path();
-        if !package_path.is_dir() {
-            continue;
-        }
-
-        let commands_dir = package_path.join("commands");
-        if !commands_dir.is_dir() {
-            continue;
-        }
-
-        for command_entry in fs::read_dir(commands_dir)? {
-            let command_entry = command_entry?;
-            let command_path = command_entry.path();
-            if !command_path.is_file() {
-                continue;
-            }
-
-            let Some(file_name) = command_path
-                .file_name()
-                .map(|name| name.to_string_lossy().to_string())
-            else {
-                continue;
-            };
-
-            if is_command_entry_file(&file_name) {
-                names.insert(file_name);
-            }
-        }
-    }
-
-    Ok(names)
 }
 
 fn create_claude_command_symlinks(format: OutputFormat) -> Result<(usize, usize)> {
@@ -427,11 +330,6 @@ fn extract_nexus_directory(format: OutputFormat) -> Result<()> {
         fs::create_dir_all(nexus_dir)?;
     }
 
-    // Always write/update the version file
-    let version_file = nexus_dir.join(".version");
-    let version = env!("CARGO_PKG_VERSION");
-    fs::write(&version_file, version).context("Failed to write .nexus/.version")?;
-
     // Extract all files from the embedded directory
     let mut files_written = 0;
     let mut files_replaced = 0;
@@ -452,7 +350,7 @@ fn extract_nexus_directory(format: OutputFormat) -> Result<()> {
     if format != OutputFormat::Json {
         if dir_exists && files_written == 0 {
             print_info(&format!(
-                ".nexus directory already exists ({} files replaced, version updated)",
+                ".nexus directory already exists ({} files replaced)",
                 files_replaced
             ));
         } else if files_written > 0 {
@@ -498,8 +396,7 @@ fn extract_dir_recursive(
         let subdir_name = subdir.path().file_name().unwrap_or_default();
         let subdir_path = target_path.join(subdir_name);
 
-        if is_root && subdir_name == "context" {
-            extract_allowed_context_projects(subdir, &subdir_path, files_written, files_replaced)?;
+        if is_root && subdir_name == "marketplace" {
             continue;
         }
 
@@ -507,63 +404,6 @@ fn extract_dir_recursive(
     }
 
     Ok(())
-}
-
-fn extract_allowed_context_projects(
-    context_dir: &Dir,
-    target_context_path: &Path,
-    files_written: &mut usize,
-    files_replaced: &mut usize,
-) -> Result<()> {
-    if !target_context_path.exists() {
-        fs::create_dir_all(target_context_path)?;
-    }
-
-    let allowlist = context_projects_allowlist();
-
-    for source in context_dir.dirs() {
-        let project = source
-            .path()
-            .file_name()
-            .unwrap_or_default()
-            .to_string_lossy()
-            .to_string();
-
-        if !allowlist.iter().any(|allowed| allowed == &project) {
-            continue;
-        }
-
-        let target = target_context_path.join(&project);
-        extract_dir_recursive(source, &target, files_written, files_replaced, false)?;
-    }
-
-    Ok(())
-}
-
-fn context_projects_allowlist() -> Vec<String> {
-    let default: Vec<String> = Vec::new();
-
-    let allowlist_file = match NEXUS_ASSETS.get_file("context/.extract-allowlist") {
-        Some(file) => file,
-        None => return default,
-    };
-
-    match std::str::from_utf8(allowlist_file.contents()) {
-        Ok(content) => {
-            let entries: Vec<String> = content
-                .lines()
-                .map(str::trim)
-                .filter(|line| !line.is_empty() && !line.starts_with('#'))
-                .map(ToOwned::to_owned)
-                .collect();
-            if entries.is_empty() {
-                Vec::new()
-            } else {
-                entries
-            }
-        }
-        Err(_) => default,
-    }
 }
 
 /// Create symlinks in .opencode/command/ for all files in .nexus/ai_harness/commands/.

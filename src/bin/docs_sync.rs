@@ -6,6 +6,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 
 use serde::{Deserialize, Serialize};
+use serde_json::{Map, Value};
 
 #[derive(Clone, Debug, Eq, PartialEq, Ord, PartialOrd)]
 struct SymbolDoc {
@@ -25,15 +26,44 @@ enum Mode {
     Guard,
 }
 
+const NEXUS_CONFIG_PATH: &str = ".nexus/config.json";
 const DOCS_SYNC_STATE_PATH: &str = ".nexus/docs-sync-state.json";
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 struct DocsSyncState {
     docs_path: String,
-    last_generated_commit: String,
-    generated_at: String,
+    last_synced_commit: String,
+    synced_at: String,
     #[serde(default)]
     last_harness_input_hash: Option<String>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+struct MarketplaceConfig {
+    #[serde(default)]
+    fumadocs: Option<FumadocsConfig>,
+    #[serde(flatten)]
+    extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+struct FumadocsConfig {
+    #[serde(default)]
+    sync_state: Option<DocsSyncState>,
+    #[serde(flatten)]
+    extra: BTreeMap<String, Value>,
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize, Default)]
+struct NexusConfig {
+    #[serde(default)]
+    harness: Option<String>,
+    #[serde(default)]
+    docs_sync_state: Option<DocsSyncState>,
+    #[serde(default)]
+    marketplace: Option<MarketplaceConfig>,
+    #[serde(flatten)]
+    extra: BTreeMap<String, Value>,
 }
 
 fn main() {
@@ -173,7 +203,7 @@ fn docs_sync_guard(repo_root: &Path) -> Result<(), String> {
         repo_root,
         state
             .as_ref()
-            .map(|value| value.last_generated_commit.as_str()),
+            .map(|value| value.last_synced_commit.as_str()),
     )?;
 
     let harness_paths = harness_paths_from_changed(&changed_paths);
@@ -231,7 +261,7 @@ fn maybe_run_llm_docs_update(repo_root: &Path) -> Result<(), String> {
     if let Some(existing_state) = state.as_ref() {
         println!(
             "docs-sync: last LLM checkpoint: {} @ {}",
-            existing_state.last_generated_commit, existing_state.generated_at
+            existing_state.last_synced_commit, existing_state.synced_at
         );
     } else {
         println!("docs-sync: last LLM checkpoint: none");
@@ -241,7 +271,7 @@ fn maybe_run_llm_docs_update(repo_root: &Path) -> Result<(), String> {
         repo_root,
         state
             .as_ref()
-            .map(|value| value.last_generated_commit.as_str()),
+            .map(|value| value.last_synced_commit.as_str()),
     )?;
     if changed_paths.is_empty() {
         println!("docs-sync: no staged or committed changes; skipping LLM docs update");
@@ -299,14 +329,14 @@ fn maybe_run_llm_docs_update(repo_root: &Path) -> Result<(), String> {
     let harness_input_hash = hash_paths(&harness_paths);
 
     let head_commit = git_single_line(repo_root, ["rev-parse", "HEAD"])?;
-    let generated_at = utc_now_string(repo_root)?;
+    let synced_at = utc_now_string(repo_root)?;
 
     save_docs_sync_state(
         repo_root,
         &DocsSyncState {
             docs_path: "docs/content/docs".to_string(),
-            last_generated_commit: head_commit,
-            generated_at,
+            last_synced_commit: head_commit,
+            synced_at,
             last_harness_input_hash: Some(harness_input_hash),
         },
     )?;
@@ -315,20 +345,10 @@ fn maybe_run_llm_docs_update(repo_root: &Path) -> Result<(), String> {
 }
 
 fn read_nexus_harness(repo_root: &Path) -> Result<String, String> {
-    let config_path = repo_root.join(".nexus/config.json");
-    if !config_path.exists() {
-        return Ok("opencode".to_string());
-    }
-
-    let content = fs::read_to_string(&config_path)
-        .map_err(|e| format!("failed to read {}: {e}", config_path.display()))?;
-
-    let parsed = serde_json::from_str::<serde_json::Value>(&content)
-        .map_err(|e| format!("failed to parse {}: {e}", config_path.display()))?;
-
-    let harness = parsed
-        .get("harness")
-        .and_then(|value| value.as_str())
+    let config = load_nexus_config(repo_root)?;
+    let harness = config
+        .harness
+        .as_deref()
         .map(str::trim)
         .filter(|value| !value.is_empty())
         .unwrap_or("opencode");
@@ -338,7 +358,7 @@ fn read_nexus_harness(repo_root: &Path) -> Result<String, String> {
 
 fn staged_and_committed_paths(
     repo_root: &Path,
-    last_generated_commit: Option<&str>,
+    last_synced_commit: Option<&str>,
 ) -> Result<Vec<String>, String> {
     let mut all_paths = BTreeSet::new();
 
@@ -351,7 +371,7 @@ fn staged_and_committed_paths(
 
     let head_commit = git_single_line(repo_root, ["rev-parse", "HEAD"])?;
 
-    if let Some(last_commit) = last_generated_commit {
+    if let Some(last_commit) = last_synced_commit {
         let last_commit_exists = Command::new("git")
             .args([
                 "rev-parse",
@@ -455,11 +475,25 @@ fn git_single_line<const N: usize>(repo_root: &Path, args: [&str; N]) -> Result<
 }
 
 fn load_docs_sync_state(repo_root: &Path) -> Result<Option<DocsSyncState>, String> {
+    let config = load_nexus_config(repo_root)?;
+
+    if let Some(state) = config
+        .marketplace
+        .as_ref()
+        .and_then(|marketplace| marketplace.fumadocs.as_ref())
+        .and_then(|fumadocs| fumadocs.sync_state.clone())
+    {
+        return Ok(Some(state));
+    }
+
+    if config.docs_sync_state.is_some() {
+        return Ok(config.docs_sync_state);
+    }
+
     let state_path = repo_root.join(DOCS_SYNC_STATE_PATH);
     if !state_path.exists() {
         return Ok(None);
     }
-
     let content = fs::read_to_string(&state_path)
         .map_err(|e| format!("failed to read state file {}: {e}", state_path.display()))?;
     let parsed = serde_json::from_str::<DocsSyncState>(&content).map_err(|e| {
@@ -472,16 +506,86 @@ fn load_docs_sync_state(repo_root: &Path) -> Result<Option<DocsSyncState>, Strin
 }
 
 fn save_docs_sync_state(repo_root: &Path, state: &DocsSyncState) -> Result<(), String> {
-    let state_path = repo_root.join(DOCS_SYNC_STATE_PATH);
-    if let Some(parent) = state_path.parent() {
-        fs::create_dir_all(parent)
-            .map_err(|e| format!("failed to create state directory {}: {e}", parent.display()))?;
+    let mut config = load_nexus_config(repo_root)?;
+
+    if config.marketplace.is_none() {
+        config.marketplace = Some(MarketplaceConfig::default());
+    }
+    if config
+        .marketplace
+        .as_ref()
+        .and_then(|marketplace| marketplace.fumadocs.as_ref())
+        .is_none()
+    {
+        if let Some(marketplace) = config.marketplace.as_mut() {
+            marketplace.fumadocs = Some(FumadocsConfig::default());
+        }
+    }
+    if let Some(marketplace) = config.marketplace.as_mut() {
+        if let Some(fumadocs) = marketplace.fumadocs.as_mut() {
+            fumadocs.sync_state = Some(state.clone());
+        }
     }
 
-    let serialized = serde_json::to_string_pretty(state)
-        .map_err(|e| format!("failed to serialize docs-sync state: {e}"))?;
-    fs::write(&state_path, format!("{serialized}\n"))
-        .map_err(|e| format!("failed to write state file {}: {e}", state_path.display()))
+    config.docs_sync_state = None;
+    save_nexus_config(repo_root, &config)?;
+
+    let docs_state_path = repo_root.join(DOCS_SYNC_STATE_PATH);
+    if docs_state_path.exists() {
+        fs::remove_file(&docs_state_path).map_err(|e| {
+            format!(
+                "failed to remove legacy docs-sync state {}: {e}",
+                docs_state_path.display()
+            )
+        })?;
+    }
+
+    Ok(())
+}
+
+fn load_nexus_config(repo_root: &Path) -> Result<NexusConfig, String> {
+    let config_path = repo_root.join(NEXUS_CONFIG_PATH);
+    if !config_path.exists() {
+        return Ok(NexusConfig::default());
+    }
+
+    let content = fs::read_to_string(&config_path)
+        .map_err(|e| format!("failed to read {}: {e}", config_path.display()))?;
+    serde_json::from_str::<NexusConfig>(&content)
+        .map_err(|e| format!("failed to parse {}: {e}", config_path.display()))
+}
+
+fn save_nexus_config(repo_root: &Path, config: &NexusConfig) -> Result<(), String> {
+    let config_path = repo_root.join(NEXUS_CONFIG_PATH);
+    if let Some(parent) = config_path.parent() {
+        fs::create_dir_all(parent).map_err(|e| {
+            format!(
+                "failed to create config directory {}: {e}",
+                parent.display()
+            )
+        })?;
+    }
+
+    let mut raw = Map::new();
+
+    if let Some(harness) = config.harness.as_ref() {
+        raw.insert("harness".to_string(), Value::String(harness.clone()));
+    }
+    if let Some(marketplace) = config.marketplace.as_ref() {
+        let value = serde_json::to_value(marketplace)
+            .map_err(|e| format!("failed to serialize marketplace config: {e}"))?;
+        raw.insert("marketplace".to_string(), value);
+    }
+    for (key, value) in &config.extra {
+        if key != "harness" && key != "docs_sync_state" && key != "marketplace" {
+            raw.insert(key.clone(), value.clone());
+        }
+    }
+
+    let serialized = serde_json::to_string_pretty(&Value::Object(raw))
+        .map_err(|e| format!("failed to serialize {}: {e}", config_path.display()))?;
+    fs::write(&config_path, format!("{serialized}\n"))
+        .map_err(|e| format!("failed to write {}: {e}", config_path.display()))
 }
 
 fn utc_now_string(repo_root: &Path) -> Result<String, String> {
