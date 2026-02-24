@@ -113,6 +113,27 @@ If clarification is needed, use the `question` tool with appropriate options.
 
 ### 6. Final Check
 
+Before writing files, build a concrete file plan and require approval per item.
+
+For each proposed context file, include:
+- target path
+- create vs update intent
+- 1-2 line summary of what will be added or changed (`Desired Outcome` + key `Next Actions`)
+
+Use the `question` tool to ask for approval for each planned file. You may use one `question` call with multiple `questions` entries (one per file).
+
+Each file approval question should provide these options:
+- `Approve` (Recommended) - Proceed with this file as proposed
+- `Adjust` - User wants to modify this file plan first
+- `Skip` - Do not create/update this file
+
+Only create/update files that are explicitly approved.
+
+After approvals are returned, create/update approved files immediately in the same command run.
+Do not stop and wait for another user prompt after approvals unless every file is `Adjust` or `Skip`.
+
+After file-level approvals are complete, run the final global check below, then execute approved file writes in this same flow:
+
 Before creating, use the `question` tool:
 ```json
 {

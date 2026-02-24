@@ -44,7 +44,8 @@ Expected shape:
 2. Do not spawn subagents.
 3. Use git history + staged diff as source-of-truth, not chat narrative.
 4. If no relevant code changes are found, do not fabricate context updates.
-5. Use exactly one `question` tool call at the end to present recommended follow-up choices.
+5. Use exactly one `question` tool call at the end, with one approval question per proposed file update/create plus an optional final next-step question.
+6. After receiving `question` answers, immediately execute approved file updates in this same command run; do not wait for another user prompt.
 
 ## Inputs To Analyze
 
@@ -103,7 +104,7 @@ Generate and use a concise prompt for the model that includes:
 
 The model output must clearly separate aligned vs not-aligned items.
 
-### Phase 5: Return Report (No File Writes)
+### Phase 5: Return Report
 
 Return a concise report in this structure:
 
@@ -133,6 +134,11 @@ Return a concise report in this structure:
 - Reason: <observed implementation change>
 ```
 
+Also include a `## Proposed File Plan` section listing each file that should be created or updated, with:
+- file path
+- create vs update intent
+- concise summary of planned additions/changes
+
 ### Phase 6: Update Checkpoint
 
 After a successful analysis pass, update `.nexus/config.json`:
@@ -140,14 +146,25 @@ After a successful analysis pass, update `.nexus/config.json`:
 - `context_sync.code.last_synced_commit = HEAD`
 - `context_sync.code.synced_at = current UTC timestamp`
 
-### Phase 7: Present Follow-Up Choices With `question`
+### Phase 7: Collect File Approvals With `question`
 
-After the report, call the `question` tool once with actionable follow-up options.
+After the report, call the `question` tool exactly once.
+
+That single call must include:
+1. One file-approval question per planned file in `## Proposed File Plan`.
+2. Optional final next-step question.
+
+For each file-approval question, use options:
+- `Approve` (Recommended): apply this file now in this command run
+- `Adjust`: revise this file proposal first
+- `Skip`: do not apply this file
+
+Only approved files should be applied.
 
 Requirements:
-- Put the recommended next step first and label it `(Recommended)`.
+- Put the recommended option first and label it `(Recommended)`.
 - Keep `custom` enabled so user can type their own next action.
-- Use `multiple: false`.
+- Use `multiple: false` for each question.
 
 Suggested options:
 1. Apply all context/index updates from this report (Recommended)
@@ -155,6 +172,15 @@ Suggested options:
 3. Create only new context candidates
 4. Show patch preview first
 5. Skip changes and keep checkpoint only
+
+### Phase 8: Apply Approved Updates Immediately
+
+After the `question` response returns:
+
+1. Determine approved files and scope choice.
+2. Apply approved context and index edits immediately.
+3. If a file is marked `Adjust`, revise proposal first, then apply after confirmation in the same flow.
+4. If all files are skipped, keep checkpoint updates only and report no file edits.
 
 ## Important Notes
 

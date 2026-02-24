@@ -4,7 +4,7 @@ description: Analyze conversation and recommend context/project updates from cha
 
 # Command: Context Sync From Chat
 
-This command is analysis-only.
+This command performs analysis first, then applies approved file updates in the same run.
 
 Read `.nexus/ai_harness/skills/context-driven-development/SKILL.md` first and use it as the only CDD source of truth.
 
@@ -24,9 +24,10 @@ No parameters required.
 
 1. Do not call other slash commands.
 2. Do not spawn subagents.
-3. Do not modify files automatically.
+3. Do not modify files before collecting approvals.
 4. Do not remove existing Next Actions; only propose additions/edits.
-5. Use exactly one `question` tool call at the end to present recommended follow-up choices.
+5. Use exactly one `question` tool call at the end, with one approval question per proposed file update/create plus an optional final next-step question.
+6. After receiving `question` answers, immediately execute approved file updates in this same command run; do not wait for another user prompt.
 
 ## Inputs To Analyze
 
@@ -77,7 +78,7 @@ For each affected project `index.md`, propose additions for relevant sections:
 
 Only propose changes supported by conversation evidence.
 
-### Phase 5: Return Report (No File Writes)
+### Phase 5: Return Report
 
 Return a concise report in this structure:
 
@@ -106,15 +107,31 @@ Return a concise report in this structure:
 - <context_id>: already aligned with conversation
 ```
 
-### Phase 6: Present Follow-Up Choices With `question`
+Also include a `## Proposed File Plan` section listing each file that should be created or updated, with:
+- file path
+- create vs update intent
+- concise summary of planned additions/changes
 
-After the report, call the `question` tool with one question that offers next-step options.
+### Phase 6: Collect File Approvals With `question`
+
+After the report, call the `question` tool exactly once.
+
+That single call must include:
+1. One file-approval question per planned file in `## Proposed File Plan`.
+2. Optional final next-step question.
+
+For each file-approval question, use options:
+- `Approve` (Recommended): apply this file now in this command run
+- `Adjust`: revise this file proposal first
+- `Skip`: do not apply this file
+
+Only approved files should be applied.
 
 Requirements:
-- Put the recommended next step as the first option and label it with `(Recommended)`.
+- Put the recommended option first and label it with `(Recommended)`.
 - Keep options concise and actionable.
 - Keep `custom` enabled so the user can type their own response.
-- Use `multiple: false`.
+- Use `multiple: false` for each question.
 
 Suggested options:
 1. Apply the proposed Next Action and project doc edits (Recommended)
@@ -123,8 +140,17 @@ Suggested options:
 4. Create new context file(s) for candidates only
 5. Show a patch preview first
 
+### Phase 7: Apply Approved Updates Immediately
+
+After the `question` response returns:
+
+1. Determine approved files and scope choice.
+2. Apply all approved edits immediately.
+3. If a file is marked `Adjust`, revise proposal first, then apply after confirmation in the same flow.
+4. If all files are skipped, return a no-change confirmation.
+
 ## Important Notes
 
-- This command recommends changes only; it does not apply them.
+- This command must not stop after approvals; execute approved edits immediately.
 - Be explicit about evidence so follow-up edits are straightforward.
 - If nothing needs updating, return an empty-change report and say why.

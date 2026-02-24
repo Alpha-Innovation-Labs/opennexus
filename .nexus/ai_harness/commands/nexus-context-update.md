@@ -26,17 +26,25 @@ This skill is the only CDD source of truth for context format, naming, structure
    - project index: `.nexus/context/<project>/index.md`
    - feature index: `.nexus/context/<project>/<feature>/index.md`
 3. If target file(s) are ambiguous, ask a focused `question` with candidate files.
-4. Update only what is necessary and preserve existing valid structure.
-5. Keep context specs as specifications, not implementation notes:
+4. Build an explicit file plan listing every context/index file that would be created or updated.
+5. For each planned file, use the `question` tool to show what you plan to add/change and request approval before editing.
+   - Include target path, create vs update intent, and short change summary.
+   - Use options: `Approve` (Recommended), `Adjust`, `Skip`.
+   - You may use one `question` call with multiple `questions` entries (one per file).
+   - Edit only files explicitly approved by the user.
+   - After approvals are returned, apply approved edits immediately in the same command run.
+   - Do not pause for an extra user prompt after approvals unless every file is `Adjust` or `Skip`.
+6. Update only what is necessary and preserve existing valid structure.
+7. Keep context specs as specifications, not implementation notes:
    - no code blocks unless already required as reference artifacts
    - no low-level implementation steps
    - outcomes and Next Actions must be E2E-observable
-6. Enforce required sections for context specs:
+8. Enforce required sections for context specs:
    - `## Desired Outcome`
    - `## Next Actions` (table with `Description` and `Test` columns)
    - `## Reference` only when needed; remove if empty
-7. Update related project/feature `index.md` files when the user request changes scope, dependencies, interfaces, or operational knowledge.
-8. If the request implies a split into multiple outcomes, propose split candidates and confirm using `question` before editing.
+9. Update related project/feature `index.md` files when the user request changes scope, dependencies, interfaces, or operational knowledge.
+10. If the request implies a split into multiple outcomes, propose split candidates and confirm using `question` before building the per-file approval plan.
 
 ## Editing Rules
 

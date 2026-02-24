@@ -25,7 +25,8 @@ If no path is provided, ask the user for a file or folder.
 3. **Analyzes the code** in the provided scope to identify user-visible behaviors
 4. **Spawns 3 subagents** to independently review functionality and propose context specs
 5. **Aggregates recommendations** into a single, deduplicated list
-6. **Presents recommended context files** (no file creation)
+6. **Presents a proposed file plan and asks approval per file**
+7. **Executes approved create/update actions in the same run**
 
 ## Workflow
 
@@ -100,13 +101,33 @@ Found N recommended context(s):
 
 If any item should update an existing context instead of creating a new one, clearly label it as **Update** and reference the existing context file.
 
-### Phase 7: Next Step Prompt
+### Phase 7: File-Level Approval via `question`
 
-After presenting the list, ask:
+After presenting the list, call the `question` tool and include one question per recommended file.
+
+Each file question should include:
+- target path
+- create vs update intent
+- short summary of what will be added or changed
+
+Use options:
+- `Approve` (Recommended) - Include this file in follow-up creation/update
+- `Adjust` - Revise this file recommendation first
+- `Skip` - Exclude this file
+
+Only approved files should be executed.
+
+Then include one final next-step question in the same `question` call.
+
+Replace the freeform prompt with these options:
 
 ```
-Would you like me to create these contexts now with /nexus-context-create, or refine the recommendations?
+1. Create approved items now in this run (Recommended)
+2. Refine recommendations first
+3. Cancel
 ```
+
+If the user chooses to create approved items now, execute those file creates/updates directly in this command flow without requiring a separate slash command.
 
 ## Rules to Enforce
 
