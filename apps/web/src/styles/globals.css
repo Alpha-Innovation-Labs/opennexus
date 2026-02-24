@@ -1,0 +1,65 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Geist", "Inter", "Avenir Next", sans-serif;
+
+  --color-background: oklch(98.4% 0.004 95.2);
+  --color-foreground: oklch(24% 0.02 264);
+
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(24% 0.02 264);
+
+  --color-primary: oklch(62% 0.18 223);
+  --color-primary-foreground: oklch(99% 0 0);
+
+  --color-secondary: oklch(95% 0.01 250);
+  --color-secondary-foreground: oklch(30% 0.03 264);
+
+  --color-muted: oklch(95% 0.01 95);
+  --color-muted-foreground: oklch(49% 0.02 260);
+
+  --color-accent: oklch(94% 0.015 230);
+  --color-accent-foreground: oklch(29% 0.02 255);
+
+  --color-destructive: oklch(60% 0.24 30);
+  --color-destructive-foreground: oklch(99% 0 0);
+
+  --color-border: oklch(88% 0.01 240);
+  --color-input: oklch(88% 0.01 240);
+  --color-ring: oklch(62% 0.18 223);
+
+  --radius: 0.75rem;
+}
+
+.dark {
+  --color-background: oklch(18% 0.015 262);
+  --color-foreground: oklch(96% 0.01 250);
+
+  --color-card: oklch(22% 0.018 262);
+  --color-card-foreground: oklch(96% 0.01 250);
+
+  --color-primary: oklch(72% 0.16 223);
+  --color-primary-foreground: oklch(19% 0.01 260);
+
+  --color-secondary: oklch(28% 0.015 255);
+  --color-secondary-foreground: oklch(94% 0.01 250);
+
+  --color-muted: oklch(25% 0.012 260);
+  --color-muted-foreground: oklch(73% 0.015 252);
+
+  --color-accent: oklch(30% 0.018 247);
+  --color-accent-foreground: oklch(95% 0.01 250);
+
+  --color-destructive: oklch(64% 0.22 30);
+  --color-destructive-foreground: oklch(98% 0 0);
+
+  --color-border: oklch(34% 0.012 250);
+  --color-input: oklch(34% 0.012 250);
+  --color-ring: oklch(72% 0.16 223);
+}
+
+html,
+body {
+  background-color: var(--color-background);
+  color: var(--color-foreground);
+}
