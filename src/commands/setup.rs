@@ -4,10 +4,12 @@
 //! (containing harness assets) to the current working directory.
 
 use anyhow::{Context, Result};
+use dialoguer::{theme::ColorfulTheme, FuzzySelect};
 use include_dir::{include_dir, Dir};
 use serde_json::{Map, Value};
 use std::collections::HashSet;
 use std::fs;
+use std::io::IsTerminal;
 #[cfg(unix)]
 use std::os::unix::fs::symlink;
 use std::path::Path;
@@ -17,6 +19,8 @@ use crate::output::{print_info, print_success};
 
 /// Embedded .nexus directory with setup-managed assets.
 static NEXUS_ASSETS: Dir = include_dir!("$CARGO_MANIFEST_DIR/.nexus");
+
+const SUPPORTED_HARNESSES: [&str; 1] = ["opencode"];
 
 /// Run the setup command.
 ///
@@ -87,6 +91,35 @@ pub fn run_setup(format: OutputFormat, harness: &str) -> Result<()> {
     }
 
     Ok(())
+}
+
+pub fn resolve_setup_harness(format: OutputFormat, harness: Option<String>) -> Result<String> {
+    if let Some(harness) = harness {
+        return Ok(harness);
+    }
+
+    if format == OutputFormat::Json
+        || !std::io::stdin().is_terminal()
+        || !std::io::stdout().is_terminal()
+    {
+        return Ok(default_harness().to_string());
+    }
+
+    let theme = ColorfulTheme::default();
+    let selected = FuzzySelect::with_theme(&theme)
+        .with_prompt("Select harness")
+        .items(&SUPPORTED_HARNESSES)
+        .default(0)
+        .interact_opt()
+        .context("Failed to read harness selection")?;
+
+    Ok(selected
+        .map(|index| SUPPORTED_HARNESSES[index].to_string())
+        .unwrap_or_else(|| default_harness().to_string()))
+}
+
+fn default_harness() -> &'static str {
+    SUPPORTED_HARNESSES[0]
 }
 
 fn write_nexus_config(format: OutputFormat, harness: &str) -> Result<()> {
