@@ -18,26 +18,45 @@ dependencies:
 | `core` | `.nexus/context/nexus-cli/` | CLI-wide setup, command system, and shared behavior |
 | `marketplace` | `.nexus/context/nexus-cli/marketplace/` | Marketplace search/install workflows and package sources |
 | `ralph` | `.nexus/context/nexus-cli/ralph/` | Rust `opennexus ralph` command parity with the current Ralph CLI API |
+| `cdd` | `.nexus/context/nexus-cli/cdd/` | Context-driven test-first orchestration and context test status reporting |
 
 ## Context Files
 
-| ID | Feature | Title | Status |
-|----|---------|-------|--------|
-| CLI_002 | core | Setup Command | Active |
-| CLI_003 | core | Version Command | Active |
-| CLI_004 | core | Help Command | Active |
-| CLI_005 | core | Uninstall Command | Active |
-| CLI_006 | core | Update Command | Active |
-| CLI_007 | marketplace | Marketplace Search Command | Active |
-| CLI_008 | marketplace | Marketplace Install Command | Active |
-| CLI_009 | ralph | Ralph Command Surface Parity | Planned |
-| CLI_010 | ralph | Ralph Loop State Lifecycle | Planned |
-| CLI_011 | ralph | Ralph Agent Backend and Rotation Parity | Planned |
-| CLI_012 | ralph | Ralph Context and Tasks Command Parity | Planned |
-| CLI_013 | ralph | Ralph Promise and Iteration Control Parity | Planned |
-| CLI_014 | ralph | Ralph Iteration Telemetry and Auto-Commit Parity | Planned |
-| CLI_015 | ralph | Ralph Prompt Construction and Template Parity | Planned |
-| CLI_016 | ralph | Ralph Diagnostics and Recovery Parity | Planned |
+| ID | Feature | Title |
+|----|---------|-------|
+| CLI_002 | core | Setup Command |
+| CLI_003 | core | Version Command |
+| CLI_004 | core | Help Command |
+| CLI_005 | core | Uninstall Command |
+| CLI_006 | core | Update Command |
+| CLI_007 | marketplace | Marketplace Search Command |
+| CLI_008 | marketplace | Marketplace Install Command |
+| CLI_009 | ralph | Ralph Command Surface Parity |
+| CLI_010 | ralph | Ralph Loop State Lifecycle |
+| CLI_011 | ralph | Ralph Agent Backend and Rotation Parity |
+| CLI_012 | ralph | Ralph Context and Tasks Command Parity |
+| CLI_013 | ralph | Ralph Promise and Iteration Control Parity |
+| CLI_014 | ralph | Ralph Iteration Telemetry and Auto-Commit Parity |
+| CLI_015 | ralph | Ralph Prompt Construction and Template Parity |
+| CLI_016 | ralph | Ralph Diagnostics and Recovery Parity |
+| CDD_001 | cdd | Context Implement Rule Selection Gate |
+| CDD_002 | cdd | Context Test Status Command |
+| CDD_003 | cdd | Context Test Generation and Discovery Gate |
+| CDD_004 | cdd | Context Coder and Validator Iteration Loop |
+| CDD_005 | cdd | Context Stage Logging and Fail-Fast Errors |
+| CDD_006 | cdd | Context Loop Bounds and Termination Controls |
+| CDD_007 | cdd | Context SQLite Run Registry and Schema |
+| CDD_008 | cdd | Context Versioned Dirty State Detection |
+| CDD_009 | cdd | Context Next Actions Task State Machine |
+| CDD_010 | cdd | Context Dynamic Agent Session Associations |
+| CDD_011 | cdd | Context Observability Event Timeline and Failure Reasons |
+| CDD_012 | cdd | Context Resume and Work Deduplication Policy |
+| CDD_013 | cdd | Context CLI Health and Drift Commands |
+| CDD_014 | cdd | Context CLI Observability and Task Drilldown |
+| CDD_015 | cdd | Context CLI Session Retrieval by Next Action |
+| CDD_016 | cdd | Context Retention Export and Maintenance |
+| CDD_017 | cdd | Context Backfill from Existing Code |
+| CDD_018 | cdd | Context Backfill Global Audit |
 
 ## Overview
 
@@ -103,6 +122,7 @@ opennexus uninstall
 `opennexus setup` manages both source assets and generated links:
 
 - Extracts embedded `.nexus` assets, updates `.nexus/.version`, and writes harness config in `.nexus/config.json`.
+- Ensures `.nexus/context/` exists as an empty directory and does not seed bundled context files.
 - Prunes stale generated files from `.opencode/command`, `.opencode/tools`, `.opencode/skills`, and `.opencode/rules`.
 - Recreates `.opencode` links to `.nexus/ai_harness/commands`, `.nexus/tools`, `.nexus/ai_harness/skills`, and `.nexus/ai_harness/rules`.
 - Creates `.claude/commands` links when `--harness claude` is selected.
@@ -112,4 +132,5 @@ opennexus uninstall
 
 - If marketplace search/install fails, verify network access or set `NEXUS_MARKETPLACE_REGISTRY_URL=file://<local-registry.json>`.
 - If setup link creation fails on restricted filesystems, check directory permissions for `.opencode/` and `.nexus/`.
+- If `.nexus/context/` unexpectedly contains seeded defaults after setup, rerun `opennexus setup`; only user-created or marketplace-installed contexts should remain.
 - If expected commands/skills/rules are missing after setup, rerun `opennexus setup` to re-extract embedded assets and regenerate links.

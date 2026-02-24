@@ -16,7 +16,9 @@ The `opennexus setup` command extracts embedded Nexus assets into the project `.
 
 | Description | Test |
 |-------------|------|
-| Extract embedded `.nexus/` assets into project `.nexus/` directory | `setup_extracts_nexus_assets` |
+| Extract embedded setup-managed `.nexus/` assets into project `.nexus/` directory while leaving `.nexus/context/` unseeded | `setup_extracts_nexus_assets` |
+| Create `.nexus/context/` as an empty directory without extracting bundled context files | `setup_creates_empty_context_directory` |
+| Remove bundled context seed content from `.nexus/context/` while preserving user-managed context files | `setup_prunes_bundled_context_seed_content` |
 | Write harness configuration to `.nexus/config.json` with `harness` key | `setup_writes_harness_config` |
 | Write version to `.nexus/config.json` under `version` key | `setup_writes_version` |
 | Create `.opencode/command` directory if `--harness opencode` | `setup_creates_opencode_command_dir` |

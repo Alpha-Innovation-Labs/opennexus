@@ -1,7 +1,7 @@
 //! Setup command for initializing OpenNexus in a project.
 //!
 //! This is a local operation that extracts the bundled .nexus directory
-//! (containing commands, skills, rules, and context) to the current working directory.
+//! (containing harness assets) to the current working directory.
 
 use anyhow::{Context, Result};
 use include_dir::{include_dir, Dir};
@@ -15,7 +15,7 @@ use std::path::Path;
 use crate::cli::OutputFormat;
 use crate::output::{print_info, print_success};
 
-/// Embedded .nexus directory with commands, skills, rules, and context.
+/// Embedded .nexus directory with setup-managed assets.
 static NEXUS_ASSETS: Dir = include_dir!("$CARGO_MANIFEST_DIR/.nexus");
 
 /// Run the setup command.
@@ -31,6 +31,10 @@ pub fn run_setup(format: OutputFormat, harness: &str) -> Result<()> {
 
     // Extract bundled .nexus directory
     extract_nexus_directory(format)?;
+
+    // Remove bundled context seed files while keeping the context directory.
+    let (_seeded_context_files_removed, _seeded_context_dirs_removed) =
+        prune_embedded_context_seed(format)?;
 
     // Persist selected harness configuration
     write_nexus_config(format, harness)?;
@@ -319,9 +323,10 @@ fn create_claude_command_symlinks(format: OutputFormat) -> Result<(usize, usize)
 
 /// Extract the bundled .nexus directory to the current working directory.
 ///
-/// This recursively extracts all files and directories from the embedded
-/// NEXUS_ASSETS to `.nexus/` in the current directory. Existing files
-/// are overwritten to keep assets up to date.
+/// This recursively extracts setup-managed files and directories from the embedded
+/// NEXUS_ASSETS to `.nexus/` in the current directory. Existing files are
+/// overwritten to keep assets up to date. The root `context/` folder is created
+/// but no bundled context files are extracted.
 fn extract_nexus_directory(format: OutputFormat) -> Result<()> {
     let nexus_dir = Path::new(".nexus");
     let dir_exists = nexus_dir.exists();
@@ -396,11 +401,101 @@ fn extract_dir_recursive(
         let subdir_name = subdir.path().file_name().unwrap_or_default();
         let subdir_path = target_path.join(subdir_name);
 
-        if is_root && subdir_name == "marketplace" {
+        if is_root && (subdir_name == "marketplace" || subdir_name == "context") {
             continue;
         }
 
         extract_dir_recursive(subdir, &subdir_path, files_written, files_replaced, false)?;
+    }
+
+    Ok(())
+}
+
+/// Remove legacy bundled context content from `.nexus/context` while preserving
+/// user-created files and always keeping the root context directory.
+fn prune_embedded_context_seed(format: OutputFormat) -> Result<(usize, usize)> {
+    let context_root = Path::new(".nexus/context");
+    if !context_root.exists() {
+        return Ok((0, 0));
+    }
+
+    let Some(embedded_context_dir) = NEXUS_ASSETS.get_dir("context") else {
+        return Ok((0, 0));
+    };
+
+    let mut files_removed = 0;
+    let mut dirs_removed = 0;
+    prune_context_seed_recursive(
+        embedded_context_dir,
+        context_root,
+        &mut files_removed,
+        &mut dirs_removed,
+    )?;
+
+    if format != OutputFormat::Json && (files_removed > 0 || dirs_removed > 0) {
+        print_success(&format!(
+            "Removed bundled context seed content ({} files, {} directories)",
+            files_removed, dirs_removed
+        ));
+    }
+
+    Ok((files_removed, dirs_removed))
+}
+
+fn prune_context_seed_recursive(
+    embedded_dir: &Dir,
+    target_dir: &Path,
+    files_removed: &mut usize,
+    dirs_removed: &mut usize,
+) -> Result<()> {
+    for file in embedded_dir.files() {
+        let file_name = match file.path().file_name() {
+            Some(name) => name,
+            None => continue,
+        };
+
+        let target_path = target_dir.join(file_name);
+        if !path_exists_or_symlink(&target_path) {
+            continue;
+        }
+
+        let metadata = fs::symlink_metadata(&target_path)?;
+        if metadata.file_type().is_dir() {
+            continue;
+        }
+
+        remove_path(&target_path)?;
+        *files_removed += 1;
+    }
+
+    for subdir in embedded_dir.dirs() {
+        let subdir_name = match subdir.path().file_name() {
+            Some(name) => name,
+            None => continue,
+        };
+
+        let subdir_path = target_dir.join(subdir_name);
+        if !path_exists_or_symlink(&subdir_path) {
+            continue;
+        }
+
+        let metadata = fs::symlink_metadata(&subdir_path)?;
+        if metadata.file_type().is_symlink() {
+            fs::remove_file(&subdir_path)?;
+            *dirs_removed += 1;
+            continue;
+        }
+
+        if !metadata.file_type().is_dir() {
+            continue;
+        }
+
+        prune_context_seed_recursive(subdir, &subdir_path, files_removed, dirs_removed)?;
+
+        if fs::read_dir(&subdir_path)?.next().is_none() {
+            fs::remove_dir(&subdir_path)?;
+            *dirs_removed += 1;
+        }
     }
 
     Ok(())
