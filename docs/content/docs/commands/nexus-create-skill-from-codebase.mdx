@@ -1,12 +1,14 @@
 ---
 title: nexus-create-skill-from-codebase
-description: Strict orchestrator for full or incremental llms.txt generation
+description: Strict orchestrator for full or incremental project SKILL.md generation
 ---
 
-This command generates `llms.txt` through a gated orchestration pipeline with decomposition, assembly, and validation stages.
+This command generates a project skill file at `.nexus/ai_harness/skills/<project-name>/SKILL.md` through a gated orchestration pipeline.
 
 - Supports full generation and incremental regeneration modes.
-- Enforces quality gates before output is accepted.
-- Tracks run state for continuity and auditability.
+- Scans root folders (minus gitignored), confirms include/exclude scope with the user, and caches it in `.nexus/config.json`.
+- Uses subagent decomposition over included code-bearing directories only.
+- Produces high-level, teaching-oriented project guidance.
+- Tracks per-project generation state for continuity.
 
-Use this when project documentation has changed and you need a trustworthy AI-friendly `llms.txt` output.
+Use this when code architecture or runtime behavior has changed and you need a refreshed project skill for contributors and coding agents.
