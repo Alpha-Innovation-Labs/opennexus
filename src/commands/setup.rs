@@ -148,47 +148,8 @@ fn write_nexus_config(format: OutputFormat, harness: &str) -> Result<()> {
         Value::String(env!("CARGO_PKG_VERSION").to_string()),
     );
 
-    let mut legacy_state: Option<Value> = obj.get("docs_sync_state").cloned();
-
-    if legacy_state.is_none() && docs_sync_state_path.exists() {
-        if let Ok(content) = fs::read_to_string(docs_sync_state_path) {
-            if let Ok(state) = serde_json::from_str::<Value>(&content) {
-                if state.is_object() {
-                    legacy_state = Some(state);
-                }
-            }
-        }
-    }
-
-    if let Some(state) = legacy_state {
-        let marketplace = obj
-            .entry("marketplace".to_string())
-            .or_insert_with(|| Value::Object(Map::new()));
-        if !marketplace.is_object() {
-            *marketplace = Value::Object(Map::new());
-        }
-
-        let marketplace_obj = marketplace
-            .as_object_mut()
-            .expect("marketplace should be object after reset");
-
-        let fumadocs = marketplace_obj
-            .entry("fumadocs".to_string())
-            .or_insert_with(|| Value::Object(Map::new()));
-        if !fumadocs.is_object() {
-            *fumadocs = Value::Object(Map::new());
-        }
-
-        let fumadocs_obj = fumadocs
-            .as_object_mut()
-            .expect("fumadocs should be object after reset");
-
-        if !fumadocs_obj.contains_key("sync_state") {
-            fumadocs_obj.insert("sync_state".to_string(), state);
-        }
-    }
-
     obj.remove("docs_sync_state");
+    obj.insert("marketplace".to_string(), Value::Object(Map::new()));
 
     let serialized = serde_json::to_string_pretty(&config).context("Failed to serialize config")?;
     fs::write(config_path, format!("{serialized}\n"))
