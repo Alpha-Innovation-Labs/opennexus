@@ -74,8 +74,16 @@ If `.nexus/config.json` exists, preserve existing keys and merge this section.
 3. Ask user to confirm with `question`:
    - `Use detected scope (Recommended)`
    - `Adjust scope`
-4. If adjusted, collect user-provided edits and finalize exhaustive lists.
-5. Write resolved lists to `.nexus/config.json` under `skill_generation.projects.<project-name>`.
+4. If adjusted, ask with two multi-select checkbox lists (`multiple: true`):
+   - `Folders to include` (show current include list)
+   - `Folders to exclude` (show current exclude list)
+5. Interpret checked items as **wrongly placed** and move them to the opposite list:
+   - checked in `Folders to include` -> move include -> exclude
+   - checked in `Folders to exclude` -> move exclude -> include
+6. Reconcile and enforce:
+   - lists must be disjoint (if overlap, ask user to resolve)
+   - combined include+exclude must be exhaustive over current inventory
+7. Write resolved lists to `.nexus/config.json` under `skill_generation.projects.<project-name>`.
 
 ### D. Subsequent-run behavior (cache exists)
 
@@ -86,7 +94,12 @@ If `.nexus/config.json` exists, preserve existing keys and merge this section.
 5. Ask one final confirmation with `question`:
    - `Use synced scope (Recommended)`
    - `Adjust scope`
-6. Persist updated lists back to `.nexus/config.json`.
+6. If adjusted, re-open both multi-select checkbox lists using current cached partition:
+   - `Folders to include`
+   - `Folders to exclude`
+7. Interpret checked items as wrongly placed and move them to the opposite list.
+8. Re-validate disjoint + exhaustive rules.
+8. Persist updated lists back to `.nexus/config.json`.
 
 ### E. Scope enforcement rules
 

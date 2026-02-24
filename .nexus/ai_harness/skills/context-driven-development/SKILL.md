@@ -35,6 +35,7 @@ Rules:
 - Every context file must live under `.nexus/context/<project>/<feature>/`.
 - Context IDs use a 3-letter prefix from either the **project** or the **feature**.
 - Choose one approach per project and be consistent.
+- If using feature-scoped prefixes, each feature/subfeature must have a unique 3-letter prefix.
 
 ## Context File Naming
 
@@ -42,6 +43,7 @@ Rules:
 - `PRJ` or `FTR`: 3-letter uppercase prefix from **project** or **feature** name
 - `NNN`: zero-padded sequence number (scoped to the chosen prefix)
 - `brief-description`: kebab-case, concise
+- For each unique prefix, numbering starts at `001` and increments within that prefix only.
 
 Prefix choice:
 - **Project-scoped** (e.g., `CLI_001`, `CLI_002`): Use when contexts span multiple features
