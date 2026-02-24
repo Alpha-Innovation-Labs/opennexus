@@ -284,13 +284,16 @@ mod tests {
 
     #[test]
     fn parses_aliases_for_prompt_file_and_tasks() {
-        let args = vec!["-f".to_string(), "Cargo.toml".to_string(), "-t".to_string()];
+        let temp = tempfile::NamedTempFile::new().expect("temp file");
+        std::fs::write(temp.path(), "task prompt").expect("write temp prompt");
+        let prompt_path = temp.path().to_string_lossy().to_string();
+        let args = vec!["-f".to_string(), prompt_path.clone(), "-t".to_string()];
         let op = parse_operation(&args).expect("parse should succeed");
         let RalphOperation::Run(options) = op else {
             panic!("expected run operation");
         };
         assert!(options.tasks_mode);
-        assert_eq!(options.prompt_source, "Cargo.toml");
+        assert_eq!(options.prompt_source, prompt_path);
     }
 
     #[test]
