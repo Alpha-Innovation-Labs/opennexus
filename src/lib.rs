@@ -11,8 +11,8 @@ pub mod output;
 pub mod services;
 pub mod utils;
 
-pub use cli::{Cli, Commands, MarketplaceCommands, OutputFormat, RalphCommand};
+pub use cli::{Cli, Commands, ContextCommands, MarketplaceCommands, OutputFormat, RalphCommand};
 pub use commands::{
-    run_marketplace_install, run_marketplace_search, run_ralph, run_setup, run_uninstall,
-    run_update,
+    run_context_backfill, run_context_implement, run_context_test_status, run_marketplace_install,
+    run_marketplace_search, run_ralph, run_setup, run_uninstall, run_update,
 };

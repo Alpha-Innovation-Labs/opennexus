@@ -13,10 +13,10 @@ mod output;
 mod services;
 mod utils;
 
-use cli::{Cli, Commands, MarketplaceCommands};
+use cli::{Cli, Commands, ContextCommands, MarketplaceCommands};
 use commands::{
-    run_marketplace_install, run_marketplace_search, run_ralph, run_setup, run_uninstall,
-    run_update,
+    run_context_backfill, run_context_implement, run_context_test_status, run_marketplace_install,
+    run_marketplace_search, run_ralph, run_setup, run_uninstall, run_update,
 };
 
 fn main() -> Result<()> {
@@ -37,6 +37,26 @@ fn main() -> Result<()> {
             }
         },
         Some(Commands::Ralph(command)) => run_ralph(&command.args),
+        Some(Commands::Context { command }) => match command {
+            ContextCommands::Implement {
+                context_file,
+                max_iterations,
+                timeout_seconds,
+                rule_file,
+            } => run_context_implement(
+                &context_file,
+                max_iterations,
+                timeout_seconds,
+                rule_file.as_deref(),
+            ),
+            ContextCommands::TestStatus {
+                context_file,
+                command_name,
+            } => run_context_test_status(&context_file, command_name.as_deref()),
+            ContextCommands::Backfill(backfill) => {
+                run_context_backfill(backfill.context_file.as_deref(), backfill.all)
+            }
+        },
     };
 
     result
