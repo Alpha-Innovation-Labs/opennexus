@@ -6,6 +6,8 @@ pub struct ContextImplementOptions {
     pub max_iterations: usize,
     pub timeout_seconds: u64,
     pub rule_file: Option<String>,
+    pub test_command: Option<String>,
+    pub test_discovery_command: Option<String>,
 }
 
 #[derive(Debug, Clone)]
@@ -24,6 +26,15 @@ pub struct ContextBackfillOptions {
 pub struct ContextParseResult {
     pub context_id: String,
     pub tests: Vec<String>,
+    pub next_actions: Vec<ContextNextAction>,
+    pub test_runner: Option<String>,
+    pub language: Option<String>,
+}
+
+#[derive(Debug, Clone)]
+pub struct ContextNextAction {
+    pub description: String,
+    pub test_id: String,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]

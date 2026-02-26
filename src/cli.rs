@@ -107,6 +107,19 @@ pub enum ContextCommands {
         /// Optional rule file under .nexus/ai_harness/rules/ to resolve ambiguity.
         #[arg(long)]
         rule_file: Option<String>,
+
+        /// Optional explicit test command template. Use {test_id} placeholder.
+        ///
+        /// Resolution precedence:
+        /// 1) --test-command override
+        /// 2) selected --rule-file metadata (test_command)
+        /// 3) project auto-detection (Cargo.toml, pyproject.toml, package.json)
+        #[arg(long)]
+        test_command: Option<String>,
+
+        /// Optional explicit test discovery command used before coding starts.
+        #[arg(long)]
+        test_discovery_command: Option<String>,
     },
 
     /// Report discovered vs missing tests from a context file.
@@ -266,11 +279,15 @@ mod tests {
                     max_iterations,
                     timeout_seconds,
                     rule_file,
+                    test_command,
+                    test_discovery_command,
                 } => {
                     assert!(context_file.contains("CDD_001"));
                     assert_eq!(max_iterations, 5);
                     assert_eq!(timeout_seconds, 120);
                     assert_eq!(rule_file.as_deref(), Some("rust/SKILL.md"));
+                    assert!(test_command.is_none());
+                    assert!(test_discovery_command.is_none());
                 }
                 _ => panic!("expected context implement command"),
             },

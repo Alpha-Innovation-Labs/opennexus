@@ -4,7 +4,7 @@ use std::collections::BTreeSet;
 use std::fs;
 use std::path::Path;
 
-use crate::core::context::model::ContextParseResult;
+use crate::core::context::model::{ContextNextAction, ContextParseResult};
 
 pub fn parse_context_file(path: &Path) -> Result<ContextParseResult> {
     if !path.exists() {
@@ -33,8 +33,49 @@ pub fn parse_context_file(path: &Path) -> Result<ContextParseResult> {
 
 pub fn parse_context_content(content: &str) -> Result<ContextParseResult> {
     let context_id = extract_context_id(content)?;
-    let tests = extract_next_actions_tests(content)?;
-    Ok(ContextParseResult { context_id, tests })
+    let next_actions = extract_next_actions(content)?;
+    let tests = next_actions
+        .iter()
+        .map(|action| action.test_id.clone())
+        .collect();
+    let language = extract_frontmatter_value(content, "language");
+    let test_runner = extract_frontmatter_value(content, "test_runner");
+    Ok(ContextParseResult {
+        context_id,
+        tests,
+        next_actions,
+        test_runner,
+        language,
+    })
+}
+
+fn extract_frontmatter_value(content: &str, wanted_key: &str) -> Option<String> {
+    if !content.trim_start().starts_with("---") {
+        return None;
+    }
+
+    let mut in_frontmatter = false;
+    for line in content.lines() {
+        if line.trim() == "---" {
+            if !in_frontmatter {
+                in_frontmatter = true;
+                continue;
+            }
+            break;
+        }
+        if !in_frontmatter {
+            continue;
+        }
+
+        let mut chunks = line.splitn(2, ':');
+        let key = chunks.next().unwrap_or("").trim();
+        let value = chunks.next().unwrap_or("").trim().trim_matches('"');
+        if key == wanted_key && !value.is_empty() {
+            return Some(value.to_string());
+        }
+    }
+
+    None
 }
 
 fn extract_context_id(content: &str) -> Result<String> {
@@ -76,7 +117,7 @@ fn extract_context_id(content: &str) -> Result<String> {
     bail!("Frontmatter must include 'context_id'.");
 }
 
-fn extract_next_actions_tests(content: &str) -> Result<Vec<String>> {
+fn extract_next_actions(content: &str) -> Result<Vec<ContextNextAction>> {
     let lines: Vec<&str> = content.lines().collect();
     let section_index = lines
         .iter()
@@ -103,7 +144,8 @@ fn extract_next_actions_tests(content: &str) -> Result<Vec<String>> {
         })?;
 
     let snake_case = Regex::new(r"^[a-z][a-z0-9_]*$").expect("snake_case regex");
-    let mut tests = BTreeSet::<String>::new();
+    let mut test_ids = BTreeSet::<String>::new();
+    let mut next_actions = Vec::<ContextNextAction>::new();
     let mut saw_row = false;
 
     for line in lines.iter().skip(header_index + 2) {
@@ -120,7 +162,9 @@ fn extract_next_actions_tests(content: &str) -> Result<Vec<String>> {
             continue;
         }
         saw_row = true;
-        let test_id = columns[1].trim();
+        let description = columns[0].trim().to_string();
+        let raw_test_id = columns[1].trim();
+        let test_id = raw_test_id.strip_prefix("test_").unwrap_or(raw_test_id);
         if test_id.is_empty() {
             bail!("Next Actions table includes an empty Test value.");
         }
@@ -130,17 +174,26 @@ fn extract_next_actions_tests(content: &str) -> Result<Vec<String>> {
                 test_id
             );
         }
-        tests.insert(test_id.to_string());
+        if !test_ids.insert(test_id.to_string()) {
+            bail!(
+                "Duplicate test identifier '{}' found in Next Actions table. Use unique Test values.",
+                test_id
+            );
+        }
+        next_actions.push(ContextNextAction {
+            description,
+            test_id: test_id.to_string(),
+        });
     }
 
     if !saw_row {
         bail!("Next Actions table has no data rows with Test values.");
     }
-    if tests.is_empty() {
+    if next_actions.is_empty() {
         bail!("No valid tests found in Next Actions table.");
     }
 
-    Ok(tests.into_iter().collect())
+    Ok(next_actions)
 }
 
 #[cfg(test)]
@@ -158,13 +211,34 @@ context_id: CDD_100
 | Description | Test |
 |-------------|------|
 | One | `alpha_test` |
-| Two | `alpha_test` |
-| Three | `beta_test` |
+| Two | `test_beta_test` |
 "#;
 
         let parsed = parse_context_content(content).expect("parse should succeed");
         assert_eq!(parsed.context_id, "CDD_100");
         assert_eq!(parsed.tests, vec!["alpha_test", "beta_test"]);
+        assert_eq!(parsed.next_actions.len(), 2);
+        assert_eq!(parsed.next_actions[1].test_id, "beta_test");
+        assert!(parsed.language.is_none());
+        assert!(parsed.test_runner.is_none());
+    }
+
+    #[test]
+    fn rejects_duplicate_test_identifier() {
+        let content = r#"---
+context_id: CDD_100
+---
+
+## Next Actions
+
+| Description | Test |
+|-------------|------|
+| One | `alpha_test` |
+| Two | `alpha_test` |
+"#;
+
+        let err = parse_context_content(content).expect_err("parse should fail");
+        assert!(err.to_string().contains("Duplicate test identifier"));
     }
 
     #[test]
@@ -203,5 +277,25 @@ context_id: CDD_101
 
         let err = parse_context_content(content).expect_err("parse should fail");
         assert!(err.to_string().contains("Invalid test identifier"));
+    }
+
+    #[test]
+    fn extracts_optional_language_and_test_runner_from_frontmatter() {
+        let content = r#"---
+context_id: CDD_102
+language: python
+test_runner: pytest
+---
+
+## Next Actions
+
+| Description | Test |
+|-------------|------|
+| One | `alpha_test` |
+"#;
+
+        let parsed = parse_context_content(content).expect("parse should succeed");
+        assert_eq!(parsed.language.as_deref(), Some("python"));
+        assert_eq!(parsed.test_runner.as_deref(), Some("pytest"));
     }
 }

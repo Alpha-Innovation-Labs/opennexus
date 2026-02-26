@@ -1,6 +1,7 @@
 //! Nexus CLI entry point.
 
 use anyhow::Result;
+use clap::CommandFactory;
 
 mod adapters;
 mod app;
@@ -28,8 +29,10 @@ fn main() -> Result<()> {
     // Route to appropriate command handler
     let result = match cli.command {
         None => {
-            let harness = resolve_setup_harness(format, None)?;
-            run_setup(format, &harness)
+            let mut cmd = Cli::command();
+            cmd.print_long_help()?;
+            println!();
+            Ok(())
         }
         Some(Commands::Setup { harness }) => {
             let harness = resolve_setup_harness(format, harness)?;
@@ -50,11 +53,15 @@ fn main() -> Result<()> {
                 max_iterations,
                 timeout_seconds,
                 rule_file,
+                test_command,
+                test_discovery_command,
             } => run_context_implement(
                 &context_file,
                 max_iterations,
                 timeout_seconds,
                 rule_file.as_deref(),
+                test_command.as_deref(),
+                test_discovery_command.as_deref(),
             ),
             ContextCommands::TestStatus {
                 context_file,

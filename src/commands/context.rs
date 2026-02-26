@@ -13,12 +13,16 @@ pub fn run_context_implement(
     max_iterations: usize,
     timeout_seconds: u64,
     rule_file: Option<&str>,
+    test_command: Option<&str>,
+    test_discovery_command: Option<&str>,
 ) -> Result<()> {
     let options = ContextImplementOptions {
         context_file: PathBuf::from(context_file),
         max_iterations,
         timeout_seconds,
         rule_file: rule_file.map(str::to_string),
+        test_command: test_command.map(str::to_string),
+        test_discovery_command: test_discovery_command.map(str::to_string),
     };
     run_context_implement_app(&options)
 }
