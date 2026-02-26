@@ -1,0 +1,153 @@
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Sora", "Avenir Next", "Segoe UI", sans-serif;
+
+  --color-background: oklch(97.4% 0.01 95);
+  --color-foreground: oklch(22% 0.02 260);
+
+  --color-card: oklch(100% 0 0);
+  --color-card-foreground: oklch(23% 0.02 260);
+
+  --color-primary: oklch(56% 0.16 216);
+  --color-primary-foreground: oklch(98.8% 0 0);
+
+  --color-secondary: oklch(93% 0.02 200);
+  --color-secondary-foreground: oklch(29% 0.03 248);
+
+  --color-muted: oklch(92% 0.012 95);
+  --color-muted-foreground: oklch(47% 0.02 255);
+
+  --color-accent: oklch(90% 0.03 174);
+  --color-accent-foreground: oklch(28% 0.03 190);
+
+  --color-border: oklch(84% 0.012 240);
+  --color-ring: oklch(56% 0.16 216);
+
+  --color-bg-band-1: oklch(98.3% 0.004 260);
+  --color-bg-band-2: oklch(96.8% 0.006 250);
+  --color-bg-separator: oklch(95.2% 0.003 250);
+
+  --color-edge-blue: oklch(70% 0.16 250);
+  --color-edge-green: oklch(77% 0.2 155);
+  --color-edge-pink: oklch(72% 0.22 355);
+}
+
+.dark {
+  --color-background: oklch(10.6% 0.006 255);
+  --color-foreground: oklch(93.5% 0.01 240);
+
+  --color-card: oklch(12.8% 0.008 252);
+  --color-card-foreground: oklch(93.5% 0.01 240);
+
+  --color-primary: oklch(73% 0.125 220);
+  --color-primary-foreground: oklch(10.6% 0.006 255);
+
+  --color-secondary: oklch(14.5% 0.008 252);
+  --color-secondary-foreground: oklch(88% 0.01 240);
+
+  --color-muted: oklch(18% 0.09 22);
+  --color-muted-foreground: oklch(72% 0.06 28);
+
+  --color-accent: oklch(16% 0.01 248);
+  --color-accent-foreground: oklch(90% 0.01 240);
+
+  --color-border: oklch(20% 0.012 248);
+  --color-ring: oklch(73% 0.125 220);
+
+  --color-bg-band-1: oklch(10.7% 0.005 255);
+  --color-bg-band-2: oklch(11.6% 0.005 252);
+  --color-bg-separator: oklch(3% 0 0);
+
+  --color-edge-blue: oklch(74% 0.17 250);
+  --color-edge-green: oklch(79% 0.2 155);
+  --color-edge-pink: oklch(74% 0.22 355);
+}
+
+html,
+body {
+  height: 100%;
+  min-height: 100%;
+  background: linear-gradient(180deg, var(--color-background), color-mix(in oklch, var(--color-background) 78%, black));
+  color: var(--color-foreground);
+}
+
+:root {
+  --grid-dot-color: rgb(156, 163, 175);
+  --flow-canvas-bg: #111315;
+  --subflow-bg: oklch(98% 0.01 20);
+}
+
+.dark {
+  --grid-dot-color: rgb(156, 163, 175);
+  --flow-canvas-bg: #111315;
+  --subflow-bg: #171717;
+}
+
+.dark body {
+  background: repeating-linear-gradient(
+    180deg,
+    var(--color-bg-band-1) 0 180px,
+    var(--color-bg-separator) 180px 214px,
+    var(--color-bg-band-2) 214px 430px,
+    var(--color-bg-separator) 430px 464px
+  );
+}
+
+body {
+  overflow: hidden;
+}
+
+.react-flow {
+  --xy-edge-stroke-default: var(--color-border);
+  --xy-edge-stroke-width-default: 1;
+  --xy-edge-stroke-selected-default: var(--color-muted-foreground);
+  --xy-connectionline-stroke-default: var(--color-border);
+  --xy-connectionline-stroke-width-default: 1;
+  --xy-attribution-background-color-default: color-mix(in oklch, var(--color-card) 55%, transparent);
+  --xy-minimap-background-color-default: var(--color-card);
+  --xy-minimap-mask-background-color-default: color-mix(in oklch, var(--color-muted) 62%, transparent);
+  --xy-minimap-mask-stroke-color-default: transparent;
+  --xy-minimap-mask-stroke-width-default: 1;
+  --xy-minimap-node-background-color-default: var(--color-muted);
+  --xy-minimap-node-stroke-color-default: transparent;
+  --xy-minimap-node-stroke-width-default: 2;
+  --xy-background-color-default: var(--flow-canvas-bg);
+  --xy-background-pattern-dots-color-default: var(--grid-dot-color);
+  --xy-background-pattern-lines-color-default: color-mix(in oklch, var(--color-border) 65%, transparent);
+  --xy-background-pattern-cross-color-default: color-mix(in oklch, var(--color-border) 65%, transparent);
+  --xy-node-color-default: var(--color-foreground);
+  --xy-node-border-default: 1px solid var(--color-border);
+  --xy-node-background-color-default: var(--color-card);
+  --xy-node-group-background-color-default: color-mix(in oklch, var(--color-card) 85%, transparent);
+  --xy-node-boxshadow-hover-default: 0 1px 4px 1px color-mix(in oklch, black 40%, transparent);
+  --xy-node-boxshadow-selected-default: 0 0 0 0.5px var(--color-primary);
+  --xy-node-border-radius-default: 3px;
+  --xy-handle-background-color-default: var(--color-primary);
+  --xy-handle-border-color-default: var(--color-card);
+  --xy-selection-background-color-default: color-mix(in oklch, var(--color-primary) 12%, transparent);
+  --xy-selection-border-default: 1px dotted color-mix(in oklch, var(--color-primary) 65%, transparent);
+  --xy-controls-button-background-color-default: var(--color-card);
+  --xy-controls-button-background-color-hover-default: var(--color-secondary);
+  --xy-controls-button-color-default: var(--color-foreground);
+  --xy-controls-button-color-hover-default: var(--color-foreground);
+  --xy-controls-button-border-color-default: var(--color-border);
+  --xy-controls-box-shadow-default: 0 0 2px 1px color-mix(in oklch, black 35%, transparent);
+  --xy-edge-label-background-color-default: var(--color-card);
+  --xy-edge-label-color-default: var(--color-foreground);
+  --xy-resize-background-color-default: var(--color-primary);
+}
+
+.react-flow .react-flow__edge-path {
+  stroke-linecap: round;
+}
+
+.react-flow.dark {
+  --xy-edge-stroke-default: var(--color-border);
+  --xy-edge-stroke-selected-default: var(--color-muted-foreground);
+  --xy-minimap-background-color-default: var(--color-card);
+  --xy-background-color-default: var(--flow-canvas-bg);
+  --xy-node-background-color-default: var(--color-card);
+  --xy-node-border-default: 1px solid var(--color-border);
+  --xy-controls-button-background-color-default: var(--color-card);
+}
