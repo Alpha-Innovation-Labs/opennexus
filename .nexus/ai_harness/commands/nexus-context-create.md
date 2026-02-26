@@ -108,6 +108,7 @@ If splitting is needed:
 Propose based on the conversation:
 - **Desired Outcome**: What success looks like (one paragraph)
 - **Next Actions**: Table with Description and Test columns
+- **Blocking Dependencies** (optional): prerequisite projects and/or contexts that must be completed first
 
 If clarification is needed, use the `question` tool with appropriate options.
 
@@ -159,21 +160,12 @@ title: Human-Readable Title
 project: project-name
 feature: feature-name
 created: "YYYY-MM-DD"
+depends_on:
+  projects:
+    - upstream-project
+  contexts:
+    - ABC_001
 ---
-
-<!-- 
-SOURCE OF TRUTH: .nexus/ai_harness/skills/context-driven-development/SKILL.md
-
-FILE NAMING: PRJ_NNN-brief-description.md
-- PRJ = 3-letter project prefix placeholder
-- NNN = zero-padded sequence number
-- Example: PRJ_NNN-project-scaffold.md
-
-CRITICAL RULES:
-- NO code at all - code belongs in the codebase
-- NO implementation details - describe WHAT, not HOW
-- Only E2E tests matter - no unit or integration tests
--->
 
 # PRJ_NNN: Title
 
@@ -195,9 +187,12 @@ CRITICAL RULES:
 | Error condition is handled gracefully | `error_handled` |
 ```
 
+If there are no blocking prerequisites, omit `depends_on` entirely.
+
 **IMPORTANT FORMAT RULES:**
 - Use `## Desired Outcome` (NOT `## Summary`)
 - Use `## Next Actions` table format (NOT `## Goals` bullet list)
+- Use optional `depends_on` frontmatter only for blocking prerequisites
 - Do NOT include `## Lessons Learned` section
 - Do NOT include `## Validation` section
 - Do NOT include `## E2E Test Scenarios` section (use Next Actions table instead)

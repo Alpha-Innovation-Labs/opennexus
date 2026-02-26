@@ -20,11 +20,12 @@ Audit context quality and coverage, identify violations, and propose specific fi
    - Ask via `question` tool: all contexts or specific project.
    - Scan under `.nexus/context/` (exclude `_reference/` and `_legacy/`).
 2. Audit numbered context specs (`PRJ_NNN-*.md`) for CDD compliance:
-   - Required frontmatter fields.
-   - Required section order (`Desired Outcome`, optional `Reference`, `Next Actions`).
-   - One-outcome clarity and no implementation-level detail.
-   - `Next Actions` table format and E2E-observable actions.
-   - Naming and location under `.nexus/context/<project>/<feature>/`.
+    - Required frontmatter fields.
+    - Optional `depends_on` shape and dependency reference validity (project/context).
+    - Required section order (`Desired Outcome`, optional `Reference`, `Next Actions`).
+    - One-outcome clarity and no implementation-level detail.
+    - `Next Actions` table format and E2E-observable actions.
+    - Naming and location under `.nexus/context/<project>/<feature>/`.
 3. Audit project/feature `index.md` docs:
    - Presence and relevance of operational knowledge sections.
    - Alignment with recently updated contexts.

@@ -40,9 +40,10 @@ This skill is the only CDD source of truth for context format, naming, structure
    - no low-level implementation steps
    - outcomes and Next Actions must be E2E-observable
 8. Enforce required sections for context specs:
-   - `## Desired Outcome`
-   - `## Next Actions` (table with `Description` and `Test` columns)
-   - `## Reference` only when needed; remove if empty
+    - `## Desired Outcome`
+    - `## Next Actions` (table with `Description` and `Test` columns)
+    - `## Reference` only when needed; remove if empty
+    - optional `depends_on` frontmatter only for blocking prerequisites
 9. Update related project/feature `index.md` files when the user request changes scope, dependencies, interfaces, or operational knowledge.
 10. If the request implies a split into multiple outcomes, propose split candidates and confirm using `question` before building the per-file approval plan.
 
@@ -52,6 +53,7 @@ This skill is the only CDD source of truth for context format, naming, structure
 - Create a new context file only when no existing context can be safely extended.
 - If creating a new context file, keep project-scoped ID ordering (`PRJ_NNN`) and naming conventions.
 - Preserve frontmatter fields and keep metadata consistent.
+- If `depends_on` is present, keep only valid blocking project/context references.
 - Do not rename files unless necessary for correctness.
 
 ## Output Format

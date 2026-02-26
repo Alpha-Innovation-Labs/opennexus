@@ -31,7 +31,7 @@ Owns context-driven development orchestration commands that transform context sp
 
 | Interface | Description |
 |-----------|-------------|
-| `opennexus context implement --context-file <path>` | Runs staged CDD orchestration (parse, generate tests, verify tests, implement, validate, repeat) |
+| `opennexus context implement --context-file <path> [--test-command "..."] [--test-discovery-command "..."]` | Runs staged CDD orchestration with test runner resolution (CLI override -> rule metadata -> project auto-detection) |
 | `opennexus context test-status --context-file <path>` | Reports test existence/discovery for tests derived from context `Next Actions` table |
 
 ## Dependencies

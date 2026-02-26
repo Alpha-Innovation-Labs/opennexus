@@ -14,6 +14,8 @@ CDD separates:
 - Context specifications (`PRJ_NNN-*.md`): define desired outcomes and E2E-observable next actions.
 - Operational knowledge (`index.md`): document how projects/features work and how to operate/debug them.
 
+CDD also supports explicit blocking dependencies between contexts and projects.
+
 Use CDD to describe what success looks like, not how code should be implemented.
 
 ## Canonical Structure
@@ -68,6 +70,24 @@ created: "YYYY-MM-DD"
 ---
 ```
 
+Optional dependency metadata:
+
+```yaml
+depends_on:
+  projects:
+    - upstream-project
+  contexts:
+    - ABC_001
+    - .nexus/context/upstream-project/feature/ABC_001-some-context.md
+```
+
+Rules:
+- `depends_on` is optional; omit when there are no prerequisites.
+- `depends_on.projects` and `depends_on.contexts` are optional lists; omit empty lists.
+- Every listed dependency is blocking: it must be completed before this context can proceed.
+- `projects` values must match `.nexus/context/<project>/` directory names.
+- `contexts` values should use context IDs when unambiguous; use full context path when disambiguation is needed.
+
 ## Context Required Sections
 
 Context specs must use this order:
@@ -103,6 +123,15 @@ Rules:
 - Every row must be E2E-observable and black-box verifiable.
 - Focus on user-visible behavior, error handling, and edge cases.
 
+## Dependency Semantics
+
+Dependencies are strict prerequisites, not suggestions.
+
+- Context dependency: this context is blocked until the referenced context is complete.
+- Project dependency: this context is blocked until prerequisite project outcomes needed for this context are complete.
+- If dependencies are unknown or not verifiable, stop and ask for clarification before implementation.
+- Keep dependency declarations minimal and explicit; do not list non-blocking relationships.
+
 ## Project and Feature `index.md`
 
 `index.md` files store operational knowledge, not context specs.
@@ -113,6 +142,7 @@ Project `index.md` should include:
 - Architecture (ASCII diagram)
 - CLI Usage
 - Key Dependencies
+- Blocking Dependencies (project/context, when applicable)
 - Environment Variables
 - Debugging & Troubleshooting
 
@@ -121,6 +151,7 @@ Feature `index.md` should include:
 - Context Files
 - Interfaces
 - Dependencies
+- Blocking Dependencies (project/context, when applicable)
 - Troubleshooting
 
 ## CDD Principles
@@ -130,6 +161,7 @@ Feature `index.md` should include:
 3. Describe what and observable results, not internal implementation.
 4. Keep project/feature operational docs current when behavior changes.
 5. Reuse and update existing contexts before creating new ones when possible.
+6. Declare blocking dependencies explicitly whenever sequencing matters.
 
 ## Anti-Patterns
 
@@ -145,11 +177,13 @@ Do not put these in numbered context specs:
 - `nexus` -> select context
 - `/nexus-context-create` -> create context specs
 - `/nexus-context-update` -> update context/index docs
+- `/nexus-context-generate-red-tests` -> generate red-only tests from `Next Actions`
 - `/nexus-context-sync-from-chat` -> propose updates from conversation
 - `/nexus-context-sync-with-code` -> propose updates from git/code changes
 - `/nexus-context-review` -> audit CDD compliance
 - `/nexus-context-search` -> search contexts by outcome/actions
 - `/nexus-context-from-code` -> recommend contexts from code scope
+- `/nexus-context-validate-unstaged` -> validate unstaged code/tests against Next Actions and language rules
 
 ## Enforcement
 
