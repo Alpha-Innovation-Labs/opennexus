@@ -1,6 +1,6 @@
 //! CLI argument parsing for the OpenNexus binary.
 
-use clap::{ArgGroup, Args, Parser, Subcommand, ValueEnum};
+use clap::{Args, Parser, Subcommand, ValueEnum};
 
 #[derive(Debug, Parser)]
 #[command(name = "opennexus")]
@@ -55,11 +55,8 @@ pub enum Commands {
     /// Run Ralph CLI with passthrough arguments.
     Ralph(RalphCommand),
 
-    /// Context-driven development orchestration commands.
-    Context {
-        #[command(subcommand)]
-        command: ContextCommands,
-    },
+    /// Run an orchestration pipeline by name.
+    Orchestration(OrchestrationCommand),
 }
 
 #[derive(Debug, Clone, Args)]
@@ -88,69 +85,73 @@ pub enum MarketplaceCommands {
     },
 }
 
-#[derive(Debug, Clone, Subcommand)]
-pub enum ContextCommands {
-    /// Run staged CDD orchestration for one context file.
-    Implement {
-        /// Path to a context file with frontmatter and Next Actions table.
-        #[arg(long)]
-        context_file: String,
-
-        /// Maximum coder/validator iterations before stopping.
-        #[arg(long, default_value_t = 3)]
-        max_iterations: usize,
-
-        /// Timeout bound in seconds for the full loop.
-        #[arg(long, default_value_t = 600)]
-        timeout_seconds: u64,
-
-        /// Optional rule file under .nexus/ai_harness/rules/ to resolve ambiguity.
-        #[arg(long)]
-        rule_file: Option<String>,
-
-        /// Optional explicit test command template. Use {test_id} placeholder.
-        ///
-        /// Resolution precedence:
-        /// 1) --test-command override
-        /// 2) selected --rule-file metadata (test_command)
-        /// 3) project auto-detection (Cargo.toml, pyproject.toml, package.json)
-        #[arg(long)]
-        test_command: Option<String>,
-
-        /// Optional explicit test discovery command used before coding starts.
-        #[arg(long)]
-        test_discovery_command: Option<String>,
-    },
-
-    /// Report discovered vs missing tests from a context file.
-    TestStatus {
-        /// Path to a context file with frontmatter and Next Actions table.
-        #[arg(long)]
-        context_file: String,
-
-        /// Optional command id resolver (default: test-status; alias: status).
-        #[arg(long)]
-        command_name: Option<String>,
-    },
-
-    /// Reconcile context task status from existing tests and code.
-    Backfill(ContextBackfillCommand),
-}
-
 #[derive(Debug, Clone, Args)]
-#[command(group(
-    ArgGroup::new("target")
-        .required(true)
-        .args(["context_file", "all"])
-))]
-pub struct ContextBackfillCommand {
-    /// Path to one context file to backfill.
+pub struct OrchestrationCommand {
+    /// Name of the orchestration pipeline from the pipeline file.
+    pub pipeline_name: String,
+
+    /// Optional secondary pipeline name (used by restart command mode).
+    pub target_pipeline_name: Option<String>,
+
+    /// Path to a specification file with frontmatter and Next Actions table.
     #[arg(long)]
     pub context_file: Option<String>,
 
-    /// Backfill every valid context spec under .nexus/context/.
+    /// Pipeline definition file (JSON/YAML). Defaults to local orchestration search paths.
     #[arg(long)]
-    pub all: bool,
+    pub pipeline_file: Option<String>,
+
+    /// Maximum coder/validator iterations before stopping.
+    #[arg(long, default_value_t = 3)]
+    pub max_iterations: usize,
+
+    /// Timeout bound in seconds for the full loop.
+    #[arg(long, default_value_t = 600)]
+    pub timeout_seconds: u64,
+
+    /// Optional rule file under .nexus/ai_harness/rules/ to resolve ambiguity.
+    #[arg(long)]
+    pub rule_file: Option<String>,
+
+    /// Optional explicit test command template. Use {test_id} placeholder.
+    #[arg(long)]
+    pub test_command: Option<String>,
+
+    /// Optional explicit test discovery command used before coding starts.
+    #[arg(long)]
+    pub test_discovery_command: Option<String>,
+
+    /// Optional OpenCode model id for orchestration LLM stages.
+    #[arg(long)]
+    pub model: Option<String>,
+
+    /// Optional checkpoint file path to persist step state after each step.
+    #[arg(long)]
+    pub checkpoint_file: Option<String>,
+
+    /// Resume from a saved checkpoint file.
+    #[arg(long)]
+    pub resume_checkpoint: Option<String>,
+
+    /// Bypass context dependency blocking gates.
+    #[arg(long, default_value_t = false)]
+    pub allow_dependency_bypass: bool,
+
+    /// Force a new run even when dedupe fingerprint matches a successful run.
+    #[arg(long, default_value_t = false)]
+    pub overwrite: bool,
+
+    /// Run id for `orchestration traces` query mode.
+    #[arg(long)]
+    pub run_id: Option<i64>,
+
+    /// Filter timelines/runs by context id.
+    #[arg(long)]
+    pub context_id: Option<String>,
+
+    /// Filter timelines by pipeline name.
+    #[arg(long)]
+    pub pipeline_filter: Option<String>,
 }
 
 #[cfg(test)]
@@ -258,11 +259,11 @@ mod tests {
     }
 
     #[test]
-    fn parses_context_implement_command() {
+    fn parses_orchestration_command() {
         let cli = Cli::parse_from([
             "opennexus",
-            "context",
-            "implement",
+            "orchestration",
+            "default",
             "--context-file",
             ".nexus/context/nexus-cli/cdd/CDD_001-context-implement-rule-selection-gate.md",
             "--max-iterations",
@@ -271,95 +272,83 @@ mod tests {
             "120",
             "--rule-file",
             "rust/SKILL.md",
+            "--model",
+            "openai/gpt-5.3-codex",
         ]);
         match cli.command {
-            Some(Commands::Context { command }) => match command {
-                ContextCommands::Implement {
-                    context_file,
-                    max_iterations,
-                    timeout_seconds,
-                    rule_file,
-                    test_command,
-                    test_discovery_command,
-                } => {
-                    assert!(context_file.contains("CDD_001"));
-                    assert_eq!(max_iterations, 5);
-                    assert_eq!(timeout_seconds, 120);
-                    assert_eq!(rule_file.as_deref(), Some("rust/SKILL.md"));
-                    assert!(test_command.is_none());
-                    assert!(test_discovery_command.is_none());
-                }
-                _ => panic!("expected context implement command"),
-            },
-            _ => panic!("expected context command"),
+            Some(Commands::Orchestration(command)) => {
+                assert_eq!(command.pipeline_name, "default");
+                assert!(command.target_pipeline_name.is_none());
+                assert!(command
+                    .context_file
+                    .as_deref()
+                    .unwrap_or_default()
+                    .contains("CDD_001"));
+                assert_eq!(command.max_iterations, 5);
+                assert_eq!(command.timeout_seconds, 120);
+                assert_eq!(command.rule_file.as_deref(), Some("rust/SKILL.md"));
+                assert_eq!(command.model.as_deref(), Some("openai/gpt-5.3-codex"));
+                assert!(command.test_command.is_none());
+                assert!(command.test_discovery_command.is_none());
+                assert!(command.checkpoint_file.is_none());
+                assert!(command.resume_checkpoint.is_none());
+                assert!(!command.allow_dependency_bypass);
+                assert!(!command.overwrite);
+                assert!(command.run_id.is_none());
+                assert!(command.context_id.is_none());
+                assert!(command.pipeline_filter.is_none());
+            }
+            _ => panic!("expected orchestration command"),
         }
     }
 
     #[test]
-    fn parses_context_test_status_command() {
+    fn parses_orchestration_stop_command() {
         let cli = Cli::parse_from([
             "opennexus",
-            "context",
-            "test-status",
+            "orchestration",
+            "stop",
             "--context-file",
-            ".nexus/context/nexus-cli/cdd/CDD_002-context-test-status-command.md",
-            "--command-name",
-            "status",
+            ".nexus/context/demo/CTX_001.md",
+            "--pipeline-filter",
+            "default",
         ]);
         match cli.command {
-            Some(Commands::Context { command }) => match command {
-                ContextCommands::TestStatus {
-                    context_file,
-                    command_name,
-                } => {
-                    assert!(context_file.contains("CDD_002"));
-                    assert_eq!(command_name.as_deref(), Some("status"));
-                }
-                _ => panic!("expected context test-status command"),
-            },
-            _ => panic!("expected context command"),
+            Some(Commands::Orchestration(command)) => {
+                assert_eq!(command.pipeline_name, "stop");
+                assert!(command.target_pipeline_name.is_none());
+                assert_eq!(
+                    command.context_file.as_deref(),
+                    Some(".nexus/context/demo/CTX_001.md")
+                );
+                assert_eq!(command.pipeline_filter.as_deref(), Some("default"));
+                assert!(command.model.is_none());
+            }
+            _ => panic!("expected orchestration stop command"),
         }
     }
 
     #[test]
-    fn parses_context_backfill_context_file_command() {
+    fn parses_orchestration_restart_command() {
         let cli = Cli::parse_from([
             "opennexus",
-            "context",
-            "backfill",
+            "orchestration",
+            "restart",
+            "default",
             "--context-file",
-            ".nexus/context/nexus-cli/cdd/CDD_017-context-backfill-from-existing-code.md",
+            ".nexus/context/demo/CTX_001.md",
         ]);
-
         match cli.command {
-            Some(Commands::Context { command }) => match command {
-                ContextCommands::Backfill(backfill) => {
-                    assert!(backfill
-                        .context_file
-                        .as_deref()
-                        .unwrap_or_default()
-                        .contains("CDD_017"));
-                    assert!(!backfill.all);
-                }
-                _ => panic!("expected context backfill command"),
-            },
-            _ => panic!("expected context command"),
-        }
-    }
-
-    #[test]
-    fn parses_context_backfill_all_command() {
-        let cli = Cli::parse_from(["opennexus", "context", "backfill", "--all"]);
-
-        match cli.command {
-            Some(Commands::Context { command }) => match command {
-                ContextCommands::Backfill(backfill) => {
-                    assert!(backfill.context_file.is_none());
-                    assert!(backfill.all);
-                }
-                _ => panic!("expected context backfill command"),
-            },
-            _ => panic!("expected context command"),
+            Some(Commands::Orchestration(command)) => {
+                assert_eq!(command.pipeline_name, "restart");
+                assert_eq!(command.target_pipeline_name.as_deref(), Some("default"));
+                assert_eq!(
+                    command.context_file.as_deref(),
+                    Some(".nexus/context/demo/CTX_001.md")
+                );
+                assert!(command.model.is_none());
+            }
+            _ => panic!("expected orchestration restart command"),
         }
     }
 }

@@ -1,5 +1,6 @@
 use anyhow::{bail, Context, Result};
 use regex::Regex;
+use serde::{Deserialize, Serialize};
 use std::collections::BTreeSet;
 use std::fs;
 use std::path::Path;
@@ -8,7 +9,7 @@ use std::process::Output;
 
 use crate::core::context::model::ContextParseResult;
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) enum RunnerSource {
     CliOverride,
     RuleFile,
@@ -25,7 +26,7 @@ impl RunnerSource {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) enum ToolchainKind {
     Rust,
     Python,
@@ -44,7 +45,7 @@ impl ToolchainKind {
     }
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub(crate) struct TestRunnerPlan {
     pub source: RunnerSource,
     pub toolchain: ToolchainKind,

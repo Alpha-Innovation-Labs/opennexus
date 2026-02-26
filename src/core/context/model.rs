@@ -1,13 +1,23 @@
+use serde::{Deserialize, Serialize};
 use std::path::PathBuf;
 
 #[derive(Debug, Clone)]
 pub struct ContextImplementOptions {
+    pub pipeline_name: String,
     pub context_file: PathBuf,
     pub max_iterations: usize,
     pub timeout_seconds: u64,
     pub rule_file: Option<String>,
     pub test_command: Option<String>,
     pub test_discovery_command: Option<String>,
+    pub agent_model: Option<String>,
+    pub pipeline_steps: Option<Vec<String>>,
+    pub red_failure_patterns: Vec<String>,
+    pub checkpoint_file: Option<PathBuf>,
+    pub resume_checkpoint: Option<PathBuf>,
+    pub allow_dependency_bypass: bool,
+    pub overwrite: bool,
+    pub run_id: Option<i64>,
 }
 
 #[derive(Debug, Clone)]
@@ -22,7 +32,7 @@ pub struct ContextBackfillOptions {
     pub all: bool,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ContextParseResult {
     pub context_id: String,
     pub tests: Vec<String>,
@@ -31,7 +41,7 @@ pub struct ContextParseResult {
     pub language: Option<String>,
 }
 
-#[derive(Debug, Clone)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ContextNextAction {
     pub description: String,
     pub test_id: String,
@@ -106,7 +116,7 @@ impl BackfillContextResult {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 pub enum ContextLoopOutcome {
     Success,
     MaxIterationsReached,
