@@ -4,6 +4,11 @@ title: Ralph Loop State Lifecycle
 project: nexus-cli
 feature: ralph
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: RAL_001
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # RAL_002: Ralph Loop State Lifecycle

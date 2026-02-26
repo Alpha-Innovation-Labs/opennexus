@@ -4,6 +4,11 @@ title: Context CLI Session Retrieval by Next Action
 project: nexus-cli
 feature: cdd
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CDD_014
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CDD_015: Context CLI Session Retrieval by Next Action

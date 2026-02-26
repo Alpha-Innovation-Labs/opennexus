@@ -4,9 +4,11 @@ title: LLM Trace Capture and Observability API
 project: nexus-cli
 feature: orchestration
 created: "2026-02-26"
+
 depends_on:
   contexts:
-    - ORC_003
+    - id: ORC_006
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # ORC_007: LLM Trace Capture and Observability API

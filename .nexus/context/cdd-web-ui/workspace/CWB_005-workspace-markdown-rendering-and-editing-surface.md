@@ -4,6 +4,11 @@ title: Workspace Markdown Rendering and Editing Surface
 project: cdd-web-ui
 feature: workspace
 created: "2026-02-24"
+
+depends_on:
+  contexts:
+    - id: CWB_004
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CWB_005: Workspace Markdown Rendering and Editing Surface

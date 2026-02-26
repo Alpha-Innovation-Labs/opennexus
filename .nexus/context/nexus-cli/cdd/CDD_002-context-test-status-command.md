@@ -4,6 +4,11 @@ title: Context Test Status Command
 project: nexus-cli
 feature: cdd
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CDD_001
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CDD_002: Context Test Status Command

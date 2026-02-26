@@ -4,9 +4,11 @@ title: Typed Step Contracts and Step Registry
 project: nexus-cli
 feature: orchestration
 created: "2026-02-26"
+
 depends_on:
   contexts:
-    - ORC_001
+    - id: ORC_001
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # ORC_002: Typed Step Contracts and Step Registry

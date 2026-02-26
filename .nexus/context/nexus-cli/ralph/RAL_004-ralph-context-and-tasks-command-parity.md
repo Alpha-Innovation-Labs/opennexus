@@ -1,12 +1,17 @@
 ---
-context_id: CLI_012
+context_id: RAL_004
 title: Ralph Context and Tasks Command Parity
 project: nexus-cli
 feature: ralph
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: RAL_003
+      why: This dependency outcome is required before this context can proceed.
 ---
 
-# CLI_012: Ralph Context and Tasks Command Parity
+# RAL_004: Ralph Context and Tasks Command Parity
 
 ## Desired Outcome
 

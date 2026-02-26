@@ -4,6 +4,11 @@ title: Context Resume and Work Deduplication Policy
 project: nexus-cli
 feature: cdd
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CDD_011
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CDD_012: Context Resume and Work Deduplication Policy

@@ -4,6 +4,13 @@ title: Workspace Live Session Stream
 project: cdd-web-ui
 feature: workspace
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CWB_002
+      why: This dependency outcome is required before this context can proceed.
+    - id: CDD_011
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CWB_003: Workspace Live Session Stream

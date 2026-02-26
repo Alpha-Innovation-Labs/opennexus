@@ -1,8 +1,14 @@
 ---
 context_id: ZDO_004
 title: GitHub Pages Docs Publication
-project: zenbt-docs
+project: fumadocs
+feature: docs
 created: "2026-02-19"
+
+depends_on:
+  contexts:
+    - id: ZDO_003
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # ZDO_004: GitHub Pages Docs Publication

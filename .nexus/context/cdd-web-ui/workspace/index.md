@@ -1,3 +1,14 @@
+---
+project_id: cdd-web-ui-workspace
+title: CDD Web UI Workspace
+created: "2026-02-27"
+status: active
+dependencies:
+  - cdd-web-ui
+  - nexus-adapter
+  - nexus-cli
+---
+
 # cdd-web-ui workspace
 
 ## Scope
@@ -30,10 +41,9 @@ Run the workspace locally with `just web` from the repository root.
 
 | Dependency | Purpose |
 |------------|---------|
-| `nexus-cli context implement` | Executes test+code workflow for selected row |
-| `nexus-cli context backfill` | Reconstructs status for already-implemented code |
-| `SQLite observability` | Stores run/task/session state queried by the UI |
-| `just web` | Launches the Next.js workspace app in `apps/web` |
+| `cdd-web-ui` | Provides the parent UI project contract and operator workflows this feature extends |
+| `nexus-adapter` | Provides typed execution and query bridge used by workspace controls |
+| `nexus-cli` | Provides orchestration and status command behavior surfaced by workspace actions |
 
 ## Troubleshooting
 

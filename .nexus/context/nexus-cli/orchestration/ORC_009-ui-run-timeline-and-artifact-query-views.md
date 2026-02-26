@@ -4,12 +4,11 @@ title: UI Run Timeline and Artifact Query Views
 project: nexus-cli
 feature: orchestration
 created: "2026-02-26"
+
 depends_on:
-  projects:
-    - cdd-web-ui
   contexts:
-    - ORC_003
-    - ORC_007
+    - id: ORC_008
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # ORC_009: UI Run Timeline and Artifact Query Views

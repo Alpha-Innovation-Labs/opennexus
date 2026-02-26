@@ -4,6 +4,11 @@ title: Context Implement Rule Selection Gate
 project: nexus-cli
 feature: cdd
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CLI_003
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CDD_001: Context Implement Rule Selection Gate

@@ -4,6 +4,11 @@ title: Context Versioned Dirty State Detection
 project: nexus-cli
 feature: cdd
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CDD_007
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CDD_008: Context Versioned Dirty State Detection

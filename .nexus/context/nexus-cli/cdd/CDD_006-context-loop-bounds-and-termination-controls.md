@@ -4,6 +4,11 @@ title: Context Loop Bounds and Termination Controls
 project: nexus-cli
 feature: cdd
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CDD_005
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CDD_006: Context Loop Bounds and Termination Controls

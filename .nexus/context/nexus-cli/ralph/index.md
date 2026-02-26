@@ -1,3 +1,12 @@
+---
+project_id: nexus-cli-ralph
+title: Nexus CLI Ralph
+created: "2026-02-27"
+status: active
+dependencies:
+  - nexus-cli
+---
+
 # nexus-cli ralph
 
 ## Scope
@@ -8,14 +17,14 @@ Owns parity delivery for `opennexus ralph`, replacing the current Bun/TypeScript
 
 | ID | Title | Status |
 |----|-------|--------|
-| CLI_009 | Ralph Command Surface Parity | Planned |
-| CLI_010 | Ralph Loop State Lifecycle | Planned |
-| CLI_011 | Ralph Agent Backend and Rotation Parity | Planned |
-| CLI_012 | Ralph Context and Tasks Command Parity | Planned |
-| CLI_013 | Ralph Promise and Iteration Control Parity | Planned |
-| CLI_014 | Ralph Iteration Telemetry and Auto-Commit Parity | Planned |
-| CLI_015 | Ralph Prompt Construction and Template Parity | Planned |
-| CLI_016 | Ralph Diagnostics and Recovery Parity | Planned |
+| RAL_001 | Ralph Command Surface Parity | Planned |
+| RAL_002 | Ralph Loop State Lifecycle | Planned |
+| RAL_003 | Ralph Agent Backend and Rotation Parity | Planned |
+| RAL_004 | Ralph Context and Tasks Command Parity | Planned |
+| RAL_005 | Ralph Promise and Iteration Control Parity | Planned |
+| RAL_006 | Ralph Iteration Telemetry and Auto-Commit Parity | Planned |
+| RAL_007 | Ralph Prompt Construction and Template Parity | Planned |
+| RAL_008 | Ralph Diagnostics and Recovery Parity | Planned |
 
 ## Interfaces
 
@@ -42,11 +51,7 @@ Owns parity delivery for `opennexus ralph`, replacing the current Bun/TypeScript
 
 | Dependency | Purpose |
 |------------|---------|
-| `clap` | Parse Ralph command and option surface |
-| `serde` / `serde_json` | Persist `.ralph` state/history/config files |
-| `tokio` + process I/O | Spawn agent subprocesses and stream output |
-| `regex` | Promise detection, tool extraction, and output parsing |
-| `git` (system command) | Snapshot changes and optional per-iteration auto-commit |
+| `nexus-cli` | Provides command runtime, option parsing surface, and process integration contracts used by Ralph parity flows |
 
 ## Environment Variables
 

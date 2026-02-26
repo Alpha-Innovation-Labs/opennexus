@@ -4,6 +4,11 @@ title: Workspace Next Action Execution
 project: cdd-web-ui
 feature: workspace
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CDD_001
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CWB_001: Workspace Next Action Execution

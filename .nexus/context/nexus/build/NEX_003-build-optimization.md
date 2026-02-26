@@ -4,6 +4,11 @@ title: Build Optimization with sccache
 project: nexus
 feature: build
 created: "2026-01-09"
+
+depends_on:
+  contexts:
+    - id: NEX_001
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # NEX_003: Build Optimization with sccache

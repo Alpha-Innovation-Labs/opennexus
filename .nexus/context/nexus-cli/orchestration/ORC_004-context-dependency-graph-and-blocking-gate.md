@@ -4,9 +4,11 @@ title: Context Dependency Graph and Blocking Gate
 project: nexus-cli
 feature: orchestration
 created: "2026-02-26"
+
 depends_on:
   contexts:
-    - ORC_003
+    - id: ORC_003
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # ORC_004: Context Dependency Graph and Blocking Gate

@@ -4,6 +4,11 @@ title: Cargo-Husky Git Hooks Setup
 project: nexus
 feature: workflow
 created: "2026-01-08"
+
+depends_on:
+  contexts:
+    - id: NEX_001
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # NEX_002: Cargo-Husky Git Hooks Setup

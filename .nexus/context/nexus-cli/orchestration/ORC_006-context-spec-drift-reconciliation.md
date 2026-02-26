@@ -4,10 +4,11 @@ title: Context Spec Drift Reconciliation
 project: nexus-cli
 feature: orchestration
 created: "2026-02-26"
+
 depends_on:
   contexts:
-    - ORC_003
-    - ORC_005
+    - id: ORC_005
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # ORC_006: Context Spec Drift Reconciliation

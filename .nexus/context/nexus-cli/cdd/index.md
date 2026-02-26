@@ -1,3 +1,12 @@
+---
+project_id: nexus-cli-cdd
+title: Nexus CLI CDD
+created: "2026-02-27"
+status: active
+dependencies:
+  - nexus-cli
+---
+
 # nexus-cli cdd
 
 ## Scope
@@ -38,10 +47,7 @@ Owns context-driven development orchestration commands that transform context sp
 
 | Dependency | Purpose |
 |------------|---------|
-| `clap` | Parse context command arguments, options, and loop controls |
-| `serde` / `serde_json` | Persist loop checkpoints, verification reports, and structured logs |
-| CDD context skill | Enforce canonical context format, action/test extraction, and naming constraints |
-| coding rule files under `.nexus/ai_harness/rules/` | Apply one selected coding rule as hard constraint during coding stages |
+| `nexus-cli` | Supplies command runtime, shared CLI surface, and integration boundaries for CDD orchestration behavior |
 
 ## Troubleshooting
 

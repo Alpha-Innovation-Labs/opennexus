@@ -13,8 +13,9 @@ This is the single source of truth for CDD in this repository.
 CDD separates:
 - Context specifications (`PRJ_NNN-*.md`): define desired outcomes and E2E-observable next actions.
 - Operational knowledge (`index.md`): document how projects/features work and how to operate/debug them.
+- Project wrapper skills (`skill/SKILL.md`, optional): document how a project should be consumed by other projects.
 
-CDD also supports explicit blocking dependencies between contexts and projects.
+CDD also supports explicit blocking dependencies between contexts.
 
 Use CDD to describe what success looks like, not how code should be implemented.
 
@@ -23,6 +24,8 @@ Use CDD to describe what success looks like, not how code should be implemented.
 ```text
 .nexus/context/<project>/
 ├── index.md                    # Project operational knowledge
+├── skill/
+│   └── SKILL.md                # Optional cross-project wrapper/integration contract
 ├── <feature>/
 │   ├── index.md                # Feature operational knowledge
 │   └── PRJ_NNN-*.md            # Context specifications
@@ -35,9 +38,23 @@ Mapping:
 
 Rules:
 - Every context file must live under `.nexus/context/<project>/<feature>/`.
+- Optional project wrapper skills live under `.nexus/context/<project>/skill/SKILL.md`.
 - Context IDs use a 3-letter prefix from either the **project** or the **feature**.
 - Choose one approach per project and be consistent.
 - If using feature-scoped prefixes, each feature/subfeature must have a unique 3-letter prefix.
+
+## Project Wrapper Skill (Optional)
+
+Use `.nexus/context/<project>/skill/SKILL.md` when a project is intended to be wrapped or reused by other projects.
+
+Purpose:
+- Define how other projects should call, query, and integrate with the wrapped project.
+- Provide stable integration guidance without turning context specs into implementation docs.
+
+Rules:
+- Treat wrapper skill guidance as integration contract documentation, not execution state.
+- Keep blocking sequencing in context frontmatter (`depends_on.contexts`), not in wrapper skill prose.
+- Keep wrapper guidance focused on cross-project usage surfaces (APIs, commands, expected inputs/outputs, guardrails).
 
 ## Context File Naming
 
@@ -70,23 +87,25 @@ created: "YYYY-MM-DD"
 ---
 ```
 
-Optional dependency metadata:
+Optional dependency metadata (blocking prerequisites only):
 
 ```yaml
 depends_on:
-  projects:
-    - upstream-project
   contexts:
-    - ABC_001
-    - .nexus/context/upstream-project/feature/ABC_001-some-context.md
+    - id: ABC_001
+      why: Requires upstream contract and CLI behavior to be finalized.
+    - id: XYZ_014
+      why: Reuses auth flow acceptance criteria.
 ```
 
 Rules:
 - `depends_on` is optional; omit when there are no prerequisites.
-- `depends_on.projects` and `depends_on.contexts` are optional lists; omit empty lists.
+- Declare dependencies in `depends_on.contexts` only.
 - Every listed dependency is blocking: it must be completed before this context can proceed.
-- `projects` values must match `.nexus/context/<project>/` directory names.
-- `contexts` values should use context IDs when unambiguous; use full context path when disambiguation is needed.
+- Each `depends_on.contexts` entry must be an object with:
+  - `id`: context ID (for example `ABC_001`)
+  - `why`: short reason for the dependency (max 140 characters)
+- Keep dependencies minimal and direct; do not duplicate transitive prerequisites.
 
 ## Context Required Sections
 
@@ -128,13 +147,32 @@ Rules:
 Dependencies are strict prerequisites, not suggestions.
 
 - Context dependency: this context is blocked until the referenced context is complete.
-- Project dependency: this context is blocked until prerequisite project outcomes needed for this context are complete.
+- Dependencies must be declared only in context frontmatter under `depends_on.contexts`.
+- Context files must never depend on project names; context dependencies are context-to-context only.
 - If dependencies are unknown or not verifiable, stop and ask for clarification before implementation.
-- Keep dependency declarations minimal and explicit; do not list non-blocking relationships.
+- Keep dependency declarations minimal and explicit; do not list non-blocking or transitive relationships.
 
 ## Project and Feature `index.md`
 
 `index.md` files store operational knowledge, not context specs.
+
+Both project and feature `index.md` files must start with YAML frontmatter using this exact schema:
+
+```yaml
+---
+project_id: project-or-subproject-id
+title: Human-Readable Title
+created: "YYYY-MM-DD"
+status: active
+dependencies:
+  - other-project-id
+---
+```
+
+Rules for index frontmatter and dependency content:
+- Use the same exact frontmatter keys for project and feature indexes.
+- `dependencies` entries must be project identifiers only.
+- Do not list apps, libraries, frameworks, crates, or tools as dependencies.
 
 Project `index.md` should include:
 - Overview
@@ -142,7 +180,6 @@ Project `index.md` should include:
 - Architecture (ASCII diagram)
 - CLI Usage
 - Key Dependencies
-- Blocking Dependencies (project/context, when applicable)
 - Environment Variables
 - Debugging & Troubleshooting
 
@@ -151,8 +188,13 @@ Feature `index.md` should include:
 - Context Files
 - Interfaces
 - Dependencies
-- Blocking Dependencies (project/context, when applicable)
 - Troubleshooting
+
+Rules:
+- Project dependencies are project-to-project documentation in `index.md` files only.
+- `index.md` dependency sections are informational only.
+- Do not use project/feature `index.md` as the authoritative source for blocking context dependencies.
+- Canonical blocking dependency data lives in context frontmatter `depends_on.contexts`.
 
 ## CDD Principles
 

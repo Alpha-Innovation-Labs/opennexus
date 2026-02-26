@@ -1,12 +1,17 @@
 ---
-context_id: CLI_007
+context_id: MKT_001
 title: Marketplace Search Command
 project: nexus-cli
 feature: marketplace
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CLI_003
+      why: This dependency outcome is required before this context can proceed.
 ---
 
-# CLI_007: Marketplace Search Command
+# MKT_001: Marketplace Search Command
 
 ## Desired Outcome
 

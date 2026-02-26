@@ -4,6 +4,11 @@ title: Ralph Agent Backend and Rotation Parity
 project: nexus-cli
 feature: ralph
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: RAL_002
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # RAL_003: Ralph Agent Backend and Rotation Parity

@@ -1,8 +1,14 @@
 ---
 context_id: ZDO_002
 title: Internal Docs Layout And TOC
-project: zenbt-docs
+project: fumadocs
+feature: docs
 created: "2026-02-18"
+
+depends_on:
+  contexts:
+    - id: ZDO_001
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # ZDO_002: Internal Docs Layout And TOC

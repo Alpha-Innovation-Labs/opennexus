@@ -4,10 +4,11 @@ title: Orchestration SQLite State Store and Schema
 project: nexus-cli
 feature: orchestration
 created: "2026-02-26"
+
 depends_on:
   contexts:
-    - ORC_001
-    - ORC_002
+    - id: ORC_002
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # ORC_003: Orchestration SQLite State Store and Schema

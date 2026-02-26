@@ -4,6 +4,11 @@ title: Workspace Context File API Safety and Conflict Handling
 project: cdd-web-ui
 feature: workspace
 created: "2026-02-24"
+
+depends_on:
+  contexts:
+    - id: CWB_005
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CWB_006: Workspace Context File API Safety and Conflict Handling

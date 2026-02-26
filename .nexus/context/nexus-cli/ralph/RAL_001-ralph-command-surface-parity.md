@@ -4,9 +4,14 @@ title: Ralph Command Surface Parity
 project: nexus-cli
 feature: ralph
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CLI_003
+      why: This dependency outcome is required before this context can proceed.
 ---
 
-# CLI_009: Ralph Command Surface Parity
+# RAL_001: Ralph Command Surface Parity
 
 ## Desired Outcome
 

@@ -4,6 +4,11 @@ title: Orchestration Command Surface and Pipeline Definition Loader
 project: nexus-cli
 feature: orchestration
 created: "2026-02-26"
+
+depends_on:
+  contexts:
+    - id: CDD_007
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # ORC_001: Orchestration Command Surface and Pipeline Definition Loader

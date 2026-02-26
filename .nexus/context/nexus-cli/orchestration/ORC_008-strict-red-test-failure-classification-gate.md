@@ -4,10 +4,11 @@ title: Strict Red-Test Failure Classification Gate
 project: nexus-cli
 feature: orchestration
 created: "2026-02-26"
+
 depends_on:
   contexts:
-    - ORC_002
-    - ORC_007
+    - id: ORC_007
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # ORC_008: Strict Red-Test Failure Classification Gate

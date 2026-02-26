@@ -4,6 +4,11 @@ title: Context Dynamic Agent Session Associations
 project: nexus-cli
 feature: cdd
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CDD_009
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CDD_010: Context Dynamic Agent Session Associations

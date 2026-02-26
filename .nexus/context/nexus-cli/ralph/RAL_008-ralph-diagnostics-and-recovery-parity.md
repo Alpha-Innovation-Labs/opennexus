@@ -1,12 +1,17 @@
 ---
-context_id: CLI_016
+context_id: RAL_008
 title: Ralph Diagnostics and Recovery Parity
 project: nexus-cli
 feature: ralph
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: RAL_007
+      why: This dependency outcome is required before this context can proceed.
 ---
 
-# CLI_016: Ralph Diagnostics and Recovery Parity
+# RAL_008: Ralph Diagnostics and Recovery Parity
 
 ## Desired Outcome
 

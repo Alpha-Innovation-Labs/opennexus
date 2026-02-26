@@ -4,6 +4,11 @@ title: Context Stage Logging and Fail-Fast Errors
 project: nexus-cli
 feature: cdd
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CDD_004
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CDD_005: Context Stage Logging and Fail-Fast Errors

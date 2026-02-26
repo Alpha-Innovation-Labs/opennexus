@@ -161,10 +161,9 @@ project: project-name
 feature: feature-name
 created: "YYYY-MM-DD"
 depends_on:
-  projects:
-    - upstream-project
   contexts:
-    - ABC_001
+    - id: ABC_001
+      why: Reuses validated upstream contract and acceptance behavior.
 ---
 
 # PRJ_NNN: Title
@@ -193,6 +192,9 @@ If there are no blocking prerequisites, omit `depends_on` entirely.
 - Use `## Desired Outcome` (NOT `## Summary`)
 - Use `## Next Actions` table format (NOT `## Goals` bullet list)
 - Use optional `depends_on` frontmatter only for blocking prerequisites
+- Use `depends_on.contexts` only (context-to-context dependencies)
+- Each dependency must use `id` and `why` (max 140 chars)
+- Keep dependencies direct; do not include transitive prerequisites
 - Do NOT include `## Lessons Learned` section
 - Do NOT include `## Validation` section
 - Do NOT include `## E2E Test Scenarios` section (use Next Actions table instead)

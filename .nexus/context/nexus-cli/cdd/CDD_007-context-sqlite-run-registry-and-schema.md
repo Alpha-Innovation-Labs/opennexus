@@ -4,6 +4,11 @@ title: Context SQLite Run Registry and Schema
 project: nexus-cli
 feature: cdd
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CDD_006
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CDD_007: Context SQLite Run Registry and Schema

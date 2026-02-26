@@ -1,12 +1,17 @@
 ---
-context_id: CLI_014
+context_id: RAL_006
 title: Ralph Iteration Telemetry and Auto-Commit Parity
 project: nexus-cli
 feature: ralph
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: RAL_005
+      why: This dependency outcome is required before this context can proceed.
 ---
 
-# CLI_014: Ralph Iteration Telemetry and Auto-Commit Parity
+# RAL_006: Ralph Iteration Telemetry and Auto-Commit Parity
 
 ## Desired Outcome
 

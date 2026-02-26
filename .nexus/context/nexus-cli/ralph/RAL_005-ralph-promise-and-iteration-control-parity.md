@@ -1,12 +1,17 @@
 ---
-context_id: CLI_013
+context_id: RAL_005
 title: Ralph Promise and Iteration Control Parity
 project: nexus-cli
 feature: ralph
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: RAL_004
+      why: This dependency outcome is required before this context can proceed.
 ---
 
-# CLI_013: Ralph Promise and Iteration Control Parity
+# RAL_005: Ralph Promise and Iteration Control Parity
 
 ## Desired Outcome
 

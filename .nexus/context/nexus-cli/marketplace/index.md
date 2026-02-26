@@ -1,3 +1,12 @@
+---
+project_id: nexus-cli-marketplace
+title: Nexus CLI Marketplace
+created: "2026-02-27"
+status: active
+dependencies:
+  - nexus-cli
+---
+
 # nexus-cli marketplace
 
 ## Scope
@@ -8,8 +17,8 @@ Owns marketplace discovery and installation workflows exposed by `opennexus mark
 
 | ID | Title | Status |
 |----|-------|--------|
-| CLI_007 | Marketplace Search Command | Active |
-| CLI_008 | Marketplace Install Command | Active |
+| MKT_001 | Marketplace Search Command | Active |
+| MKT_002 | Marketplace Install Command | Active |
 
 ## Interfaces
 
@@ -25,10 +34,7 @@ Owns marketplace discovery and installation workflows exposed by `opennexus mark
 
 | Dependency | Purpose |
 |------------|---------|
-| `reqwest` | Fetch remote registry payloads |
-| `serde` / `serde_json` | Parse and emit marketplace payloads |
-| `tempfile` | Stage cloned repositories before install |
-| `git` (system command) | Clone marketplace repositories |
+| `nexus-cli` | Provides command runtime and installation lifecycle behavior used by marketplace flows |
 
 ## Troubleshooting
 

@@ -4,10 +4,11 @@ title: Run Deduplication and Overwrite Policy
 project: nexus-cli
 feature: orchestration
 created: "2026-02-26"
+
 depends_on:
   contexts:
-    - ORC_003
-    - ORC_004
+    - id: ORC_004
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # ORC_005: Run Deduplication and Overwrite Policy

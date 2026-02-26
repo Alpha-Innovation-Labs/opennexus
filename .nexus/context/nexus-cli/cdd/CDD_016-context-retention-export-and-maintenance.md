@@ -4,6 +4,11 @@ title: Context Retention Export and Maintenance
 project: nexus-cli
 feature: cdd
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CDD_015
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CDD_016: Context Retention Export and Maintenance

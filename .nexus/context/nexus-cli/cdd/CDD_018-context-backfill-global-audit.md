@@ -4,6 +4,11 @@ title: Context Backfill Global Audit
 project: nexus-cli
 feature: cdd
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CDD_017
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CDD_018: Context Backfill Global Audit

@@ -4,6 +4,11 @@ title: Context CLI Health and Drift Commands
 project: nexus-cli
 feature: cdd
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: CDD_012
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CDD_013: Context CLI Health and Drift Commands

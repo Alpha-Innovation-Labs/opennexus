@@ -1,8 +1,10 @@
 ---
 context_id: ZDO_001
 title: Docs Home Foundation
-project: zenbt-docs
+project: fumadocs
+feature: docs
 created: "2026-02-18"
+
 ---
 
 # ZDO_001: Docs Home Foundation

@@ -3,6 +3,7 @@ project_id: nexus
 title: Nexus Core - Shared Infrastructure
 created: "2024-12-01"
 status: active
+dependencies: []
 ---
 
 # nexus
@@ -15,9 +16,9 @@ Core workspace infrastructure for the OpenNexus repository. This project capture
 
 | Feature | Path | Purpose |
 |---------|------|---------|
-| `testing` | `.nexus/context/nexus/` | Shared test scaffolding and test utility behavior |
-| `workflow` | `.nexus/context/nexus/` | Git hook and quality gate workflow expectations |
-| `build` | `.nexus/context/nexus/` | Build speed and local developer feedback-loop optimization |
+| `testing` | `.nexus/context/nexus/testing/` | Shared test scaffolding and test utility behavior |
+| `workflow` | `.nexus/context/nexus/workflow/` | Git hook and quality gate workflow expectations |
+| `build` | `.nexus/context/nexus/build/` | Build speed and local developer feedback-loop optimization |
 
 ## Context Files
 
@@ -56,14 +57,11 @@ opennexus marketplace search "query"
 opennexus marketplace install fumadocs
 ```
 
-## Key Dependencies
+## Project Dependencies
 
 | Dependency | Purpose |
 |------------|---------|
-| `cargo-husky` | Git hook orchestration for pre-commit/pre-push checks |
-| `just` | Standard local workflow command runner |
-| `sccache` | Rust compilation cache for faster rebuilds |
-| `nexus-test-utils` | Shared test isolation helpers used by E2E tests |
+| None | No cross-project runtime dependency is documented for this shared infrastructure project |
 
 ## Environment Variables
 

@@ -4,6 +4,11 @@ title: Workspace Sidebar Selection Sync and Unsaved Change Guards
 project: cdd-web-ui
 feature: workspace
 created: "2026-02-24"
+
+depends_on:
+  contexts:
+    - id: CWB_006
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CWB_007: Workspace Sidebar Selection Sync and Unsaved Change Guards

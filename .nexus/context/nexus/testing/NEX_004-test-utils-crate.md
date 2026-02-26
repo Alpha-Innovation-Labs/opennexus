@@ -4,6 +4,11 @@ title: Shared Test Utilities Crate
 project: nexus
 feature: testing
 created: "2026-01-09"
+
+depends_on:
+  contexts:
+    - id: NEX_001
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # NEX_004: Shared Test Utilities Crate

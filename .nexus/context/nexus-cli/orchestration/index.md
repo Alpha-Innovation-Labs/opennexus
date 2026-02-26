@@ -1,3 +1,13 @@
+---
+project_id: nexus-cli-orchestration
+title: Nexus CLI Orchestration
+created: "2026-02-27"
+status: active
+dependencies:
+  - nexus-cli
+  - nexus-cli-cdd
+---
+
 # nexus-cli orchestration
 
 ## Scope
@@ -31,15 +41,8 @@ Owns the generic pipeline orchestration platform for `opennexus orchestration <p
 
 | Dependency | Purpose |
 |------------|---------|
-| `nexus-cli/cdd` | Source of context parsing conventions and prior context lifecycle semantics |
-| `SQLite` | Durable run, step, artifact, and observability state for CLI and UI consumers |
-| `serde` / `serde_json` / `serde_yaml` | Pipeline definition parsing and typed payload serialization |
-| `context-driven-development` skill | Canonical context structure, dependency semantics, and test identifier rules |
-
-## Blocking Dependencies
-
-- If orchestration semantics reuse prior CDD run-state behavior, align with `CDD_007`, `CDD_008`, `CDD_011`, and `CDD_012` before finalizing contracts.
-- If dependency gate behavior is ambiguous, resolve `depends_on` references before execution.
+| `nexus-cli` | Provides command runtime and shared CLI behavior required by orchestration workflows |
+| `nexus-cli-cdd` | Provides CDD lifecycle conventions used by orchestration dependency and status semantics |
 
 ## Troubleshooting
 

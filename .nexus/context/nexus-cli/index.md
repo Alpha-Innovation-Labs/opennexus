@@ -4,9 +4,7 @@ title: OpenNexus CLI
 created: "2024-12-01"
 status: active
 dependencies:
-  - clap
-  - include_dir
-  - reqwest
+  - nexus
 ---
 
 # nexus-cli
@@ -15,7 +13,7 @@ dependencies:
 
 | Feature | Path | Purpose |
 |---------|------|---------|
-| `core` | `.nexus/context/nexus-cli/` | CLI-wide setup, command system, and shared behavior |
+| `core` | `.nexus/context/nexus-cli/core/` | CLI-wide setup, command system, and shared behavior |
 | `marketplace` | `.nexus/context/nexus-cli/marketplace/` | Marketplace search/install workflows and package sources |
 | `ralph` | `.nexus/context/nexus-cli/ralph/` | Rust `opennexus ralph` command parity with the current Ralph CLI API |
 | `cdd` | `.nexus/context/nexus-cli/cdd/` | Context-driven test-first orchestration and context test status reporting |
@@ -25,21 +23,21 @@ dependencies:
 
 | ID | Feature | Title |
 |----|---------|-------|
-| CLI_002 | core | Setup Command |
-| CLI_003 | core | Version Command |
-| CLI_004 | core | Help Command |
-| CLI_005 | core | Uninstall Command |
-| CLI_006 | core | Update Command |
-| CLI_007 | marketplace | Marketplace Search Command |
-| CLI_008 | marketplace | Marketplace Install Command |
-| CLI_009 | ralph | Ralph Command Surface Parity |
-| CLI_010 | ralph | Ralph Loop State Lifecycle |
-| CLI_011 | ralph | Ralph Agent Backend and Rotation Parity |
-| CLI_012 | ralph | Ralph Context and Tasks Command Parity |
-| CLI_013 | ralph | Ralph Promise and Iteration Control Parity |
-| CLI_014 | ralph | Ralph Iteration Telemetry and Auto-Commit Parity |
-| CLI_015 | ralph | Ralph Prompt Construction and Template Parity |
-| CLI_016 | ralph | Ralph Diagnostics and Recovery Parity |
+| CLI_001 | core | Setup Command |
+| CLI_002 | core | Version Command |
+| CLI_003 | core | Help Command |
+| CLI_004 | core | Uninstall Command |
+| CLI_005 | core | Update Command |
+| MKT_001 | marketplace | Marketplace Search Command |
+| MKT_002 | marketplace | Marketplace Install Command |
+| RAL_001 | ralph | Ralph Command Surface Parity |
+| RAL_002 | ralph | Ralph Loop State Lifecycle |
+| RAL_003 | ralph | Ralph Agent Backend and Rotation Parity |
+| RAL_004 | ralph | Ralph Context and Tasks Command Parity |
+| RAL_005 | ralph | Ralph Promise and Iteration Control Parity |
+| RAL_006 | ralph | Ralph Iteration Telemetry and Auto-Commit Parity |
+| RAL_007 | ralph | Ralph Prompt Construction and Template Parity |
+| RAL_008 | ralph | Ralph Diagnostics and Recovery Parity |
 | CDD_001 | cdd | Context Implement Rule Selection Gate |
 | CDD_002 | cdd | Context Test Status Command |
 | CDD_003 | cdd | Context Test Generation and Discovery Gate |
@@ -112,14 +110,11 @@ opennexus update
 opennexus uninstall
 ```
 
-## Key Dependencies
+## Project Dependencies
 
-| Crate | Purpose |
-|-------|---------|
-| clap | CLI parsing and command tree |
-| include_dir | Embeds `.nexus` assets in the binary for setup extraction |
-| reqwest | Fetches marketplace registry data |
-| serde_json | JSON output payloads (`--format json`) |
+| Dependency | Purpose |
+|------------|---------|
+| `nexus` | Provides shared repository workflow conventions and infrastructure used by `nexus-cli` development and verification flows |
 
 ## Environment Variables
 

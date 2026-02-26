@@ -59,14 +59,18 @@ Normalization output fields:
 
 ## Output Content Contract
 
-Generated docs should land under:
+Generated docs should land under `docs/content/docs/reference/` with structure inferred from source modules (not hardcoded section names).
+
+One valid example:
 
 ```text
 docs/content/docs/reference/
-  core/
-  primitives/
-  exchanges/
+  commands/
+  cli/
+  output/
 ```
+
+The agent implementing docs sync decides the final section layout from the codebase itself. Sections must emerge from discovered modules/symbols and adapt as code structure changes.
 
 Each generated page includes:
 
@@ -87,7 +91,7 @@ Each generated page includes:
 ### Fumadocs-Specific Navigation Rules
 
 - Root-level `docs/content/docs/meta.json` keeps explicit section ordering.
-- Generated reference sections include their own `meta.json` files.
+- Generated reference sections include their own `meta.json` files and are derived from discovered source structure.
 - Slugs must resolve through `source.getPage(...)` under `/docs` base URL.
 
 ## Determinism Rules

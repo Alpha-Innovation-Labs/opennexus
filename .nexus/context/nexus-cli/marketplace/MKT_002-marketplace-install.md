@@ -1,12 +1,17 @@
 ---
-context_id: CLI_008
+context_id: MKT_002
 title: Marketplace Install Command
 project: nexus-cli
 feature: marketplace
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: MKT_001
+      why: This dependency outcome is required before this context can proceed.
 ---
 
-# CLI_008: Marketplace Install Command
+# MKT_002: Marketplace Install Command
 
 ## Desired Outcome
 

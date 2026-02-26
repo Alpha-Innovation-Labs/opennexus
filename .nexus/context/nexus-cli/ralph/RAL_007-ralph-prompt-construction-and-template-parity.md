@@ -1,12 +1,17 @@
 ---
-context_id: CLI_015
+context_id: RAL_007
 title: Ralph Prompt Construction and Template Parity
 project: nexus-cli
 feature: ralph
 created: "2026-02-23"
+
+depends_on:
+  contexts:
+    - id: RAL_006
+      why: This dependency outcome is required before this context can proceed.
 ---
 
-# CLI_015: Ralph Prompt Construction and Template Parity
+# RAL_007: Ralph Prompt Construction and Template Parity
 
 ## Desired Outcome
 

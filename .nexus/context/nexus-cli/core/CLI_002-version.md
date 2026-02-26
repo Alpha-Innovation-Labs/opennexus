@@ -4,6 +4,11 @@ title: Version Command
 project: nexus-cli
 feature: core
 created: "2025-01-04"
+
+depends_on:
+  contexts:
+    - id: CLI_001
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CLI_002: Version Command

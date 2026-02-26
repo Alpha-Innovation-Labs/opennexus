@@ -4,6 +4,11 @@ title: Workspace Context File Tree and Center Markdown View
 project: cdd-web-ui
 feature: workspace
 created: "2026-02-24"
+
+depends_on:
+  contexts:
+    - id: CWB_001
+      why: This dependency outcome is required before this context can proceed.
 ---
 
 # CWB_004: Workspace Context File Tree and Center Markdown View
