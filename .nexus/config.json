@@ -9,5 +9,29 @@
       }
     }
   },
+  "skill_generation": {
+    "projects": {
+      "opennexus": {
+        "include_folders": [
+          "src",
+          "apps",
+          "tests",
+          "justfiles",
+          "wrappers",
+          "packaging",
+          ".nexus",
+          ".opencode",
+          ".github",
+          ".cargo",
+          ".cargo-husky"
+        ],
+        "exclude_folders": [
+          "docs",
+          ".ruff_cache"
+        ],
+        "updated_at": "2026-02-24T14:29:50Z"
+      }
+    }
+  },
   "version": "0.1.7"
 }

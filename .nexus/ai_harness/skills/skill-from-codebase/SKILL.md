@@ -20,6 +20,7 @@ Define a consistent standard for generating and maintaining `SKILL.md` as an ins
 4. **Adaptive structure** - Infer repository domains and public entity types from current codebase.
 5. **Incremental by default when possible** - Use commit baseline diffing to update only impacted sections.
 6. **Committed-history only** - Generation and refresh decisions must use committed git history, never uncommitted working-tree changes.
+7. **Scope-sync compliant** - Maintain explicit root-folder include/exclude classification and exclude docs-only paths from domain generation.
 
 ## Required Files
 
@@ -46,6 +47,12 @@ Generation is commit-based:
 - If `git status --porcelain` is not empty, abort generation.
 - Never derive impact analysis from unstaged, staged-but-uncommitted, or untracked files.
 - Incremental diff source is strictly `last_generated_commit..HEAD`.
+
+## Scope-Sync Compliance
+
+- Classify every root folder as included or excluded before domain inference.
+- Exclude documentation-only roots and paths (for example `docs/`, `**/*.md`) from domain generation.
+- Keep excluded paths available for link/source validation only.
 
 ### Full Mode
 
@@ -114,7 +121,12 @@ Each usage card must include:
 4. `Minimal flow` (2-4 steps)
 5. `Key APIs`
 6. `Pitfalls` (1-2 concrete mistakes)
-7. `Source` (verified internal path, optional public docs)
+7. `Source` (verified internal repo path only; keep brief, non-catalog)
+
+Usage card constraints:
+
+- `Source` must point to existing internal files or directories in this repository.
+- For web usage cards, `Key APIs` must use exact full route identifiers only (for example `/api/v1/users/{id}`), never shorthand names.
 
 ## Quality Gates (Mandatory)
 
@@ -128,6 +140,7 @@ Each usage card must include:
 8. Usage cards include executable guidance.
 9. API names in usage cards are verified against real symbols in current codebase.
 10. Incremental mode changed only impacted sections unless explicit escalation to full mode.
+11. Version strings copy manifest semantics exactly (operators and pins), e.g. React `^19.2.4`.
 
 ## Anti-Patterns
 
