@@ -19,6 +19,7 @@ dependencies:
 | `marketplace` | `.nexus/context/nexus-cli/marketplace/` | Marketplace search/install workflows and package sources |
 | `ralph` | `.nexus/context/nexus-cli/ralph/` | Rust `opennexus ralph` command parity with the current Ralph CLI API |
 | `cdd` | `.nexus/context/nexus-cli/cdd/` | Context-driven test-first orchestration and context test status reporting |
+| `orchestration` | `.nexus/context/nexus-cli/orchestration/` | Generic pipeline orchestration platform with SQLite-backed state and observability |
 
 ## Context Files
 
@@ -57,6 +58,15 @@ dependencies:
 | CDD_016 | cdd | Context Retention Export and Maintenance |
 | CDD_017 | cdd | Context Backfill from Existing Code |
 | CDD_018 | cdd | Context Backfill Global Audit |
+| ORC_001 | orchestration | Orchestration Command Surface and Pipeline Definition Loader |
+| ORC_002 | orchestration | Typed Step Contracts and Step Registry |
+| ORC_003 | orchestration | Orchestration SQLite State Store and Schema |
+| ORC_004 | orchestration | Context Dependency Graph and Blocking Gate |
+| ORC_005 | orchestration | Run Deduplication and Overwrite Policy |
+| ORC_006 | orchestration | Context Spec Drift Reconciliation |
+| ORC_007 | orchestration | LLM Trace Capture and Observability API |
+| ORC_008 | orchestration | Strict Red-Test Failure Classification Gate |
+| ORC_009 | orchestration | UI Run Timeline and Artifact Query Views |
 
 ## Overview
 
