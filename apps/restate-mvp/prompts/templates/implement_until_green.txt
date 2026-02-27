@@ -1,0 +1,6 @@
+Rewrite the following answer as one concise sentence while preserving factual content.
+
+Original answer:
+{{steps.generate_red_tests.response_text}}
+
+Return only the rewritten sentence.

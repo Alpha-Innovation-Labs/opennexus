@@ -33,10 +33,15 @@ restate:
       sleep 2
     fi
 
-    if ! pgrep -f "apps/restate-mvp/src/index.ts" >/dev/null 2>&1; then
+    if ! lsof -ti:9080 >/dev/null 2>&1; then
       nohup bun run --cwd apps/restate-mvp dev > logs/restate-mvp/service.log 2>&1 &
       echo $! > logs/restate-mvp/service.pid
-      sleep 2
+      sleep 3
+    fi
+
+    if ! lsof -ti:9080 >/dev/null 2>&1; then
+      echo "Restate workflow service failed to start on port 9080. Check logs/restate-mvp/service.log"
+      exit 1
     fi
 
     restate -y deployments register localhost:9080 >/dev/null || true
@@ -44,9 +49,32 @@ restate:
 
     WORKFLOW_ID="mvp-demo-$(date +%s)"
 
-    curl --max-time 180 -fsS -X POST "http://localhost:8080/ConversationWorkflow/${WORKFLOW_ID}/run" \
+    PIPELINE_FILE="${RBX_RESTATE_PIPELINE_FILE:-pipelines/configurable-five-step.yaml}"
+    CONFIG_FILE="${RBX_RESTATE_CONFIG_FILE:-configs/local-weather.yaml}"
+
+    curl --max-time 30 -fsS -X POST "http://localhost:8080/ConversationWorkflow/${WORKFLOW_ID}/run/send" \
       -H "content-type: application/json" \
-      -d '{"promptFile":"prompts/weather.txt"}' >/tmp/restate-mvp-result.json
+      -d "{\"pipelineFile\":\"${PIPELINE_FILE}\",\"configFile\":\"${CONFIG_FILE}\"}" >/tmp/restate-mvp-accepted.json
+
+    OUTPUT_URL="http://localhost:8080/restate/workflow/ConversationWorkflow/${WORKFLOW_ID}/output"
+    for _ in $(seq 1 300); do
+      HTTP_CODE=$(curl --max-time 10 -sS -o /tmp/restate-mvp-poll.json -w "%{http_code}" "$OUTPUT_URL" || true)
+      if [ "$HTTP_CODE" = "200" ]; then
+        cp /tmp/restate-mvp-poll.json /tmp/restate-mvp-result.json
+        break
+      fi
+      if [ "$HTTP_CODE" != "470" ]; then
+        echo "Unexpected workflow output status: ${HTTP_CODE}"
+        cat /tmp/restate-mvp-poll.json
+        exit 1
+      fi
+      sleep 1
+    done
+
+    if [ ! -f /tmp/restate-mvp-result.json ]; then
+      echo "Workflow output was not ready within polling window."
+      exit 1
+    fi
 
     echo "Invocation complete. Result stored at /tmp/restate-mvp-result.json"
     echo "Opening Restate UI at http://localhost:9070"

@@ -1,0 +1,36 @@
+name: simplified-five-step
+steps:
+  - id: prepare_context
+    type: prepare_context
+    params:
+      prompt_file: prompts/weather.txt
+      question: What's the weather right now in Paris?
+
+  - id: generate_red_tests
+    type: opencode_prompt
+    params:
+      template_file: prompts/templates/generate_red_tests.txt
+      output_key: response_text
+
+  - id: validate_red_phase
+    type: summarize_text
+    params:
+      source_step: generate_red_tests
+      source_key: response_text
+      output_key: summary_text
+
+  - id: implement_until_green
+    type: opencode_prompt
+    params:
+      template_file: prompts/templates/implement_until_green.txt
+      output_key: response_text
+
+  - id: finalize_run
+    type: finalize_result
+    params:
+      primary_step: generate_red_tests
+      primary_key: response_text
+      summary_step: validate_red_phase
+      summary_key: summary_text
+      final_step: implement_until_green
+      final_key: response_text

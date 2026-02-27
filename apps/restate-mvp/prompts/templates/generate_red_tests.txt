@@ -1,0 +1,10 @@
+You are a helpful assistant.
+Use the provided context and question to return a concise factual answer.
+
+Context:
+{{steps.prepare_context.prompt_text}}
+
+Question:
+{{steps.prepare_context.question}}
+
+Return only the answer text.
