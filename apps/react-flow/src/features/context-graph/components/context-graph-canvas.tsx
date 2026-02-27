@@ -14,7 +14,7 @@ import {
   useNodesState,
   useReactFlow,
 } from "@xyflow/react";
-import { FoldVertical, Move, MousePointer2, RefreshCw, Scaling } from "lucide-react";
+import { ChevronRight, FoldVertical, Move, MousePointer2, RefreshCw, Scaling } from "lucide-react";
 
 import { ContextDetailsModal } from "@/features/context-graph/components/context-details-modal";
 import { ContextCardNode } from "@/features/context-graph/components/nodes/context-card-node";
@@ -27,6 +27,7 @@ import {
   type ContextFlowNode,
   type ContextFlowNodeData,
   type ProjectGroupNodeData,
+  type SubprojectTagNodeData,
 } from "@/features/context-graph/services/context-graph-layout-service";
 import {
   hasSiblingCollision,
@@ -949,6 +950,37 @@ function ContextGraphCanvasInner({ graphData, edgeMapping }: ContextGraphCanvasP
         ? "border-amber-500/70 bg-amber-500/10 text-amber-300"
         : "border-border/70 bg-card/80 text-muted-foreground";
 
+  const breadcrumbParts = useMemo(() => {
+    const parts: string[] = ["Projects"];
+
+    if (viewState.kind === "project-detail") {
+      parts.push(viewState.projectId);
+
+      const focusedNode = focusedNodeId ? nodes.find((node) => node.id === focusedNodeId) : undefined;
+      if (focusedNode?.type === "subprojectTag") {
+        const data = focusedNode.data as SubprojectTagNodeData;
+        parts.push(data.label);
+      }
+
+      if (focusedNode?.type === "contextCard") {
+        const data = focusedNode.data as ContextFlowNodeData;
+        parts.push(data.context.id);
+      }
+
+      return parts;
+    }
+
+    const focusedNode = focusedNodeId ? nodes.find((node) => node.id === focusedNodeId) : undefined;
+    if (focusedNode?.type === "projectGroup") {
+      const data = focusedNode.data as ProjectGroupNodeData;
+      if ((data.groupKind ?? "project") === "project") {
+        parts.push(data.projectName ?? data.groupId);
+      }
+    }
+
+    return parts;
+  }, [focusedNodeId, nodes, viewState]);
+
   return (
     <>
       <div
@@ -980,6 +1012,18 @@ function ContextGraphCanvasInner({ graphData, edgeMapping }: ContextGraphCanvasP
           onNodesChange={handleNodesChange}
           onEdgesChange={onEdgesChange}
         >
+          <Panel position="top-left" className="!left-4 !top-4">
+            <div className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-card/90 px-2.5 py-1 text-[11px] text-muted-foreground">
+              {breadcrumbParts.map((part, index) => (
+                <span key={`${part}-${index}`} className="inline-flex items-center gap-1.5">
+                  {index > 0 ? <ChevronRight className="h-3 w-3" /> : null}
+                  <span className={index === breadcrumbParts.length - 1 ? "max-w-[220px] truncate text-foreground" : undefined} title={part}>
+                    {part}
+                  </span>
+                </span>
+              ))}
+            </div>
+          </Panel>
           <MiniMap position="bottom-right" pannable zoomable className="rounded-lg border border-border/70 bg-card/90" />
           <Controls position="bottom-right" className="!bottom-4 !right-[220px] rounded-lg border border-border/70 bg-card/90" />
           <Panel position="bottom-right" className="!bottom-4 !right-[380px]">
