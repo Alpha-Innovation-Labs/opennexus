@@ -5,3 +5,4 @@ implement_prompt_template: prompts/templates/implement_until_green.txt
 use_sandbox: true
 cleanup_sandbox: true
 sandbox_prefix: nexus-restate-mvp
+worktree_base_dir: ""

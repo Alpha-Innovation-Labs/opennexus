@@ -1,0 +1,15 @@
+You are now in the green phase.
+
+Using the current worktree contents, update code/tests so the resolved test command passes.
+
+Inputs:
+- Red phase summary: {{steps.generate_red_tests.response_text}}
+- Last test output:
+{{steps.run_red_tests.stderr}}
+- Test command: {{steps.resolve_test_runner.verify_command}}
+
+Requirements:
+1) Keep the project initialized with `uv init --package .` conventions.
+2) Keep tests meaningful for PRJ_001 setup behavior and keep them in this exact directory: {{steps.derive_test_targets.output_dir}}.
+3) Make the suite pass.
+4) Return a concise summary of what changed.

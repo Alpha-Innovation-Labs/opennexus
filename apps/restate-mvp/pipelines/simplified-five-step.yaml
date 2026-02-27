@@ -1,33 +1,41 @@
 name: simplified-five-step
 steps:
+  - id: assign_worktree
+    block_id: assign_worktree
+    params:
+      use_sandbox: true
+      cleanup_sandbox: true
+      sandbox_prefix: nexus-restate-mvp
+
   - id: prepare_context
-    type: prepare_context
+    block_id: prepare_context
     params:
       prompt_file: prompts/weather.txt
       question: What's the weather right now in Paris?
 
   - id: generate_red_tests
-    type: opencode_prompt
+    block_id: opencode_prompt
     params:
       template_file: prompts/templates/generate_red_tests.txt
       output_key: response_text
 
   - id: validate_red_phase
-    type: summarize_text
+    block_id: summarize_text
     params:
       source_step: generate_red_tests
       source_key: response_text
       output_key: summary_text
 
   - id: implement_until_green
-    type: opencode_prompt
+    block_id: opencode_prompt
     params:
       template_file: prompts/templates/implement_until_green.txt
       output_key: response_text
 
   - id: finalize_run
-    type: finalize_result
+    block_id: finalize_result
     params:
+      worktree_step: assign_worktree
       primary_step: generate_red_tests
       primary_key: response_text
       summary_step: validate_red_phase

@@ -1,34 +1,38 @@
 name: configurable-five-step
 steps:
-  - id: prepare_context
-    type: prepare_context
+  - id: assign_worktree
+    block_id: assign_worktree
     params:
       use_sandbox: true
       cleanup_sandbox: true
       sandbox_prefix: nexus-restate-mvp
 
+  - id: prepare_context
+    block_id: prepare_context
+
   - id: generate_red_tests
-    type: opencode_prompt
+    block_id: opencode_prompt
     params:
       template_config_key: red_prompt_template
       output_key: response_text
 
   - id: validate_red_phase
-    type: summarize_text
+    block_id: summarize_text
     params:
       source_step: generate_red_tests
       source_key: response_text
       output_key: summary_text
 
   - id: implement_until_green
-    type: opencode_prompt
+    block_id: opencode_prompt
     params:
       template_config_key: implement_prompt_template
       output_key: response_text
 
   - id: finalize_run
-    type: finalize_result
+    block_id: finalize_result
     params:
+      worktree_step: assign_worktree
       primary_step: generate_red_tests
       primary_key: response_text
       summary_step: validate_red_phase

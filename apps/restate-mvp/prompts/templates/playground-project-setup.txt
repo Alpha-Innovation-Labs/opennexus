@@ -1,0 +1,22 @@
+You are executing inside a git worktree directory.
+
+Goal: implement the Playground project setup context PRJ_001 in the current working directory.
+
+Required test location (must match Rust orchestration scaffold convention):
+{{steps.derive_test_targets.output_dir}}
+
+Required test files:
+{{steps.derive_test_targets.required_test_paths_text}}
+
+Context source:
+{{steps.prepare_context.prompt_text}}
+
+Instructions:
+1) Create a brand new Python project in this working directory using `uv init --package .`.
+2) Ensure Python source is under `src/` and follows module/package structure.
+3) Add `pytest` as a dev dependency.
+4) Create intentionally failing tests exactly at the required test file paths listed above.
+5) Respect repository rule: use absolute imports only.
+6) At the end, return a concise summary of files created/updated and mention which required tests are currently red.
+
+If the project already exists, make it compliant and report what you changed.
