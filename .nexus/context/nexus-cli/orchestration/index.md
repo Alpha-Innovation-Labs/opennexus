@@ -37,6 +37,11 @@ Owns the generic pipeline orchestration platform for `opennexus orchestration <p
 | `opennexus orchestration runs --context-file <path>` | Lists historical runs and their terminal reasons |
 | `opennexus orchestration traces --run-id <id>` | Returns structured per-step traces and artifact references |
 
+Runtime notes:
+- Pipeline execution should remain definition-driven (JSON/YAML) with step order controlled by pipeline files, not hardcoded runner branching.
+- OpenCode-backed jobs should initialize the SDK once per runtime and resolve server port from environment (`RBX_OPENCODE_PORT`, then fallback defaults).
+- Restate-backed execution can expose the same lifecycle semantics as local orchestration while preserving step-level observability.
+
 ## Dependencies
 
 | Dependency | Purpose |
@@ -49,3 +54,5 @@ Owns the generic pipeline orchestration platform for `opennexus orchestration <p
 - If a pipeline is rejected as already completed, inspect run fingerprint inputs and rerun with explicit overwrite when intended.
 - If a context is blocked, verify referenced `depends_on` project or context records are complete and unambiguous.
 - If UI views are empty, verify traces and step outputs were persisted for the selected run id.
+- If OpenCode job steps fail to initialize in orchestration, verify the configured SDK port is not colliding and `RBX_OPENCODE_PORT` is set to the intended value.
+- If coding steps unexpectedly modify tests, verify orchestration write-policy enforcement is enabled for source-only coding jobs and rejects test-path mutations.

@@ -14,7 +14,13 @@ dependencies:
 
 `cdd-web-ui` provides a lightweight web workspace for context-driven development operations backed by the CDD SQLite observability data model. It allows operators to execute one selected context line, inspect persisted task results, and follow active coding-session progress.
 
-The graph experience includes an OpenCode side panel plus keyboard-driven chat modals (`Ctrl/Cmd+N` for a new single chat, `Ctrl/Cmd+A` for dual-lane parallel chat with a shared composer).
+The graph experience includes an OpenCode side panel plus keyboard-driven chat modals (`Ctrl/Cmd+N` for a new single chat, `Ctrl/Cmd+A` for dual-lane parallel chat, `Ctrl/Cmd+S` for branch forking), a composer-level Fork fallback button, and a header-level `Forks` lineage graph viewer with diff-style fork-origin snippets.
+
+The workspace keeps a persistent right-side chat shell while center views (Context/Forks/Chats/Workflows) change, and chat width restore-on-expand uses saved local state.
+
+The flow UI also includes a `Workflows` view for invocation observability, with left-sidebar invocation selection and main-panel workflow status plus step-result details.
+
+Theme controls now live in the top-right navbar as a single icon toggle (sun/moon), and selected mode persists across refresh while graph canvas backgrounds follow the active theme.
 
 ## Features
 
@@ -56,6 +62,21 @@ bun --cwd apps/react-flow run test:e2e -- e2e/opencode-toolcalls.e2e.ts
 
 # Run real OpenCode streaming e2e (no mocks)
 OPENCODE_E2E_REAL=1 bun --cwd apps/react-flow run test:e2e -- e2e/opencode-streaming-real.e2e.ts
+
+# Run forks tab lineage graph e2e
+bun --cwd apps/react-flow run test:e2e -- e2e/opencode-forks-tab.e2e.ts
+
+# Start local OpenCode server required by forks APIs
+opencode serve --port 4096
+
+# Run canvas theme persistence + light-mode color e2e
+bun --cwd apps/react-flow run test:e2e -- e2e/canvas-theme-light-mode.e2e.ts
+
+# Initialize shadcn in this app (run once)
+bunx --bun shadcn@latest init --defaults --base-color neutral
+
+# Install/refresh shadcn UI primitives through CLI
+bunx --bun shadcn@latest add button dialog badge card resizable skeleton
 
 # Execute one context file workflow from backend
 opennexus context implement --context-file <path>
@@ -103,5 +124,20 @@ opennexus context test-status --context-file <path>
 - If assistant replies show only after reload, verify live SSE reply streaming is active on `/api/opencode/conversations/:id/messages` and the panel receives `delta` events before `done`.
 - If tool calls do not appear in assistant messages, verify SSE `tool` events are emitted and conversation history includes tool parts for the same reply.
 - If the `Ctrl/Cmd+N` or `Ctrl/Cmd+A` graph chat shortcuts do not open dialogs, verify keyboard focus remains in the app and no browser extension is intercepting those keys.
+- If `Ctrl/Cmd+S` does not fork the conversation, use the composer Fork button and confirm an active conversation is selected.
 - If parallel chat lanes show `(No text response)` unexpectedly, verify fallback history recovery can read latest assistant messages from `/api/opencode/conversations/:id/messages`.
+- If forked chats exist in modal lanes but the `Forks` graph view is empty, verify sessions were created through native OpenCode fork APIs so parent linkage metadata is persisted.
+- If operators cannot tell where a branch split happened, verify fork-origin message highlighting is visible in the branched lane timeline.
+- If forks view shows `Unable to list forked OpenCode conversations: fetch failed`, verify `opencode serve --port 4096` is running (or `OPENCODE_BASE_URL` points to a reachable OpenCode server).
+- If fork-origin bullets appear but edge mapping looks wrong, verify only user messages are used for origin mapping and fork cards are ordered by source message index.
+- If chat split flashes from fallback width before settling, verify width is read once at mount and a skeleton is shown until hydration completes.
+- If chat resize causes jitter or repeated layout thrash, verify persisted width writes do not also drive continuously mutating reactive size state during drag.
+- If chat re-expands at the wrong size, verify expand flow re-reads `workspace.chat.size` before remounting the split layout.
+- If fork-origin highlights look incorrect in the `Forks` tab, verify parent message timestamps are available and nearest-prior user-message selection is applied.
+- If simplified review should show one lineage but multiple families appear, verify root-family filtering is limited to the most recently updated fork family.
+- If the theme flips back to dark on refresh, verify `workspace.theme` is persisted and read before shell render.
+- If light mode appears active but canvas still looks dark, verify canvas background color is explicitly set for light mode in both Context and Forks views.
+- If switching between Context and Forks drops zoom or layout state, verify tab switching hides/shows mounted canvases instead of remounting instances.
 - If real no-mock streaming E2E is skipped unexpectedly, verify `OPENCODE_E2E_REAL=1` is set in the test command environment.
+- If Workflows view shows no invocations, verify Restate is running locally and invocation list APIs can call `restate invocations list --all`.
+- If Workflows detail cards do not populate after selecting one invocation, verify the workflow output endpoint has reached terminal output and invocation detail API receives the selected workflow id.

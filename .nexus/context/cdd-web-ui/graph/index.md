@@ -26,6 +26,8 @@ The graph runs as a full-screen canvas and supports mode-based interaction for s
 | CWG_004 | Graph Auto-Layout and Stable Re-Layout Behavior |
 | CWG_005 | Context Node Detail Modal and Content Preview |
 | CWG_006 | OpenCode Conversation Panel and Repository-Scoped Session Listing |
+| CWG_007 | Shadcn Installation Baseline and Resize Hydration Guardrails |
+| CWG_008 | Workflow Invocation Sidebar and Step Detail Observability |
 
 ## Interfaces
 
@@ -46,11 +48,32 @@ The graph runs as a full-screen canvas and supports mode-based interaction for s
 | `OpenCode Conversation Panel` | Operator sees a right-side conversation panel for creating, selecting, and continuing OpenCode sessions |
 | `Repository-Scoped Conversation Selector` | Operator sees only sessions associated with the current repository directory |
 | `Tool Call Trace` | Operator sees expandable tool call entries with OpenCode-style state labels and input/output/error details inside assistant messages |
+| `Forks Tab` | Operator switches from Projects to Forks and sees a lineage-focused graph of one fork family during simplified mode |
+| `Fork Origin Snippet` | Operator sees diff-style message snippets that highlight the likely fork source message and mute skipped context |
+| `Fork Origin Border Bullets` | Operator sees border-aligned source bullets on highlighted root transcript lines where fork edges originate |
+| `Fork-Origin Ordered Fork Nodes` | Operator sees fork cards ordered top-to-bottom by the source message order in the root transcript |
+| `User-Only Fork Transcript` | Operator sees only user turns in the root transcript used for fork-origin mapping |
+| `Fork Conversation Modal` | Operator opens full fork conversation history by double-clicking a fork conversation node |
+| `Navbar Theme Toggle` | Operator flips light/dark mode from a single navbar icon button and sees icon inversion based on current mode |
+| `Theme-Persistent Canvas` | Operator refreshes and retains the selected theme with matching canvas background color for the active mode |
+| `Non-Remount Tab Swap` | Operator switches Context/Forks tabs without remounting graph canvases so prior viewport/state remains intact |
 | `Resizable Split Layout` | Operator can drag the graph/conversation separator and expand conversation width up to half the viewport |
 | `Scope Breadcrumb` | Operator sees a compact top-left breadcrumb that reflects current project and focused sub-scope |
 | `Shortcut New Chat Modal` | Operator opens a new-chat dialog with Ctrl/Cmd+N using the same chat surface as the sidebar panel |
 | `Shortcut Parallel Chat Modal` | Operator opens a dual-lane dialog with Ctrl/Cmd+A and drives both lanes from one shared composer |
 | `Streaming Recovery Fallback` | Operator still sees assistant text when stream deltas are missing by recovering from latest persisted messages |
+| `Shortcut Fork Modal` | Operator opens a forked-chat modal from the active conversation with Ctrl/Cmd+S |
+| `Composer Fork Fallback` | Operator can fork the active conversation from a Fork button next to Send when shortcuts are unavailable |
+| `Forks Header Button` | Operator opens a conversation lineage graph modal from the panel header via `Forks` |
+| `Lane-Local Composers` | Operator sends prompts independently in each branch lane without broadcasting across all lanes |
+| `Message-Point Forking` | Operator forks from a specific user message inside a lane to create deeper branch descendants |
+| `Fork Origin Highlight` | Operator sees the exact message that produced a branch with distinct background treatment |
+| `Persistent Chat Shell` | Operator keeps one right-side chat sidebar location/size while center workspace views change |
+| `Chat Width Restore on Expand` | Operator collapses and re-expands chat sidebar and gets the prior saved width |
+| `Chat Resize Hydration Guard` | Operator avoids first-frame width flicker by reading saved chat size once at mount before rendering split panes |
+| `Workflows Sidebar` | Operator sees workflow invocations in the left sidebar and selects one to inspect |
+| `Workflow Step Details` | Operator sees readable invocation metadata and labeled step outputs in the main panel |
+| `Workflows Loading Skeletons` | Operator sees skeleton placeholders while workflow invocation and detail data is loading |
 
 ## Dependencies
 
@@ -86,7 +109,26 @@ The graph runs as a full-screen canvas and supports mode-based interaction for s
 - If streamed replies still render as `(No text response)`, verify SSE frame parsing handles both LF (`\n\n`) and CRLF (`\r\n\r\n`) delimiters.
 - If assistant text appears but tool traces are missing, verify streaming emits `tool` events and assistant messages include tool parts when fetched from history.
 - If tool rows never leave `running`, verify tool state updates are being upserted per `callId` as new stream frames arrive.
+- If highlighted fork-origin rows look incorrect, verify parent conversation message timestamps are available and fork origin selection prefers the nearest prior user message.
+- If fork graph shows multiple unrelated families during simplified review mode, verify only the most recently updated root family is selected.
+- If double-click on fork node does not open history, verify interaction is bound to fork session nodes and not group/anchor nodes.
+- If forks view shows `Unable to list forked OpenCode conversations: fetch failed`, verify OpenCode server is running and reachable on `OPENCODE_BASE_URL`.
+- If one trunk line appears to connect unrelated forks, verify edge routing uses per-fork source handles from matched root transcript bullets.
+- If fork cards appear out of origin order, verify sorting prioritizes matched root message index before updated timestamp.
+- If dragging forks stops canvas panning (or vice versa), verify fork node drag and canvas pan are both enabled in React Flow interaction config.
+- If graph theme resets to dark after refresh, verify `workspace.theme` persistence is read before first render and navbar toggle state matches stored mode.
+- If light mode still shows a dark canvas, verify explicit light-mode canvas background is applied to both Context and Forks graph canvases.
+- If switching Context/Forks tabs resets zoom, layout, or selection unexpectedly, verify canvases are kept mounted and only visibility is toggled.
 - If parallel chat lane headers show fallback IDs instead of descriptive names, verify OpenCode session creation returns titles and lane labels refresh from server responses.
 - If parallel lanes show `(No text response)` while backend generated a reply, verify no-delta recovery fetch reads latest assistant messages after stream completion.
 - If Ctrl/Cmd+N or Ctrl/Cmd+A does not open chat modals, verify graph page focus is active and no browser/system shortcut handler is overriding the keybinding.
-- If panel resize cannot reach half viewport, verify split sizing constraints are configured with percentage units and max size allows `50%`.
+- If Ctrl/Cmd+S does not fork the active conversation, use the Fork button next to Send and verify conversation selection is non-empty.
+- If forked lanes appear but `Forks` graph is empty, verify fork creation uses native OpenCode session fork metadata (parent linkage) rather than replay-created standalone sessions.
+- If branch intent is unclear in a lane, verify the fork-origin message highlight is present on the message used for branching.
+- If chat split briefly shows an incorrect initial width before settling, verify width hydration is mount-only and gated by a skeleton while storage loads.
+- If chat resize feels jittery, verify persisted width writes do not feed back into continuously changing reactive panel-size state during the same drag.
+- If chat re-expands at an unexpected size, verify expand behavior re-reads persisted `workspace.chat.size` before restoring the split layout.
+- If panel resize cannot reach expected width in workspace split views, verify split sizing constraints are configured with percentage units and intended max-size guardrails.
+- If Workflows view sidebar is empty, verify Restate is reachable and invocation list query returns records for `ConversationWorkflow`.
+- If Workflows detail panel stays blank after selecting an invocation, verify invocation detail query includes a valid `workflowId` and output endpoint is available.
+- If workflow output fetch returns pending state, verify the selected invocation reached a terminal status before expecting step output payloads.

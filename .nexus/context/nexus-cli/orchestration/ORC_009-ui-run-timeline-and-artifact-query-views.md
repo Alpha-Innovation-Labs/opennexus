@@ -26,3 +26,5 @@ Operators can inspect orchestration progress and outcomes in a UI through querya
 | Expose filtering by context id, pipeline name, and run id for timeline retrieval | `orchestration_ui_query_supports_context_pipeline_and_run_filters` |
 | Expose associated LLM trace references for steps that generated traces | `orchestration_ui_query_exposes_associated_llm_trace_references` |
 | Return actionable errors for unknown run ids or unsupported filter combinations | `orchestration_ui_query_reports_actionable_unknown_run_or_filter_errors` |
+| Expose output readiness state for workflow invocations so clients can distinguish pending output from terminal failure | `orchestration_ui_query_exposes_output_readiness_for_running_workflows` |
+| Expose per-step output payloads for one invocation so clients can render readable step result views | `orchestration_ui_query_exposes_human_readable_step_outputs_for_invocations` |

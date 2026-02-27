@@ -26,3 +26,6 @@ Pipelines execute via reusable independent steps with declared typed inputs and 
 | Validate pipeline wiring by ensuring each step input is satisfiable from prior outputs or initial context | `orchestration_validates_step_input_wiring_before_execution` |
 | Execute ordered step sequence through a generic runner without step-specific branching in the runner | `orchestration_runner_executes_ordered_steps_without_step_specific_branching` |
 | Return actionable errors when required step contracts are missing or incompatible | `orchestration_reports_actionable_missing_or_incompatible_step_contracts` |
+| Dispatch step execution through reusable job modules so pipeline YAML controls step order and composition | `orchestration_dispatches_reusable_job_modules_from_pipeline_yaml` |
+| Provide a reusable `opencode_prompt` job contract that accepts prompt template and mapped variables from prior step outputs | `orchestration_opencode_prompt_job_accepts_template_and_mapped_variables` |
+| Enforce coding-step write policy in orchestration by rejecting test file edits when coding jobs are configured as source-only | `orchestration_rejects_test_file_mutations_during_source_only_coding_steps` |

@@ -26,3 +26,5 @@ depends_on:
 | Reject malformed pipeline definitions with actionable validation guidance | `orchestration_rejects_malformed_pipeline_definitions_with_guidance` |
 | Reject unknown pipeline names and return available pipeline candidates | `orchestration_reports_unknown_pipeline_name_with_candidates` |
 | Emit startup summary with context id, pipeline name, and ordered step count | `orchestration_emits_startup_summary_with_context_pipeline_and_steps` |
+| Accept runtime backend selection for pipeline runs so orchestration can target local runner or Restate-backed execution | `orchestration_accepts_runtime_backend_selection_for_pipeline_runs` |
+| Resolve OpenCode SDK server port from environment configuration before runtime initialization | `orchestration_resolves_opencode_sdk_port_from_environment` |
