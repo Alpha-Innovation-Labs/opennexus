@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import { Bot, GitFork, SendHorizontal } from "lucide-react";
 
-import { createConversationSession, createMessageId, forkConversationSession, streamConversationReply } from "@/features/opencode-panel/lib/chat-client";
+import { createConversationSession, createMessageId, forkConversationSession, streamConversationReply } from "@/features/llm-conversation/lib/llm-chat-client";
 import { cloneMessages, type ChatMessage, type ForkSeed } from "@/features/opencode-panel/model/chat-types";
 import { cn } from "@/shared/lib/cn";
 import { Button } from "@/shared/ui/button";

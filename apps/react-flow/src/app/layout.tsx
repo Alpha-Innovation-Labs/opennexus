@@ -3,6 +3,7 @@ import type { ReactNode } from "react";
 
 import "@xyflow/react/dist/style.css";
 import "@/styles/globals.css";
+import { AppQueryProvider } from "@/shared/providers/query-provider";
 
 export const metadata: Metadata = {
   title: "CDD Context Graph",
@@ -12,7 +13,9 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
   return (
     <html lang="en">
-      <body className="font-sans antialiased">{children}</body>
+      <body className="font-sans antialiased">
+        <AppQueryProvider>{children}</AppQueryProvider>
+      </body>
     </html>
   );
 }

@@ -39,38 +39,98 @@
 }
 
 .dark {
-  --color-background: oklch(10.6% 0.006 255);
-  --color-foreground: oklch(93.5% 0.01 240);
+  --color-background: #151313;
+  --color-foreground: #f6f3f3;
 
-  --color-card: oklch(12.8% 0.008 252);
-  --color-card-foreground: oklch(93.5% 0.01 240);
-  --color-popover: oklch(12.8% 0.008 252);
-  --color-popover-foreground: oklch(93.5% 0.01 240);
+  --color-card: #1c1717;
+  --color-card-foreground: #f6f3f3;
+  --color-popover: #231f1f;
+  --color-popover-foreground: #f6f3f3;
 
-  --color-primary: oklch(73% 0.125 220);
-  --color-primary-foreground: oklch(10.6% 0.006 255);
+  --color-primary: #fab283;
+  --color-primary-foreground: #1c1717;
 
-  --color-secondary: oklch(14.5% 0.008 252);
-  --color-secondary-foreground: oklch(88% 0.01 240);
+  --color-secondary: #2a2727;
+  --color-secondary-foreground: #ddd7d6;
 
-  --color-muted: oklch(18% 0.09 22);
-  --color-muted-foreground: oklch(72% 0.06 28);
+  --color-muted: #221d1d;
+  --color-muted-foreground: #b0a5a4;
 
-  --color-accent: oklch(16% 0.01 248);
-  --color-accent-foreground: oklch(90% 0.01 240);
+  --color-accent: #0a1d4d;
+  --color-accent-foreground: #f6f3f3;
 
-  --color-border: oklch(20% 0.012 248);
-  --color-input: oklch(20% 0.012 248);
-  --color-ring: oklch(73% 0.125 220);
-  --color-destructive: oklch(70.4% 0.191 22.216);
+  --color-border: #4d4343;
+  --color-input: #2a2727;
+  --color-ring: #034cff;
+  --color-destructive: #fc533a;
 
-  --color-bg-band-1: oklch(10.7% 0.005 255);
-  --color-bg-band-2: oklch(11.6% 0.005 252);
-  --color-bg-separator: oklch(3% 0 0);
+  --color-bg-band-1: #151313;
+  --color-bg-band-2: #1c1717;
+  --color-bg-separator: #100f0f;
 
-  --color-edge-blue: oklch(74% 0.17 250);
-  --color-edge-green: oklch(79% 0.2 155);
-  --color-edge-pink: oklch(74% 0.22 355);
+  --color-edge-blue: #93e9f6;
+  --color-edge-green: #12c905;
+  --color-edge-pink: #edb2f1;
+}
+
+.dark[data-theme-variant="tui"] {
+  --color-background: #0a0a0a;
+  --color-foreground: #eeeeee;
+
+  --color-card: #141414;
+  --color-card-foreground: #eeeeee;
+  --color-popover: #1e1e1e;
+  --color-popover-foreground: #eeeeee;
+
+  --color-primary: #fab283;
+  --color-primary-foreground: #0a0a0a;
+
+  --color-secondary: #5c9cf5;
+  --color-secondary-foreground: #eeeeee;
+
+  --color-muted: #1e1e1e;
+  --color-muted-foreground: #808080;
+
+  --color-accent: #9d7cd8;
+  --color-accent-foreground: #eeeeee;
+
+  --color-border: #484848;
+  --color-input: #282828;
+  --color-ring: #034cff;
+  --color-destructive: #e06c75;
+
+  --color-bg-band-1: #0a0a0a;
+  --color-bg-band-2: #141414;
+  --color-bg-separator: #0a0a0a;
+
+  --color-edge-blue: #5c9cf5;
+  --color-edge-green: #7fd88f;
+  --color-edge-pink: #9d7cd8;
+
+  --grid-dot-color: rgb(96, 96, 96);
+  --flow-canvas-bg: #141414;
+  --subflow-bg: #1e1e1e;
+
+  --md-text: #eeeeee;
+  --md-heading: #9d7cd8;
+  --md-link: #fab283;
+  --md-link-text: #56b6c2;
+  --md-code: #7fd88f;
+  --md-quote: #e5c07b;
+  --md-emph: #e5c07b;
+  --md-strong: #f5a742;
+  --md-list-item: #fab283;
+  --md-list-enumeration: #56b6c2;
+
+  --syntax-comment: #808080;
+  --syntax-keyword: #9d7cd8;
+  --syntax-function: #fab283;
+  --syntax-variable: #e06c75;
+  --syntax-string: #7fd88f;
+  --syntax-number: #f5a742;
+  --syntax-type: #e5c07b;
+  --syntax-operator: #56b6c2;
+  --syntax-punctuation: #eeeeee;
 }
 
 html,
@@ -86,27 +146,91 @@ body {
   --flow-canvas-bg: oklch(96.8% 0.006 250);
   --subflow-bg: oklch(98% 0.01 20);
   --flow-edge: var(--color-edge-blue);
+
+  --md-text: #1a1a1a;
+  --md-heading: #d68c27;
+  --md-link: #3b7dd8;
+  --md-link-text: #318795;
+  --md-code: #3d9a57;
+  --md-quote: #b0851f;
+  --md-emph: #b0851f;
+  --md-strong: #d68c27;
+  --md-list-item: #3b7dd8;
+  --md-list-enumeration: #318795;
+
+  --syntax-comment: #8a8a8a;
+  --syntax-keyword: #d68c27;
+  --syntax-function: #3b7dd8;
+  --syntax-variable: #d1383d;
+  --syntax-string: #3d9a57;
+  --syntax-number: #d68c27;
+  --syntax-type: #b0851f;
+  --syntax-operator: #318795;
+  --syntax-punctuation: #1a1a1a;
+
+  --opencode-input-bg: color-mix(in oklch, var(--color-background) 86%, white);
+  --opencode-input-area-bg: color-mix(in oklch, var(--color-card) 88%, white);
+  --opencode-composer-border: color-mix(in oklch, var(--color-border) 70%, transparent);
+  --opencode-composer-chip-bg: color-mix(in oklch, var(--color-muted) 60%, white);
+  --opencode-conversation-bg: color-mix(in oklch, var(--color-background) 96%, black);
 }
 
 .dark {
   --grid-dot-color: rgb(156, 163, 175);
-  --flow-canvas-bg: #111315;
-  --subflow-bg: #171717;
+  --flow-canvas-bg: #1a1717;
+  --subflow-bg: #231f1f;
   --flow-edge: var(--color-edge-blue);
+
+  --md-text: #eeeeee;
+  --md-heading: #9d7cd8;
+  --md-link: #fab283;
+  --md-link-text: #56b6c2;
+  --md-code: #7fd88f;
+  --md-quote: #e5c07b;
+  --md-emph: #e5c07b;
+  --md-strong: #f5a742;
+  --md-list-item: #fab283;
+  --md-list-enumeration: #56b6c2;
+
+  --syntax-comment: #808080;
+  --syntax-keyword: #9d7cd8;
+  --syntax-function: #fab283;
+  --syntax-variable: #e06c75;
+  --syntax-string: #7fd88f;
+  --syntax-number: #f5a742;
+  --syntax-type: #e5c07b;
+  --syntax-operator: #56b6c2;
+  --syntax-punctuation: #eeeeee;
+
+  --opencode-input-bg: color-mix(in oklch, var(--color-background) 82%, white);
+  --opencode-input-area-bg: color-mix(in oklch, var(--color-card) 85%, white);
+  --opencode-composer-border: color-mix(in oklch, var(--color-border) 85%, transparent);
+  --opencode-composer-chip-bg: color-mix(in oklch, var(--color-muted) 90%, black);
+  --opencode-conversation-bg: color-mix(in oklch, var(--color-background) 94%, black);
+}
+
+.dark[data-theme-variant="tui"] {
+  --opencode-input-bg: #1f1f1f;
+  --opencode-input-area-bg: #222222;
+  --opencode-composer-border: #3a3a3a;
+  --opencode-composer-chip-bg: #2c2c2c;
+  --opencode-conversation-bg: #181818;
 }
 
 .dark body {
-  background: repeating-linear-gradient(
-    180deg,
-    var(--color-bg-band-1) 0 180px,
-    var(--color-bg-separator) 180px 214px,
-    var(--color-bg-band-2) 214px 430px,
-    var(--color-bg-separator) 430px 464px
-  );
+  background: linear-gradient(180deg, var(--color-bg-band-1), var(--color-bg-band-2));
 }
 
 body {
   overflow: hidden;
+}
+
+.opencode-markdown ul > li::marker {
+  color: var(--md-list-item);
+}
+
+.opencode-markdown ol > li::marker {
+  color: var(--md-list-enumeration);
 }
 
 .react-flow {
