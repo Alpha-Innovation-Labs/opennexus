@@ -25,3 +25,7 @@ __backup
 wrappers/python/opennexus/src/opennexus/__pycache__
 wrappers/python/opennexus/.venv/
 wrappers/python/opennexus/dist/
+
+# Local Restate runtime and app dependency artifacts
+restate-data/
+apps/restate-mvp/node_modules/
