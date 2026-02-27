@@ -5,7 +5,6 @@ created: "2026-02-26"
 status: active
 dependencies:
   - nexus-cli
-  - cdd-web-ui
 ---
 
 # nexus-adapter
@@ -58,7 +57,6 @@ opennexus orchestration timeline --context-file <path> --format json
 | Dependency | Purpose |
 |------------|---------|
 | `nexus-cli` | Provides orchestration command surface and output contracts consumed by adapter integrations |
-| `cdd-web-ui` | Primary downstream consumer that relies on adapter execution/query behavior |
 
 ## Blocking Dependencies
 

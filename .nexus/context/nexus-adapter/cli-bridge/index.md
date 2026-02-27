@@ -6,7 +6,6 @@ status: active
 dependencies:
   - nexus-adapter
   - nexus-cli
-  - cdd-web-ui
 ---
 
 # nexus-adapter cli-bridge
@@ -41,7 +40,6 @@ Owns the typed bridge between web features and `opennexus orchestration` command
 |------------|---------|
 | `nexus-adapter` | Provides adapter-level contracts and lifecycle rules for bridge behavior |
 | `nexus-cli` | Provides orchestration command surface consumed by bridge execution and query paths |
-| `cdd-web-ui` | Primary downstream consumer that relies on normalized bridge responses |
 
 ## Blocking Dependencies
 
