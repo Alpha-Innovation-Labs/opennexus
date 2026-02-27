@@ -29,3 +29,6 @@ Pipelines execute via reusable independent steps with declared typed inputs and 
 | Dispatch step execution through reusable job modules so pipeline YAML controls step order and composition | `orchestration_dispatches_reusable_job_modules_from_pipeline_yaml` |
 | Provide a reusable `opencode_prompt` job contract that accepts prompt template and mapped variables from prior step outputs | `orchestration_opencode_prompt_job_accepts_template_and_mapped_variables` |
 | Enforce coding-step write policy in orchestration by rejecting test file edits when coding jobs are configured as source-only | `orchestration_rejects_test_file_mutations_during_source_only_coding_steps` |
+| Register orchestration blocks from modular files and dispatch by unique `block_id` through a block registry | `orchestration_block_registry_dispatches_modular_blocks_by_unique_block_id` |
+| Include a dedicated worktree assignment block that sets runtime working directory for downstream coding blocks | `orchestration_assign_worktree_block_sets_runtime_working_directory_for_downstream_blocks` |
+| Persist assigned worktree path in step output so replay and restart continue in the same working directory | `orchestration_persists_assigned_worktree_path_for_replay_and_restart` |

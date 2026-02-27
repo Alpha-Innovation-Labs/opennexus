@@ -33,3 +33,9 @@ Workspace sidebar state, selected file routing, and unsaved-change guardrails st
 | Warn before navigation when unsaved changes are present and user attempts to switch files | `workspace_warns_before_switching_files_with_unsaved_changes` |
 | Warn before leaving page when unsaved changes are present | `workspace_warns_before_page_leave_with_unsaved_changes` |
 | Restore previous selected file after reload when route path is still valid | `workspace_restores_selected_file_after_reload_when_path_valid` |
+| Show chat sessions in the left sidebar for `Chats` view and load the selected session transcript in the center panel | `workspace_chats_sidebar_selection_loads_center_transcript` |
+| Keep chat rows within sidebar width and truncate long titles with a single-line ellipsis | `workspace_chats_sidebar_rows_truncate_titles_with_ellipsis` |
+| Render long sidebar lists through a shadcn `ScrollArea` without horizontal bleed or clipped rows | `workspace_sidebar_uses_shadcn_scroll_area_for_long_lists` |
+| Keep `Chats` sidebar selection on the same route and update center transcript without full page navigation | `workspace_chats_selection_updates_center_without_route_reload` |
+| Keep chat session listing stable when selecting sidebar chats so selection does not refetch the session list | `workspace_chats_selection_does_not_refetch_sidebar_session_list` |
+| Show pointer cursor affordance on hover for selectable chat rows in the sidebar | `workspace_chats_sidebar_rows_show_pointer_cursor_on_hover` |

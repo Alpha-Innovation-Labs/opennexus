@@ -39,8 +39,19 @@ Owns the generic pipeline orchestration platform for `opennexus orchestration <p
 
 Runtime notes:
 - Pipeline execution should remain definition-driven (JSON/YAML) with step order controlled by pipeline files, not hardcoded runner branching.
+- Pipeline step definitions should reference reusable execution units by `block_id`, with block implementations loaded from modular files via a block registry.
+- Pipeline execution should accept both pipeline file and config file inputs so runtime values are supplied outside of hardcoded runner logic.
 - OpenCode-backed jobs should initialize the SDK once per runtime and resolve server port from environment (`RBX_OPENCODE_PORT`, then fallback defaults).
+- Worktree-backed coding runs should resolve working directory base from `RBX_WORKTREE_BASE_DIR` (or `RBX_WORKTREE_ROOT`) and default to `~/.worktrees/<project_name>/...` when unset.
 - Restate-backed execution can expose the same lifecycle semantics as local orchestration while preserving step-level observability.
+
+## Environment Variables
+
+| Variable | Default | Description |
+|----------|---------|-------------|
+| `RBX_OPENCODE_PORT` | `4196` | OpenCode SDK server port for orchestration jobs |
+| `RBX_WORKTREE_BASE_DIR` | `~/.worktrees` | Base directory where `<project_name>` worktree folders are created |
+| `RBX_WORKTREE_ROOT` | (none) | Optional compatibility alias for worktree base directory |
 
 ## Dependencies
 
@@ -56,3 +67,5 @@ Runtime notes:
 - If UI views are empty, verify traces and step outputs were persisted for the selected run id.
 - If OpenCode job steps fail to initialize in orchestration, verify the configured SDK port is not colliding and `RBX_OPENCODE_PORT` is set to the intended value.
 - If coding steps unexpectedly modify tests, verify orchestration write-policy enforcement is enabled for source-only coding jobs and rejects test-path mutations.
+- If worktree assignment fails, verify `RBX_WORKTREE_BASE_DIR` resolves to a writable location and repository `git worktree` operations are permitted.
+- If Restate startup fails with node-name mismatch for existing data, set `RESTATE_NODE_NAME` to the existing node identity before running orchestration commands.

@@ -36,6 +36,7 @@ Run the workspace locally with `just web` from the repository root.
 | `Select Next Action` | Operator picks one row from a context file and starts execution |
 | `Task Result Panel` | Operator sees persisted implemented/failed/missing status for selected row |
 | `Live Session Panel` | Operator views in-progress provider session output and task progress |
+| `Chats Sidebar Selection` | Operator selects a chat session in the left sidebar and sees that transcript in the center panel |
 
 ## Dependencies
 
@@ -51,3 +52,7 @@ Run the workspace locally with `just web` from the repository root.
 - If result panel is empty for completed work, verify task status was persisted in SQLite.
 - If live stream does not update, verify provider session records are attached to the selected task.
 - If the web app is unavailable, rerun `just web` and inspect `logs/web.log`.
+- If chat rows overflow the left sidebar, verify row titles use single-line ellipsis truncation and list containers suppress horizontal bleed.
+- If long chats/workflow lists do not scroll correctly, verify sidebar list rendering uses shadcn `ScrollArea` and not ad-hoc overflow containers.
+- If selecting a chat feels like a full reload, verify center transcript mode does not run background polling and sidebar selection does not re-fetch the session list.
+- If chat selection visibility is weak in TUI mode, verify sidebar uses `#141414`-aligned panel background with a higher-contrast background-only selected row state.

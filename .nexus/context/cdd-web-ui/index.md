@@ -14,13 +14,25 @@ dependencies:
 
 `cdd-web-ui` provides a lightweight web workspace for context-driven development operations backed by the CDD SQLite observability data model. It allows operators to execute one selected context line, inspect persisted task results, and follow active coding-session progress.
 
-The graph experience includes an OpenCode side panel plus keyboard-driven chat modals (`Ctrl/Cmd+N` for a new single chat, `Ctrl/Cmd+A` for dual-lane parallel chat, `Ctrl/Cmd+S` for branch forking), a composer-level Fork fallback button, and a header-level `Forks` lineage graph viewer with diff-style fork-origin snippets.
+The graph experience includes an OpenCode side panel plus keyboard-driven chat modals (`Ctrl/Cmd+N` for a new single chat, `Ctrl/Cmd+A` for dual-lane parallel chat, `Ctrl/Cmd+S` for branch forking), and a header-level `Forks` lineage graph viewer with diff-style fork-origin snippets.
+
+Chat-capable flow surfaces now share one reusable `llm-conversation` feature for conversation listing, message history loading, prompt sending, streaming updates, and tool-call replay behavior.
+
+Workspace navigation is path-based (`/context`, `/forks`, `/chats`, `/workflows`) and chats support deep links at `/chats/:conversation_id` while the right chat panel remains independently selectable.
+
+Chat list and transcript hydration use session-storage cache first and then reconcile with latest server state while showing a lightweight syncing indicator.
+
+Chat presentation now uses a compact token-aware header, an integrated auto-grow composer, minimal assistant stream chrome with boxed tool rows, and an opaque sticky previous-user context banner while scrolling.
 
 The workspace keeps a persistent right-side chat shell while center views (Context/Forks/Chats/Workflows) change, and chat width restore-on-expand uses saved local state.
+
+The workspace shell keeps the left sidebar as a full-height column while top navigation, main content, and right chat are composed inside one encapsulated container; primary view navigation remains in the top nav and sidebar content changes with the active view.
 
 The flow UI also includes a `Workflows` view for invocation observability, with left-sidebar invocation selection and main-panel workflow status plus step-result details.
 
 Theme controls now live in the top-right navbar as a single icon toggle (sun/moon), and selected mode persists across refresh while graph canvas backgrounds follow the active theme.
+
+The top-right navbar also includes a two-option theme variant picker (`Current Theme`, `TUI Theme`) and defaults to the TUI variant for new sessions.
 
 ## Features
 
@@ -66,6 +78,9 @@ OPENCODE_E2E_REAL=1 bun --cwd apps/react-flow run test:e2e -- e2e/opencode-strea
 # Run forks tab lineage graph e2e
 bun --cwd apps/react-flow run test:e2e -- e2e/opencode-forks-tab.e2e.ts
 
+# Run chats sidebar selection no-refetch regression e2e
+bun --cwd apps/react-flow run test:e2e -- e2e/chats-sidebar-selection-no-refetch.e2e.ts
+
 # Start local OpenCode server required by forks APIs
 opencode serve --port 4096
 
@@ -77,6 +92,9 @@ bunx --bun shadcn@latest init --defaults --base-color neutral
 
 # Install/refresh shadcn UI primitives through CLI
 bunx --bun shadcn@latest add button dialog badge card resizable skeleton
+
+# Add Pierre Diffs dependency used for code-modification tool output rendering
+bun --cwd apps/react-flow add @pierre/diffs
 
 # Execute one context file workflow from backend
 opennexus context implement --context-file <path>
@@ -126,6 +144,11 @@ opennexus context test-status --context-file <path>
 - If the `Ctrl/Cmd+N` or `Ctrl/Cmd+A` graph chat shortcuts do not open dialogs, verify keyboard focus remains in the app and no browser extension is intercepting those keys.
 - If `Ctrl/Cmd+S` does not fork the conversation, use the composer Fork button and confirm an active conversation is selected.
 - If parallel chat lanes show `(No text response)` unexpectedly, verify fallback history recovery can read latest assistant messages from `/api/opencode/conversations/:id/messages`.
+- If panel, modal, and preview chat behavior diverges, verify those surfaces use the shared `llm-conversation` feature contract instead of local duplicated transport logic.
+- If selecting a chat looks like a full refresh, verify route navigation is client-side and distinguish shell remount issues from in-surface rerender/loading updates.
+- If center and right chat panes show different transcripts, verify this is expected: center follows `/chats/:conversation_id`, right panel keeps its own selected conversation.
+- If `/chats/:conversation_id` shows hydration mismatch warnings, verify browser-only cache/theme initialization runs post-mount and server/client first render stay deterministic.
+- If a chat route crashes on tool output rendering, verify patch-like tool output paths degrade safely instead of invoking single-file diff rendering on multi-file patches.
 - If forked chats exist in modal lanes but the `Forks` graph view is empty, verify sessions were created through native OpenCode fork APIs so parent linkage metadata is persisted.
 - If operators cannot tell where a branch split happened, verify fork-origin message highlighting is visible in the branched lane timeline.
 - If forks view shows `Unable to list forked OpenCode conversations: fetch failed`, verify `opencode serve --port 4096` is running (or `OPENCODE_BASE_URL` points to a reachable OpenCode server).
@@ -141,3 +164,7 @@ opennexus context test-status --context-file <path>
 - If real no-mock streaming E2E is skipped unexpectedly, verify `OPENCODE_E2E_REAL=1` is set in the test command environment.
 - If Workflows view shows no invocations, verify Restate is running locally and invocation list APIs can call `restate invocations list --all`.
 - If Workflows detail cards do not populate after selecting one invocation, verify the workflow output endpoint has reached terminal output and invocation detail API receives the selected workflow id.
+- If startup logs show many `/api/orchestration/status` calls, verify this is expected per-context status fanout and consider active-view-gated status loading when reducing noise.
+- If startup logs show frequent `/api/opencode/conversations/:id/messages` calls, verify polling cadence and shared conversation hook dependencies/defaults are referentially stable.
+- If markdown list bullets do not match TUI colors, verify `--md-list-item` and `--md-list-enumeration` are set and `.opencode-markdown *::marker` styling is active.
+- If token usage indicator shows no details on hover, verify shadcn tooltip wiring and hover trigger are mounted in the panel header.

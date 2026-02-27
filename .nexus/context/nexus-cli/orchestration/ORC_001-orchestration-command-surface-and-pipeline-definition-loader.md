@@ -28,3 +28,5 @@ depends_on:
 | Emit startup summary with context id, pipeline name, and ordered step count | `orchestration_emits_startup_summary_with_context_pipeline_and_steps` |
 | Accept runtime backend selection for pipeline runs so orchestration can target local runner or Restate-backed execution | `orchestration_accepts_runtime_backend_selection_for_pipeline_runs` |
 | Resolve OpenCode SDK server port from environment configuration before runtime initialization | `orchestration_resolves_opencode_sdk_port_from_environment` |
+| Accept pipeline step definitions that reference reusable execution blocks by `block_id` | `orchestration_accepts_pipeline_steps_with_block_id_references` |
+| Accept a separate run config file path and resolve it alongside pipeline definitions | `orchestration_accepts_separate_pipeline_and_config_file_inputs` |
