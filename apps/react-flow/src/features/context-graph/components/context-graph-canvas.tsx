@@ -5,6 +5,7 @@ import type { NodeMouseHandler, NodeTypes, OnMoveEnd, OnNodeDrag, OnNodesChange,
 import {
   applyNodeChanges,
   Background,
+  BackgroundVariant,
   Controls,
   MiniMap,
   Panel,
@@ -44,10 +45,12 @@ import type {
   NadStatusAdapterError,
   NadStatusResult,
 } from "@/features/orchestration-status/model/nad-orchestration-status-types";
+import { useThemeMode } from "@/shared/hooks/use-theme-mode";
 
 interface ContextGraphCanvasProps {
   graphData: ContextGraphData;
   edgeMapping: ContextEdgeMapping;
+  themeMode?: "light" | "dark";
 }
 
 const nodeTypes: NodeTypes = {
@@ -158,7 +161,9 @@ function writePersistedFlowState(state: PersistedFlowState): void {
   window.localStorage.setItem(FLOW_STORAGE_KEY, JSON.stringify(state));
 }
 
-function ContextGraphCanvasInner({ graphData, edgeMapping }: ContextGraphCanvasProps) {
+function ContextGraphCanvasInner({ graphData, edgeMapping, themeMode = "dark" }: ContextGraphCanvasProps) {
+  const canvasBackground = themeMode === "dark" ? "#111315" : "#eef2f7";
+  const gridDotColor = themeMode === "dark" ? "rgba(156, 163, 175, 0.46)" : "rgba(101, 123, 148, 0.5)";
   const [viewState, setViewState] = useState<GraphViewState>({ kind: "projects" });
 
   const detailGraphInput = useMemo(() => {
@@ -985,8 +990,9 @@ function ContextGraphCanvasInner({ graphData, edgeMapping }: ContextGraphCanvasP
     <>
       <div
         ref={canvasRef}
+        data-testid="context-graph-canvas"
         className="h-full w-full overflow-hidden"
-        style={{ backgroundColor: "var(--flow-canvas-bg)" }}
+        style={{ backgroundColor: canvasBackground }}
         tabIndex={0}
         onKeyDown={handleKeyboardMove}
       >
@@ -994,7 +1000,7 @@ function ContextGraphCanvasInner({ graphData, edgeMapping }: ContextGraphCanvasP
           nodes={nodesWithActions}
           edges={edgesWithVisibility}
           nodeTypes={nodeTypes}
-          colorMode="dark"
+          colorMode={themeMode}
           snapToGrid
           snapGrid={[24, 24]}
           fitView={!hasStoredViewport}
@@ -1011,6 +1017,7 @@ function ContextGraphCanvasInner({ graphData, edgeMapping }: ContextGraphCanvasP
           elementsSelectable
           onNodesChange={handleNodesChange}
           onEdgesChange={onEdgesChange}
+          style={{ backgroundColor: canvasBackground }}
         >
           <Panel position="top-left" className="!left-4 !top-4">
             <div className="inline-flex items-center gap-1.5 rounded-md border border-border/70 bg-card/90 px-2.5 py-1 text-[11px] text-muted-foreground">
@@ -1102,7 +1109,7 @@ function ContextGraphCanvasInner({ graphData, edgeMapping }: ContextGraphCanvasP
               </span>
             </div>
           </Panel>
-          <Background gap={24} size={1.3} color="var(--grid-dot-color)" />
+          <Background variant={BackgroundVariant.Dots} gap={20} size={2} color={gridDotColor} />
         </ReactFlow>
       </div>
 
@@ -1122,9 +1129,12 @@ function ContextGraphCanvasInner({ graphData, edgeMapping }: ContextGraphCanvasP
 }
 
 export function ContextGraphCanvas(props: ContextGraphCanvasProps) {
+  const inferredThemeMode = useThemeMode();
+  const resolvedThemeMode = props.themeMode ?? inferredThemeMode;
+
   return (
     <ReactFlowProvider>
-      <ContextGraphCanvasInner {...props} />
+      <ContextGraphCanvasInner {...props} themeMode={resolvedThemeMode} />
     </ReactFlowProvider>
   );
 }

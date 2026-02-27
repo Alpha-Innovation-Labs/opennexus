@@ -17,11 +17,20 @@ interface ConversationSummary {
   updatedAt: number;
 }
 
+interface ForkConversationSummary {
+  id: string;
+  title: string;
+  parentId: string | null;
+  createdAt: number;
+  updatedAt: number;
+}
+
 interface ConversationMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
   toolCalls: ConversationToolCall[];
+  createdAt: number;
 }
 
 interface ConversationReplyResult {
@@ -168,13 +177,40 @@ export async function listConversations(): Promise<ConversationSummary[]> {
     .sort((left, right) => right.updatedAt - left.updatedAt);
 }
 
-export async function listConversationMessages(conversationId: string): Promise<ConversationMessage[]> {
+export async function listForkConversations(): Promise<ForkConversationSummary[]> {
+  const runtime = await getRuntime();
+  const repoRoot = resolveRepoRoot();
+
+  const result = await runtime.client.session.list({
+    query: { directory: repoRoot },
+  });
+
+  if (result.error || !result.data) {
+    throw new Error("Failed to list OpenCode conversations");
+  }
+
+  const raw = result.data.map((session) => ({
+    id: session.id,
+    title: session.title,
+    parentId: session.parentID ?? null,
+    createdAt: session.time.created,
+    updatedAt: session.time.updated,
+  }));
+
+  const parentIds = new Set(raw.map((entry) => entry.parentId).filter((entry): entry is string => Boolean(entry)));
+
+  return raw
+    .filter((entry) => entry.parentId !== null || parentIds.has(entry.id))
+    .sort((left, right) => right.updatedAt - left.updatedAt);
+}
+
+export async function listConversationMessages(conversationId: string, limit = 80): Promise<ConversationMessage[]> {
   const runtime = await getRuntime();
   const repoRoot = resolveRepoRoot();
 
   const result = await runtime.client.session.messages({
     path: { id: conversationId },
-    query: { directory: repoRoot, limit: 80 },
+    query: { directory: repoRoot, limit },
   });
 
   if (result.error || !result.data) {
@@ -187,6 +223,7 @@ export async function listConversationMessages(conversationId: string): Promise<
       role: message.info.role,
       content: normalizeMessageText(message.parts),
       toolCalls: normalizeToolCalls(message.parts as Array<Record<string, unknown>>),
+      createdAt: message.info.time.created,
     }))
     .filter((message) => message.content.length > 0 || message.toolCalls.length > 0);
 }
@@ -207,6 +244,26 @@ export async function createConversation(title?: string): Promise<ConversationCr
   return {
     id: result.data.id,
     title: result.data.title,
+  };
+}
+
+export async function forkConversation(sourceConversationId: string, upToMessageId?: string): Promise<ConversationCreateResult> {
+  const runtime = await getRuntime();
+  const repoRoot = resolveRepoRoot();
+
+  const forkResult = await runtime.client.session.fork({
+    path: { id: sourceConversationId },
+    query: { directory: repoRoot },
+    ...(upToMessageId ? { body: { messageID: upToMessageId } } : {}),
+  });
+
+  if (forkResult.error || !forkResult.data) {
+    throw new Error("Failed to fork OpenCode conversation session");
+  }
+
+  return {
+    id: forkResult.data.id,
+    title: forkResult.data.title,
   };
 }
 

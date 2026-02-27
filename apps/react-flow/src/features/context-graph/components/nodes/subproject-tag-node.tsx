@@ -2,14 +2,15 @@ import type { NodeProps } from "@xyflow/react";
 import { Bot, FileText } from "lucide-react";
 
 import type { SubprojectTagNodeData } from "@/features/context-graph/services/context-graph-layout-service";
+import { GraphNodeAccent, GraphNodeTemplate } from "@/shared/ui/graph-node-template";
 
 export function SubprojectTagNode({ data }: NodeProps) {
   const nodeData = data as SubprojectTagNodeData;
 
   return (
-    <div className="h-full w-full rounded-lg border border-border/80 bg-card/90 px-3 py-2 text-card-foreground">
+    <GraphNodeTemplate className="px-3 py-2">
       <div className="flex h-full items-center gap-3">
-        <span className="h-9 w-0.5 rounded bg-primary/90" aria-hidden />
+        <GraphNodeAccent />
         <div className="min-w-0 flex-1">
           <div className="flex items-center gap-2">
             <span className="inline-flex h-5 min-w-8 items-center justify-center rounded border border-border/80 bg-background/60 px-1 text-[10px] font-semibold uppercase tracking-[0.12em] text-foreground">
@@ -31,6 +32,6 @@ export function SubprojectTagNode({ data }: NodeProps) {
           </div>
         </div>
       </div>
-    </div>
+    </GraphNodeTemplate>
   );
 }

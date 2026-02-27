@@ -8,7 +8,7 @@ interface RouteContext {
   params: Promise<{ conversationId: string }>;
 }
 
-export async function GET(_: Request, context: RouteContext) {
+export async function GET(request: Request, context: RouteContext) {
   const { conversationId } = await context.params;
 
   if (!conversationId) {
@@ -23,8 +23,12 @@ export async function GET(_: Request, context: RouteContext) {
     );
   }
 
+  const { searchParams } = new URL(request.url);
+  const parsedLimit = Number.parseInt(searchParams.get("limit") ?? "", 10);
+  const messageLimit = Number.isFinite(parsedLimit) ? Math.max(20, Math.min(400, parsedLimit)) : 80;
+
   try {
-    const messages = await listConversationMessages(conversationId);
+    const messages = await listConversationMessages(conversationId, messageLimit);
     return NextResponse.json({ messages }, { status: 200 });
   } catch (error) {
     const detail = error instanceof Error ? error.message : "unknown_error";
