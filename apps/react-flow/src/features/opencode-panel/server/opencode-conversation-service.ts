@@ -21,10 +21,29 @@ interface ConversationMessage {
   id: string;
   role: "user" | "assistant";
   content: string;
+  toolCalls: ConversationToolCall[];
 }
 
 interface ConversationReplyResult {
   text: string;
+}
+
+interface StreamedConversationEvent {
+  type: "delta" | "tool" | "done" | "error";
+  text?: string;
+  message?: string;
+  toolCall?: ConversationToolCall;
+}
+
+interface ConversationToolCall {
+  id: string;
+  callId: string;
+  tool: string;
+  status: "pending" | "running" | "completed" | "error" | "unknown";
+  title?: string;
+  input?: string;
+  output?: string;
+  error?: string;
 }
 
 let runtimePromise: Promise<OpencodeRuntime> | null = null;
@@ -91,6 +110,43 @@ function normalizeMessageText(parts: Array<{ type: string; text?: string }>): st
     .trim();
 }
 
+function safeStringify(value: unknown): string | undefined {
+  if (value === undefined || value === null) {
+    return undefined;
+  }
+
+  if (typeof value === "string") {
+    return value;
+  }
+
+  try {
+    return JSON.stringify(value, null, 2);
+  } catch {
+    return String(value);
+  }
+}
+
+function normalizeToolCalls(parts: Array<Record<string, unknown>>): ConversationToolCall[] {
+  return parts
+    .filter((part) => part.type === "tool")
+    .map((part) => {
+      const state = (part.state ?? {}) as Record<string, unknown>;
+      const status = typeof state.status === "string" ? state.status : "unknown";
+
+      return {
+        id: typeof part.id === "string" ? part.id : `${part.callID ?? "tool"}`,
+        callId: typeof part.callID === "string" ? part.callID : typeof part.id === "string" ? part.id : "unknown",
+        tool: typeof part.tool === "string" ? part.tool : "unknown",
+        status:
+          status === "pending" || status === "running" || status === "completed" || status === "error" ? status : "unknown",
+        title: typeof state.title === "string" ? state.title : undefined,
+        input: safeStringify(state.input),
+        output: typeof state.output === "string" ? state.output : safeStringify(state.output),
+        error: typeof state.error === "string" ? state.error : undefined,
+      };
+    });
+}
+
 export async function listConversations(): Promise<ConversationSummary[]> {
   const runtime = await getRuntime();
   const repoRoot = resolveRepoRoot();
@@ -130,8 +186,9 @@ export async function listConversationMessages(conversationId: string): Promise<
       id: message.info.id,
       role: message.info.role,
       content: normalizeMessageText(message.parts),
+      toolCalls: normalizeToolCalls(message.parts as Array<Record<string, unknown>>),
     }))
-    .filter((message) => message.content.length > 0);
+    .filter((message) => message.content.length > 0 || message.toolCalls.length > 0);
 }
 
 export async function createConversation(title?: string): Promise<ConversationCreateResult> {
@@ -172,4 +229,132 @@ export async function sendConversationMessage(conversationId: string, message: s
   return {
     text: normalizeAssistantText(result.data.parts),
   };
+}
+
+export async function streamConversationMessage(
+  conversationId: string,
+  message: string,
+  requestSignal?: AbortSignal,
+): Promise<AsyncGenerator<StreamedConversationEvent>> {
+  const runtime = await getRuntime();
+  const repoRoot = resolveRepoRoot();
+
+  const beforeResult = await runtime.client.session.messages({
+    path: { id: conversationId },
+    query: { directory: repoRoot, limit: 80 },
+  });
+
+  if (beforeResult.error || !beforeResult.data) {
+    throw new Error("Failed to read conversation state before streaming reply");
+  }
+
+  const knownAssistantIds = new Set(
+    beforeResult.data.filter((entry) => entry.info.role === "assistant").map((entry) => entry.info.id),
+  );
+
+  const startedAt = Date.now();
+
+  const promptResult = await runtime.client.session.promptAsync({
+    path: { id: conversationId },
+    query: { directory: repoRoot },
+    body: {
+      parts: [{ type: "text", text: message }],
+    },
+  });
+
+  if (promptResult.error) {
+    throw new Error("Failed to send OpenCode prompt asynchronously");
+  }
+
+  async function* eventGenerator(): AsyncGenerator<StreamedConversationEvent> {
+    const deadlineAt = startedAt + 90_000;
+    let assistantMessageId: string | null = null;
+    let previousText = "";
+    const knownToolFingerprints = new Map<string, string>();
+
+    const sleep = (ms: number) =>
+      new Promise<void>((resolve) => {
+        setTimeout(resolve, ms);
+      });
+
+    try {
+      while (Date.now() < deadlineAt) {
+        if (requestSignal?.aborted) {
+          yield { type: "error", message: "Request aborted" };
+          return;
+        }
+
+        const messagesResult = await runtime.client.session.messages({
+          path: { id: conversationId },
+          query: { directory: repoRoot, limit: 80 },
+        });
+
+        if (messagesResult.error || !messagesResult.data) {
+          throw new Error("Failed to fetch streaming messages");
+        }
+
+        if (!assistantMessageId) {
+          const candidate = [...messagesResult.data]
+            .reverse()
+            .find((entry) => {
+              if (entry.info.role !== "assistant") {
+                return false;
+              }
+
+              return !knownAssistantIds.has(entry.info.id);
+            });
+
+          if (candidate) {
+            assistantMessageId = candidate.info.id;
+          }
+        }
+
+        if (assistantMessageId) {
+          const assistantEntry = messagesResult.data.find((entry) => entry.info.id === assistantMessageId);
+
+          if (assistantEntry) {
+            const nextText = normalizeMessageText(assistantEntry.parts);
+            if (nextText.length > previousText.length) {
+              yield { type: "delta", text: nextText.slice(previousText.length) };
+              previousText = nextText;
+            }
+
+            const toolCalls = normalizeToolCalls(assistantEntry.parts as Array<Record<string, unknown>>);
+            for (const toolCall of toolCalls) {
+              const fingerprint = JSON.stringify({
+                status: toolCall.status,
+                title: toolCall.title,
+                output: toolCall.output,
+                error: toolCall.error,
+              });
+              const previousFingerprint = knownToolFingerprints.get(toolCall.callId);
+              if (previousFingerprint !== fingerprint) {
+                knownToolFingerprints.set(toolCall.callId, fingerprint);
+                yield { type: "tool", toolCall };
+              }
+            }
+
+            const completedAt = "completed" in assistantEntry.info.time ? assistantEntry.info.time.completed : undefined;
+            if (typeof completedAt === "number") {
+              yield { type: "done" };
+              return;
+            }
+          }
+        }
+
+        await sleep(250);
+      }
+
+      if (previousText.length > 0) {
+        yield { type: "done" };
+      } else {
+        yield { type: "error", message: "Timed out waiting for streamed response" };
+      }
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : "unknown_error";
+      yield { type: "error", message: detail };
+    }
+  }
+
+  return eventGenerator();
 }

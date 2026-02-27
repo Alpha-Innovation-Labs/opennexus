@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 
-import { listConversationMessages, sendConversationMessage } from "@/features/opencode-panel/server/opencode-conversation-service";
+import { listConversationMessages, streamConversationMessage } from "@/features/opencode-panel/server/opencode-conversation-service";
 
 export const runtime = "nodejs";
 
@@ -57,16 +57,63 @@ export async function POST(request: Request, context: RouteContext) {
     );
   }
 
+  const encoder = new TextEncoder();
+
   try {
-    const response = await sendConversationMessage(conversationId, message);
-    return NextResponse.json(response, { status: 200 });
+    const stream = new ReadableStream<Uint8Array>({
+      async start(controller) {
+        const enqueue = (event: Record<string, unknown>) => {
+          controller.enqueue(encoder.encode(`data: ${JSON.stringify(event)}\n\n`));
+        };
+
+        try {
+          const replyStream = await streamConversationMessage(conversationId, message, request.signal);
+          for await (const event of replyStream) {
+            if (event.type === "delta" && typeof event.text === "string") {
+              enqueue({ type: "delta", text: event.text });
+              continue;
+            }
+
+            if (event.type === "tool" && event.toolCall) {
+              enqueue({ type: "tool", toolCall: event.toolCall });
+              continue;
+            }
+
+            if (event.type === "error") {
+              enqueue({ type: "error", message: event.message ?? "Failed to stream OpenCode reply" });
+              break;
+            }
+
+            if (event.type === "done") {
+              enqueue({ type: "done" });
+              break;
+            }
+          }
+        } catch (error) {
+          const detail = error instanceof Error ? error.message : "unknown_error";
+          enqueue({ type: "error", message: `Unable to stream OpenCode response: ${detail}` });
+        } finally {
+          controller.close();
+        }
+      },
+    });
+
+    return new Response(stream, {
+      status: 200,
+      headers: {
+        "Content-Type": "text/event-stream; charset=utf-8",
+        "Cache-Control": "no-cache, no-transform",
+        Connection: "keep-alive",
+        "X-Accel-Buffering": "no",
+      },
+    });
   } catch (error) {
     const detail = error instanceof Error ? error.message : "unknown_error";
     return NextResponse.json(
       {
         error: {
           category: "opencode_prompt_failed",
-          message: `Unable to get a response from OpenCode: ${detail}`,
+          message: `Unable to start OpenCode streaming response: ${detail}`,
         },
       },
       { status: 502 },
