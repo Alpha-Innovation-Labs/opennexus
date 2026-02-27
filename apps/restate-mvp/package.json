@@ -1,0 +1,15 @@
+{
+  "name": "restate-mvp",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "tsx src/index.ts"
+  },
+  "dependencies": {
+    "@opencode-ai/sdk": "^1.2.15",
+    "@restatedev/restate-sdk": "^1.6.0"
+  },
+  "devDependencies": {
+    "tsx": "^4.20.3"
+  }
+}

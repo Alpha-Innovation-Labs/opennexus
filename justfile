@@ -20,6 +20,7 @@ help:
     @echo "  just \033[0;33mdocs\033[0m                     \033[0;32mRun local docs server\033[0m"
     @echo "  just \033[0;33mweb\033[0m                      \033[0;32mRun local CDD web UI\033[0m"
     @echo "  just \033[0;33mflow\033[0m                     \033[0;32mRun local context graph UI\033[0m"
+    @echo "  just \033[0;33mrestate\033[0m                  \033[0;32mRun Restate MVP + open UI\033[0m"
     @echo "  just \033[0;33mdocs-sync\033[0m                \033[0;32mCheck docs sync drift\033[0m"
     @echo "  just \033[0;33mbuild\033[0m                    \033[0;32mBuild development binary\033[0m"
     @echo "  just \033[0;33mtest\033[0m                     \033[0;32mRun all tests\033[0m"
@@ -33,6 +34,7 @@ help:
     @echo "  just \033[0;33mdocs\033[0m                     \033[0;32mRun local docs server\033[0m"
     @echo "  just \033[0;33mweb\033[0m                      \033[0;32mRun local CDD web UI\033[0m"
     @echo "  just \033[0;33mflow\033[0m                     \033[0;32mRun local context graph UI\033[0m"
+    @echo "  just \033[0;33mrestate\033[0m                  \033[0;32mRun Restate MVP + open UI\033[0m"
     @echo "  just \033[0;33mdocs-sync\033[0m                \033[0;32mCheck docs sync drift\033[0m"
     @echo ""
     @echo "\033[1;35m  Building:\033[0m"
@@ -74,6 +76,7 @@ import 'justfiles/development/marketplace-install.just'
 import 'justfiles/development/docs.just'
 import 'justfiles/development/web.just'
 import 'justfiles/development/flow.just'
+import 'justfiles/development/restate.just'
 
 # ============================================================================
 # Building Commands
