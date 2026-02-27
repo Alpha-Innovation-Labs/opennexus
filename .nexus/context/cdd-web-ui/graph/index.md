@@ -45,7 +45,12 @@ The graph runs as a full-screen canvas and supports mode-based interaction for s
 | `Subproject Icon Stats` | Operator sees per-row icon counts for total context files and adapter-authored context files |
 | `OpenCode Conversation Panel` | Operator sees a right-side conversation panel for creating, selecting, and continuing OpenCode sessions |
 | `Repository-Scoped Conversation Selector` | Operator sees only sessions associated with the current repository directory |
+| `Tool Call Trace` | Operator sees expandable tool call entries with OpenCode-style state labels and input/output/error details inside assistant messages |
 | `Resizable Split Layout` | Operator can drag the graph/conversation separator and expand conversation width up to half the viewport |
+| `Scope Breadcrumb` | Operator sees a compact top-left breadcrumb that reflects current project and focused sub-scope |
+| `Shortcut New Chat Modal` | Operator opens a new-chat dialog with Ctrl/Cmd+N using the same chat surface as the sidebar panel |
+| `Shortcut Parallel Chat Modal` | Operator opens a dual-lane dialog with Ctrl/Cmd+A and drives both lanes from one shared composer |
+| `Streaming Recovery Fallback` | Operator still sees assistant text when stream deltas are missing by recovering from latest persisted messages |
 
 ## Dependencies
 
@@ -77,4 +82,11 @@ The graph runs as a full-screen canvas and supports mode-based interaction for s
 - If subproject labels show raw feature keys unexpectedly, verify feature `index.md` title metadata is present and parsed for the relevant feature folder.
 - If conversation selector is empty or `502` appears, verify OpenCode server reachability and panel API base URL resolution.
 - If creating or listing conversations fails for this repo, verify repository directory scoping is passed to OpenCode session endpoints.
+- If assistant replies only appear after page reload, verify the panel message POST route emits SSE `delta` events and a terminal `done` event for the active conversation.
+- If streamed replies still render as `(No text response)`, verify SSE frame parsing handles both LF (`\n\n`) and CRLF (`\r\n\r\n`) delimiters.
+- If assistant text appears but tool traces are missing, verify streaming emits `tool` events and assistant messages include tool parts when fetched from history.
+- If tool rows never leave `running`, verify tool state updates are being upserted per `callId` as new stream frames arrive.
+- If parallel chat lane headers show fallback IDs instead of descriptive names, verify OpenCode session creation returns titles and lane labels refresh from server responses.
+- If parallel lanes show `(No text response)` while backend generated a reply, verify no-delta recovery fetch reads latest assistant messages after stream completion.
+- If Ctrl/Cmd+N or Ctrl/Cmd+A does not open chat modals, verify graph page focus is active and no browser/system shortcut handler is overriding the keybinding.
 - If panel resize cannot reach half viewport, verify split sizing constraints are configured with percentage units and max size allows `50%`.

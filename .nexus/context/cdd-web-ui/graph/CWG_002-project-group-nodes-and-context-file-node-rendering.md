@@ -32,6 +32,7 @@ The graph view renders each project as a visual group container and renders only
 | Display context id and title in node labels for operator readability | `graph_displays_context_id_and_title_in_node_labels` |
 | Render context cards using compact, consistent width constraints for dense graph readability | `graph_renders_context_cards_with_compact_consistent_width` |
 | Size context card height from inferred title line count so single-line and two-line labels remain legible | `graph_sizes_context_card_height_from_inferred_title_line_count` |
+| Render a scope breadcrumb that shows Projects and the current project or focused sub-scope in graph navigation | `graph_renders_scope_breadcrumb_for_project_and_subscope_focus` |
 | Remove non-essential node chips so context id and title remain the primary node label content | `graph_removes_nonessential_node_chips_from_context_card_labels` |
 | Render subflow header as one-line project-and-feature label text for quick scanability | `graph_renders_subflow_header_as_single_line_project_feature_label` |
 | Preserve deterministic node identity values across rerenders for stable interaction state | `graph_preserves_deterministic_node_identity_across_rerenders` |

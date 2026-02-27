@@ -14,6 +14,8 @@ dependencies:
 
 `cdd-web-ui` provides a lightweight web workspace for context-driven development operations backed by the CDD SQLite observability data model. It allows operators to execute one selected context line, inspect persisted task results, and follow active coding-session progress.
 
+The graph experience includes an OpenCode side panel plus keyboard-driven chat modals (`Ctrl/Cmd+N` for a new single chat, `Ctrl/Cmd+A` for dual-lane parallel chat with a shared composer).
+
 ## Features
 
 | Feature | Path | Purpose |
@@ -48,6 +50,12 @@ just flow
 
 # Run graph e2e checks (collision and overview fit)
 bun --cwd apps/react-flow run test:e2e
+
+# Run tool-call rendering e2e for graph chat
+bun --cwd apps/react-flow run test:e2e -- e2e/opencode-toolcalls.e2e.ts
+
+# Run real OpenCode streaming e2e (no mocks)
+OPENCODE_E2E_REAL=1 bun --cwd apps/react-flow run test:e2e -- e2e/opencode-streaming-real.e2e.ts
 
 # Execute one context file workflow from backend
 opennexus context implement --context-file <path>
@@ -92,3 +100,8 @@ opennexus context test-status --context-file <path>
 - If project dependency edges are not visible, verify there are cross-project `depends_on.contexts` links in loaded context files.
 - If dragged project subflows overlap, verify move mode is active and collision blocking is reverting only the moved project card.
 - If graph conversation selector shows no sessions, verify OpenCode server is reachable at `OPENCODE_BASE_URL` and repository-scoped session listing is returning `200`.
+- If assistant replies show only after reload, verify live SSE reply streaming is active on `/api/opencode/conversations/:id/messages` and the panel receives `delta` events before `done`.
+- If tool calls do not appear in assistant messages, verify SSE `tool` events are emitted and conversation history includes tool parts for the same reply.
+- If the `Ctrl/Cmd+N` or `Ctrl/Cmd+A` graph chat shortcuts do not open dialogs, verify keyboard focus remains in the app and no browser extension is intercepting those keys.
+- If parallel chat lanes show `(No text response)` unexpectedly, verify fallback history recovery can read latest assistant messages from `/api/opencode/conversations/:id/messages`.
+- If real no-mock streaming E2E is skipped unexpectedly, verify `OPENCODE_E2E_REAL=1` is set in the test command environment.
