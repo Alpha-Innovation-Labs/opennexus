@@ -2,3 +2,5 @@
 node_modules/
 logs/
 tsconfig.tsbuildinfo
+.nexus/orchestration/state.sqlite
+test-results/
