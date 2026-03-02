@@ -79,7 +79,7 @@ pub fn run_marketplace_search(query: &str, format: OutputFormat) -> Result<()> {
         return Ok(());
     }
 
-    print_success(&format!("Found {} marketplace entrie(s):", matches.len()));
+    print_success(&format!("Found {} marketplace entries:", matches.len()));
     for entry in matches {
         eprintln!(
             "- {} ({})\n  {}\n  install: opennexus marketplace install {}",
@@ -110,7 +110,7 @@ pub fn run_marketplace_list(format: OutputFormat) -> Result<()> {
     }
 
     print_success(&format!(
-        "Available marketplace entrie(s): {}",
+        "Available marketplace entries: {}",
         registry.len()
     ));
     for entry in &registry {
