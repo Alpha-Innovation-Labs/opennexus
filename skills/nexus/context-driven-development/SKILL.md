@@ -209,21 +209,22 @@ created: "YYYY-MM-DD"
 Optional dependency metadata (blocking prerequisites only):
 
 ```yaml
+skills:
+  - justfile
+  - nextjs
 depends_on:
   contexts:
-    - id: ABC_001
-      why: Requires upstream contract and CLI behavior to be finalized.
-    - id: XYZ_014
-      why: Reuses auth flow acceptance criteria.
+    - ABC_001
+    - XYZ_014
 ```
 
 Rules:
 - `depends_on` is optional; omit when there are no prerequisites.
 - Declare dependencies in `depends_on.contexts` only.
 - Every listed dependency is blocking: it must be completed before this context can proceed.
-- Each `depends_on.contexts` entry must be an object with:
-  - `id`: context ID (for example `ABC_001`)
-  - `why`: short reason for the dependency (max 140 characters)
+- `depends_on.contexts` entries must be context IDs (for example `ABC_001`).
+- `skills` is optional; use it to reference implementation guidance by skill name only.
+- `skills` entries must be bare names (for example `justfile`, `nextjs`, `pnpm`) and must map to files under `skills/**/<name>/SKILL.md`.
 - Keep dependencies minimal and direct; do not duplicate transitive prerequisites.
 
 ## Context Required Sections
@@ -268,6 +269,7 @@ Dependencies are strict prerequisites, not suggestions.
 - Context dependency: this context is blocked until the referenced context is complete.
 - Dependencies must be declared only in context frontmatter under `depends_on.contexts`.
 - Context files must never depend on project names; context dependencies are context-to-context only.
+- Skill references are guidance only and must be declared under top-level `skills` using skill names.
 - If dependencies are unknown or not verifiable, stop and ask for clarification before implementation.
 - Keep dependency declarations minimal and explicit; do not list non-blocking or transitive relationships.
 

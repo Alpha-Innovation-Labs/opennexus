@@ -4,7 +4,7 @@ description: Create new context specifications from user goals
 
 # Command: Create Context
 
-You are creating context specification(s) following `.nexus/ai_harness/skills/context-driven-development/SKILL.md`.
+You are creating context specification(s) following `skills/nexus/context-driven-development/SKILL.md`.
 
 Read that skill first and treat it as the only CDD source of truth.
 
@@ -108,7 +108,8 @@ If splitting is needed:
 Propose based on the conversation:
 - **Desired Outcome**: What success looks like (one paragraph)
 - **Next Actions**: Table with Description and Test columns
-- **Blocking Dependencies** (optional): prerequisite projects and/or contexts that must be completed first
+- **Blocking Dependencies** (optional): prerequisite contexts that must be completed first
+- **Relevant Skills** (optional): skill names from `skills/` (for example `justfile`, `nextjs`, `pnpm`)
 
 If clarification is needed, use the `question` tool with appropriate options.
 
@@ -160,10 +161,12 @@ title: Human-Readable Title
 project: project-name
 feature: feature-name
 created: "YYYY-MM-DD"
+skills:
+  - justfile
+  - nextjs
 depends_on:
   contexts:
-    - id: ABC_001
-      why: Reuses validated upstream contract and acceptance behavior.
+    - ABC_001
 ---
 
 # PRJ_NNN: Title
@@ -187,13 +190,16 @@ depends_on:
 ```
 
 If there are no blocking prerequisites, omit `depends_on` entirely.
+If no skill guidance is needed, omit `skills` entirely.
 
 **IMPORTANT FORMAT RULES:**
 - Use `## Desired Outcome` (NOT `## Summary`)
 - Use `## Next Actions` table format (NOT `## Goals` bullet list)
 - Use optional `depends_on` frontmatter only for blocking prerequisites
 - Use `depends_on.contexts` only (context-to-context dependencies)
-- Each dependency must use `id` and `why` (max 140 chars)
+- Use optional top-level `skills` frontmatter for implementation guidance references
+- `skills` entries must be bare skill names only (for example `justfile`, not a file path)
+- Every `skills` entry must resolve to an existing file under `skills/**/<name>/SKILL.md`
 - Keep dependencies direct; do not include transitive prerequisites
 - Do NOT include `## Lessons Learned` section
 - Do NOT include `## Validation` section
@@ -210,12 +216,12 @@ If there are no blocking prerequisites, omit `depends_on` entirely.
 
 ### 9. Create index.md Files If Needed
 
-- If this is the first context in a new project directory, create `.nexus/context/<project>/index.md` following the project index requirements in `.nexus/ai_harness/skills/context-driven-development/SKILL.md`.
+- If this is the first context in a new project directory, create `.nexus/context/<project>/index.md` following the project index requirements in `skills/nexus/context-driven-development/SKILL.md`.
 - If this is the first context in a new feature directory, create `.nexus/context/<project>/<feature>/index.md` with sections: Scope, Context Files, Interfaces, Dependencies, Troubleshooting.
 
 ### 10. Read Applicable Rules
 
 After creating the context file(s), read any relevant skill/rule guidance for implementation. Common source:
-- `.nexus/ai_harness/skills/context-driven-development/SKILL.md` - Context file standards
+- `skills/nexus/context-driven-development/SKILL.md` - Context file standards
 - Any language-specific rules (e.g., `rs.md` for Rust)
 - Any tool-specific rules (e.g., `justfiles.md`)

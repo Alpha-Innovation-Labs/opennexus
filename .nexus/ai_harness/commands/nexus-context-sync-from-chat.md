@@ -6,7 +6,7 @@ description: Analyze conversation and recommend context/project updates from cha
 
 This command performs analysis first, then applies approved file updates in the same run.
 
-Read `.nexus/ai_harness/skills/context-driven-development/SKILL.md` first and use it as the only CDD source of truth.
+Read `skills/nexus/context-driven-development/SKILL.md` first and use it as the only CDD source of truth.
 
 Its job is to read the current conversation, analyze existing context files, and report:
 1. what Next Actions should be added or updated
@@ -34,7 +34,7 @@ No parameters required.
 1. Current conversation (source of new requirements/constraints/decisions)
 2. `.nexus/context/**/PRJ_NNN-*.md` context files
 3. `.nexus/context/**/index.md` project operational docs
-4. `.nexus/ai_harness/skills/context-driven-development/SKILL.md` format requirements
+4. `skills/nexus/context-driven-development/SKILL.md` format requirements
 
 ## Workflow
 
@@ -64,7 +64,7 @@ For each matched context:
 Formatting rules for each proposal:
 - `Description`: human-readable, starts with a verb.
 - `Test`: snake_case without `test_` prefix.
-- Keep actions E2E-observable per `.nexus/ai_harness/skills/context-driven-development/SKILL.md`.
+- Keep actions E2E-observable per `skills/nexus/context-driven-development/SKILL.md`.
 
 ### Phase 4: Propose Project-Level Knowledge Updates
 

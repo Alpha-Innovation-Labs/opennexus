@@ -30,7 +30,7 @@ Do not include staged-only changes unless the user explicitly asks.
 
 ## Workflow
 
-1. Read `.nexus/ai_harness/skills/context-driven-development/SKILL.md` first.
+1. Read `skills/nexus/context-driven-development/SKILL.md` first.
 2. Validate that the context file exists under `.nexus/context/`.
 3. Parse `## Next Actions` table from:
    - explicit table text if provided, otherwise

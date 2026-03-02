@@ -25,7 +25,7 @@ The implementation details stay in code and engineering decisions. The context s
 
 CDD in Nexus is anchored by harness source files:
 
-- `.nexus/ai_harness/skills/context-driven-development/SKILL.md`: the canonical CDD specification. It defines context purpose, naming, required frontmatter, required sections, E2E testability rules, anti-patterns, and project/feature index expectations.
+- `skills/nexus/context-driven-development/SKILL.md`: the canonical CDD specification. It defines context purpose, naming, required frontmatter, required sections, E2E testability rules, anti-patterns, and project/feature index expectations.
 - `.nexus/ai_harness/commands/nexus-context-create.md`: the workflow spec for creating context files from user goals.
 - `.nexus/ai_harness/commands/nexus-context-update.md`: the workflow spec for updating existing context and index docs.
 - `.nexus/ai_harness/commands/nexus-context-sync-from-chat.md`: the analysis-only workflow for proposing context/index updates from conversation evidence.
@@ -196,4 +196,4 @@ When harness is `opencode`, `opennexus setup` also removes stale generated entri
 
 Important: `.nexus/**` is the source of truth. `.opencode/**` entries are generated linkage created by setup.
 
-For authoritative CDD rules, see `.nexus/ai_harness/skills/context-driven-development/SKILL.md`.
+For authoritative CDD rules, see `skills/nexus/context-driven-development/SKILL.md`.

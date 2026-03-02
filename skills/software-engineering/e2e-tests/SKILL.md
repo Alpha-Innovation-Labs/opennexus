@@ -15,7 +15,7 @@ This project uses **exclusively E2E (end-to-end) tests**. We do not write unit t
 1. **E2E tests only** - No unit tests, no integration tests. Every test validates a complete scenario from start to finish.
 2. **No mocks** - Tests must use real services, real databases, and real API calls. Mocking defeats the purpose of E2E testing.
 3. **Real-world data** - Prefer production-like data over synthetic test fixtures. Tests should reflect actual usage patterns.
-4. **Context-driven** - Every test originates from Next Actions defined in a context file (see `.nexus/ai_harness/skills/context-driven-development/SKILL.md`).
+4. **Context-driven** - Every test originates from Next Actions defined in a context file (see `skills/nexus/context-driven-development/SKILL.md`).
 
 ## Test Source: Context Files
 

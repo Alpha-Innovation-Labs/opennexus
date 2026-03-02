@@ -49,7 +49,7 @@ Examples:
 
 ## Workflow
 
-1. Read `.nexus/ai_harness/skills/context-driven-development/SKILL.md`.
+1. Read `skills/nexus/context-driven-development/SKILL.md`.
 2. Read `.nexus/ai_harness/rules/e2e-tests/SKILL.md` if present.
 3. Validate context path is inside `.nexus/context/`.
 4. Parse frontmatter (`context_id`, `project`, `feature`) and `## Next Actions` table.

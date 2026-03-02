@@ -4,7 +4,7 @@ description: Search existing context files for relevant outcomes/actions
 
 # Command: Search Contexts
 
-You are searching through existing context files to answer the user's query. Use `.nexus/ai_harness/skills/context-driven-development/SKILL.md` as the format source of truth, and search the "Desired Outcome" and "Next Actions" sections of `.nexus/context/` files to find relevant information.
+You are searching through existing context files to answer the user's query. Use `skills/nexus/context-driven-development/SKILL.md` as the format source of truth, and search the "Desired Outcome" and "Next Actions" sections of `.nexus/context/` files to find relevant information.
 
 Read the CDD skill first before scanning contexts.
 

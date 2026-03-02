@@ -6,7 +6,7 @@ description: Analyze git changes since last code sync and align contexts with im
 
 This command is code-diff-driven.
 
-Read `.nexus/ai_harness/skills/context-driven-development/SKILL.md` first and use it as the only CDD source of truth.
+Read `skills/nexus/context-driven-development/SKILL.md` first and use it as the only CDD source of truth.
 
 Its job is to inspect repository code changes since the last code-sync checkpoint, compare those changes to existing context files, and recommend updates.
 
@@ -53,7 +53,7 @@ Expected shape:
 2. Staged changes (`git diff --cached`)
 3. `.nexus/context/**/PRJ_NNN-*.md` context files
 4. `.nexus/context/**/index.md` project/feature docs
-5. `.nexus/ai_harness/skills/context-driven-development/SKILL.md`
+5. `skills/nexus/context-driven-development/SKILL.md`
 
 ## Workflow
 

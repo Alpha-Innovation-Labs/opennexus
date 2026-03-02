@@ -16,6 +16,7 @@ Process:
 2. Parse the context file and extract:
     - frontmatter (`context_id`, `project`, `feature`)
     - optional frontmatter `depends_on` (`projects`, `contexts`)
+    - optional top-level frontmatter `skills` (skill names only)
     - `## Desired Outcome`
     - all `## Next Actions` rows (`Description`, `Test`)
 3. Enforce dependency gate before implementation:
@@ -35,8 +36,11 @@ Process:
       - If one existing rule is clearly dominant, still present the list and confirm the single selected rule.
       - If multiple existing rules could apply, use the `question` tool with `multiple: false` and `custom: true` so the user must pick one listed rule or provide one custom rule string.
    - If no coding-related rules exist in `.nexus/ai_harness/rules/`, skip rule selection and continue without asking a rule-selection question.
-7. Determine whether there is a skill under `.nexus/ai_harness/skills/` that is directly applicable to this context/project/feature.
-   - If one is clearly applicable, treat it as a required skill constraint in addition to the selected rule.
+7. Resolve skill constraints from frontmatter and repository skills:
+   - If the context frontmatter includes `skills`, treat each skill name as required.
+   - Validate each named skill exists under `skills/**/<name>/SKILL.md`.
+   - If a named skill is missing, stop and ask the user how to proceed.
+   - If no `skills` are listed, optionally infer one clearly applicable skill from `skills/` and report that choice.
    - If none are clearly applicable, continue with rule-only constraints.
 8. If requirements are ambiguous or missing critical details beyond rule selection/skill selection, ask clarifying questions before proceeding.
 9. Decompose the context `Next Actions` into discrete implementation tasks and identify dependencies.

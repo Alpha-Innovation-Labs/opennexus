@@ -6,7 +6,7 @@ description: Review context files for Context-Driven Development compliance
 
 Review existing context files and index docs for compliance with:
 
-- `.nexus/ai_harness/skills/context-driven-development/SKILL.md`
+- `skills/nexus/context-driven-development/SKILL.md`
 
 Read the CDD skill first and treat it as the only source of truth.
 
@@ -21,7 +21,8 @@ Audit context quality and coverage, identify violations, and propose specific fi
    - Scan under `.nexus/context/` (exclude `_reference/` and `_legacy/`).
 2. Audit numbered context specs (`PRJ_NNN-*.md`) for CDD compliance:
     - Required frontmatter fields.
-    - Optional `depends_on` shape and dependency reference validity (project/context).
+    - Optional `depends_on` shape and dependency reference validity.
+    - Optional `skills` list uses bare skill names and each resolves under `skills/**/<name>/SKILL.md`.
     - Required section order (`Desired Outcome`, optional `Reference`, `Next Actions`).
     - One-outcome clarity and no implementation-level detail.
     - `Next Actions` table format and E2E-observable actions.

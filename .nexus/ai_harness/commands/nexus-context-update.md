@@ -14,7 +14,7 @@ Your job:
 ## Rule Sources (read first)
 
 Before editing, read and enforce:
-1. `.nexus/ai_harness/skills/context-driven-development/SKILL.md`
+1. `skills/nexus/context-driven-development/SKILL.md`
 
 This skill is the only CDD source of truth for context format, naming, structure, and index expectations.
 
@@ -44,6 +44,7 @@ This skill is the only CDD source of truth for context format, naming, structure
     - `## Next Actions` (table with `Description` and `Test` columns)
     - `## Reference` only when needed; remove if empty
     - optional `depends_on` frontmatter only for blocking prerequisites
+    - optional top-level `skills` frontmatter with skill names only (for example `justfile`, `nextjs`)
 9. Update related project/feature `index.md` files when the user request changes scope, dependencies, interfaces, or operational knowledge.
 10. If the request implies a split into multiple outcomes, propose split candidates and confirm using `question` before building the per-file approval plan.
 
@@ -54,6 +55,7 @@ This skill is the only CDD source of truth for context format, naming, structure
 - If creating a new context file, keep project-scoped ID ordering (`PRJ_NNN`) and naming conventions.
 - Preserve frontmatter fields and keep metadata consistent.
 - If `depends_on` is present, keep only valid blocking project/context references.
+- If `skills` is present, keep bare skill names only and ensure each exists under `skills/**/<name>/SKILL.md`.
 - Do not rename files unless necessary for correctness.
 
 ## Output Format
