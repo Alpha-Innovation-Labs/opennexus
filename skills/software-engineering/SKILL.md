@@ -63,3 +63,14 @@ description: This skill should be used every time you do software engineering
 3. Behavior/API changes require aligned documentation updates.
 4. Required output contract: problem, scope, evidence, risks, follow-ups.
 5. "Done" means understandable, verifiable, and supportable by someone else.
+
+## VII. Sub-Skills (Use These with This Constitution)
+
+Use this parent skill as the universal software-engineering constitution, then apply the relevant sub-skill(s) for stack-specific rules:
+
+- [e2e-tests](./e2e-tests/SKILL.md) - End-to-end testing standards, no mocks, real services.
+- [justfile](./justfile/SKILL.md) - Justfile structure, naming, modular recipe organization.
+- [nextjs](./nextjs/SKILL.md) - Next.js architecture, Tailwind v4 rules, app boundaries.
+- [pnpm](./pnpm/SKILL.md) - Workspace layout, hardlink policy, Bun runtime execution.
+- [python](./python/SKILL.md) - `uv` package workflow, `msgspec.Struct`, `src/`-only code.
+- [rust](./rust/SKILL.md) - Rust project structure by domain/features and module boundaries.
