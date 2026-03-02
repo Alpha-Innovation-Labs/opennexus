@@ -1,6 +1,6 @@
 {
   "name": "opennexus",
-  "version": "0.1.7",
+  "version": "0.1.8",
   "description": "Thin CLI client for the Nexus context-driven development system",
   "license": "MIT",
   "repository": {
