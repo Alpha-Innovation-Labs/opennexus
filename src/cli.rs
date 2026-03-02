@@ -69,6 +69,9 @@ pub struct RalphCommand {
 
 #[derive(Debug, Clone, Subcommand)]
 pub enum MarketplaceCommands {
+    /// List all marketplace entries.
+    List,
+
     /// Search marketplace entries by query.
     Search {
         /// Query string matched against id, name, and description.
@@ -165,6 +168,18 @@ mod tests {
             Some(Commands::Marketplace { command }) => match command {
                 MarketplaceCommands::Search { query } => assert_eq!(query, "fumadocs"),
                 _ => panic!("expected marketplace search command"),
+            },
+            _ => panic!("expected marketplace command"),
+        }
+    }
+
+    #[test]
+    fn parses_marketplace_list_command() {
+        let cli = Cli::parse_from(["opennexus", "marketplace", "list"]);
+        match cli.command {
+            Some(Commands::Marketplace { command }) => match command {
+                MarketplaceCommands::List => {}
+                _ => panic!("expected marketplace list command"),
             },
             _ => panic!("expected marketplace command"),
         }

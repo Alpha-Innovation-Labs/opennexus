@@ -48,8 +48,13 @@ The graph runs as a full-screen canvas and supports mode-based interaction for s
 | `Subproject Icon Stats` | Operator sees per-row icon counts for total context files and adapter-authored context files |
 | `OpenCode Conversation Panel` | Operator sees a right-side conversation panel for creating, selecting, and continuing OpenCode sessions |
 | `Repository-Scoped Conversation Selector` | Operator sees only sessions associated with the current repository directory |
-| `Tool Call Trace` | Operator sees expandable tool call entries with compact icon-first headers plus input/output/error details inside assistant messages |
+| `Tool Call Trace` | Operator sees compact inline one-line rows for `glob`/`grep`/`read`, plus assistant-segment-grouped `apply_patch` rows with repository-relative file-tree navigation and selected-file diff focus |
+| `Bash Output Highlighting` | Operator sees bash tool output rendered as terminal-style syntax-highlighted `shellsession` content |
 | `Code Modification Diff View` | Operator sees patch-style visual diffs for code-modifying tool outputs when patch payloads are available |
+| `Attachment Chips` | Operator sees user-message attachment chips for directory/file context that was attached in OpenCode |
+| `Image Attachment Preview` | Operator sees image attachment thumbnails and can click to open a full preview dialog |
+| `Chat Row Context Menu` | Operator can right-click a chat row to open actions menu with open/split/delete operations |
+| `Chat Split Open Actions` | Operator opens a selected chat in vertical or horizontal split relative to the active chat |
 | `Forks Tab` | Operator switches from Projects to Forks and sees a lineage-focused graph of one fork family during simplified mode |
 | `Fork Origin Snippet` | Operator sees diff-style message snippets that highlight the likely fork source message and mute skipped context |
 | `Fork Origin Border Bullets` | Operator sees border-aligned source bullets on highlighted root transcript lines where fork edges originate |
@@ -68,10 +73,17 @@ The graph runs as a full-screen canvas and supports mode-based interaction for s
 | `Reusable LLM Conversation Feature` | Operator gets consistent fetch/send/stream chat behavior across panel, modal lanes, and preview surfaces through one shared feature contract |
 | `Path-Segment View Routing` | Operator navigates workspace views via `/context`, `/forks`, `/chats`, `/workflows` and deep-links center chat with `/chats/:conversation_id` |
 | `Session Cache First Chat Hydration` | Operator sees cached conversations/messages immediately from session storage while UI shows a syncing indicator for latest server refresh |
+| `Chats View Center-First Layout` | Operator uses `/chats/:conversation_id` without the global right sidebar, with conversation interaction centered in main content |
 | `Compact Chat Header and Composer` | Operator sees title + token metrics with icon-only controls, plus one integrated auto-grow composer with send-only action |
 | `Sticky Previous User Context` | Operator sees an opaque sticky banner with the previous user turn for the currently visible transcript region |
-| `Minimal Assistant Stream Chrome` | Operator sees assistant markdown/tool stream without outer message boxes while tool rows remain boxed and collapsible |
+| `Sticky Previous User Hover History` | Operator hovers sticky banner to open prior-user history, keeps menu open while moving into it, clicks a row to jump transcript, and sees timestamp metadata right-aligned |
+| `Minimal Assistant Stream Chrome` | Operator sees assistant markdown/tool stream without outer message boxes while tool rows follow shared per-tool rendering modes |
+| `Pane-Aware Tool Truncation` | Operator sees inline `read`/`grep`/`glob` rows truncate against live pane width with full label text available on hover |
+| `Bounded Apply Patch Expansion` | Operator sees `apply_patch` rows start collapsed to a bounded height and uses a bottom arrow control to expand/collapse the diff area |
+| `Apply Patch Split View Resize` | Operator resizes the apply-patch file-tree and selected-file diff panes within bounded width constraints |
+| `Bounded Expansion Scroll` | Operator sees long expanded user messages and `apply_patch` diffs constrained by max-height with internal scroll areas |
 | `TUI Conversation Surface Token` | Operator sees chat transcript surfaces themed by a shared TUI conversation background token |
+| `Conversation Module Decomposition` | Operator benefits from maintainable chat implementation split into feature-scoped subcomponents, hooks, and libs |
 | `Shortcut Fork Modal` | Operator opens a forked-chat modal from the active conversation with Ctrl/Cmd+S |
 | `Composer Fork Fallback` | Operator can fork the active conversation from a Fork button next to Send when shortcuts are unavailable |
 | `Forks Header Button` | Operator opens a conversation lineage graph modal from the panel header via `Forks` |
@@ -134,9 +146,11 @@ The graph runs as a full-screen canvas and supports mode-based interaction for s
 - If parallel chat lane headers show fallback IDs instead of descriptive names, verify OpenCode session creation returns titles and lane labels refresh from server responses.
 - If one chat surface behaves differently than another for the same conversation, verify all surfaces use the shared `llm-conversation` feature APIs/hooks instead of local transport logic.
 - If center and right chat panes show different conversations, verify center follows `/chats/:conversation_id` and right panel remains intentionally independent.
+- If right sidebar appears while `Chats` view is active, verify chats route uses center-first layout and does not mount the global right chat shell.
 - If chat appears stale right after open, verify session-storage hydration is active and `Syncing latest` indicator clears after server reconciliation.
 - If `/chats/:conversation_id` reports hydration mismatch, verify browser-only cache/theme reads are deferred until after mount and SSR markup is deterministic.
 - If chat route throws a client exception on tool diffs, verify patch-like tool output falls back to safe text rendering for multi-file patches.
+- If conversation panel changes become risky or slow, verify chat rendering/scroll/markdown/tool logic is split into feature-scoped single-concern modules.
 - If parallel lanes show `(No text response)` while backend generated a reply, verify no-delta recovery fetch reads latest assistant messages after stream completion.
 - If Ctrl/Cmd+N or Ctrl/Cmd+A does not open chat modals, verify graph page focus is active and no browser/system shortcut handler is overriding the keybinding.
 - If Ctrl/Cmd+S does not fork the active conversation, use the Fork button next to Send and verify conversation selection is non-empty.
@@ -149,6 +163,19 @@ The graph runs as a full-screen canvas and supports mode-based interaction for s
 - If Workflows view sidebar is empty, verify Restate is reachable and invocation list query returns records for `ConversationWorkflow`.
 - If Workflows detail panel stays blank after selecting an invocation, verify invocation detail query includes a valid `workflowId` and output endpoint is available.
 - If `/api/opencode/conversations/:id/messages` repeats excessively while idle, verify shared LLM conversation hook defaults/dependencies are referentially stable and polling is scoped to active surfaces.
+- If transcript overflows on long expanded user or `apply_patch` content, verify bounded max-height plus internal `ScrollArea` behavior is active for those expansions.
 - If workflow output fetch returns pending state, verify the selected invocation reached a terminal status before expecting step output payloads.
 - If code-modifying tool calls still show raw text instead of diffs, verify Pierre Diffs patch extraction path can read patch payloads from tool input/output.
+- If collapsed tool headers show stale titles instead of command/input summaries, verify header labels are derived from parsed tool input and constrained with ellipsis until expanded.
+- If expanded tool cards still show `Input`/`Output` section labels, verify output-first rendering path is active for non-inline tool rows.
+- If bash output looks like unstyled plain text, verify Shiki `shellsession` highlighting is applied in bash tool output rendering.
 - If list marker colors do not match TUI expectations, verify markdown marker CSS uses `--md-list-item` and `--md-list-enumeration` tokens.
+- If split layout percentages are not restored after reload, verify orientation-scoped split layout keys are saved and panel ids remain stable.
+- If right-click chat actions target the wrong row, verify row focus state updates on context-menu open and selected action receives the intended conversation id.
+- If OpenCode attachment chips are missing, verify message-part normalization includes `file` parts with source path/type and optional MIME metadata.
+- If sticky history menu closes when moving from the banner into the menu, verify pointer enter/leave tracking is attached to the combined hover region.
+- If clicking a sticky history row does not navigate to the corresponding transcript turn, verify target lookup uses `data-chat-message-id` and scrolls the active transcript viewport.
+- If inline `read`/`grep`/`glob` rows expand the pane in narrow widths, verify truncation width budget is computed from current transcript container width rather than static assumptions.
+- If consecutive `apply_patch` calls do not merge in one row, verify grouping includes only adjacent assistant-segment patches and resets after user turns.
+- If apply-patch tree paths appear absolute, verify displayed file paths are normalized to repository-relative values.
+- If apply-patch content appears oversized in collapsed mode or cannot be toggled back, verify bounded collapsed height and bottom-arrow expand/collapse control are active.

@@ -1,8 +1,0 @@
-prompt_file: prompts/weather.txt
-question: What's the weather right now in Paris?
-red_prompt_template: prompts/templates/generate_red_tests.txt
-implement_prompt_template: prompts/templates/implement_until_green.txt
-use_sandbox: true
-cleanup_sandbox: true
-sandbox_prefix: nexus-restate-mvp
-worktree_base_dir: ""

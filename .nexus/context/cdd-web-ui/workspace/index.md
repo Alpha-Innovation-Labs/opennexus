@@ -37,6 +37,7 @@ Run the workspace locally with `just web` from the repository root.
 | `Task Result Panel` | Operator sees persisted implemented/failed/missing status for selected row |
 | `Live Session Panel` | Operator views in-progress provider session output and task progress |
 | `Chats Sidebar Selection` | Operator selects a chat session in the left sidebar and sees that transcript in the center panel |
+| `Chats Row Context Actions` | Operator right-clicks a chat row to open context actions including split-open and delete |
 
 ## Dependencies
 
@@ -56,3 +57,6 @@ Run the workspace locally with `just web` from the repository root.
 - If long chats/workflow lists do not scroll correctly, verify sidebar list rendering uses shadcn `ScrollArea` and not ad-hoc overflow containers.
 - If selecting a chat feels like a full reload, verify center transcript mode does not run background polling and sidebar selection does not re-fetch the session list.
 - If chat selection visibility is weak in TUI mode, verify sidebar uses `#141414`-aligned panel background with a higher-contrast background-only selected row state.
+- If row-hover delete appears in the wrong location, verify timestamp-slot replacement keeps delete affordance in the same inline cell as the time label.
+- If delete action appears without confirmation, verify row-level delete and bulk delete both open the confirmation dialog before API calls.
+- If chat sidebar renders hydration errors about nested buttons, verify row wrappers and row actions are not nested interactive elements (`button` inside `button`).

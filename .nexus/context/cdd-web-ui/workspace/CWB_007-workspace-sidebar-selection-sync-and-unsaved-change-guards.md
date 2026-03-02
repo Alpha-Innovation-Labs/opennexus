@@ -39,3 +39,7 @@ Workspace sidebar state, selected file routing, and unsaved-change guardrails st
 | Keep `Chats` sidebar selection on the same route and update center transcript without full page navigation | `workspace_chats_selection_updates_center_without_route_reload` |
 | Keep chat session listing stable when selecting sidebar chats so selection does not refetch the session list | `workspace_chats_selection_does_not_refetch_sidebar_session_list` |
 | Show pointer cursor affordance on hover for selectable chat rows in the sidebar | `workspace_chats_sidebar_rows_show_pointer_cursor_on_hover` |
+| Highlight the right-clicked chat row so context menu actions clearly target the intended conversation | `workspace_chat_row_right_click_focus_state_is_visible` |
+| Render chat sidebar row actions with non-nested interactive semantics so hydration-safe click and keyboard behavior is preserved | `workspace_chat_sidebar_rows_avoid_nested_interactive_hydration_errors` |
+| Support shift-range multi-select deletion with confirmation while preserving independent single-row hover delete behavior | `workspace_chat_sidebar_supports_shift_range_multiselect_and_confirmed_bulk_delete` |
+| Remove the top-navbar activity collapse control while preserving sidebar and chat-selection workflows | `workspace_top_nav_hides_activity_collapse_control_without_breaking_selection_flows` |

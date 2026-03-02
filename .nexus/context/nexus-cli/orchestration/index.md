@@ -41,15 +41,17 @@ Runtime notes:
 - Pipeline execution should remain definition-driven (JSON/YAML) with step order controlled by pipeline files, not hardcoded runner branching.
 - Pipeline step definitions should reference reusable execution units by `block_id`, with block implementations loaded from modular files via a block registry.
 - Pipeline execution should accept both pipeline file and config file inputs so runtime values are supplied outside of hardcoded runner logic.
-- OpenCode-backed jobs should initialize the SDK once per runtime and resolve server port from environment (`RBX_OPENCODE_PORT`, then fallback defaults).
+- OpenCode-backed jobs should first connect to `127.0.0.1:4096` (or configured `RBX_OPENCODE_PORT`) and only spawn a local SDK runtime when no server is reachable.
 - Worktree-backed coding runs should resolve working directory base from `RBX_WORKTREE_BASE_DIR` (or `RBX_WORKTREE_ROOT`) and default to `~/.worktrees/<project_name>/...` when unset.
+- Pipeline runs should use workflow ids that include context-derived slug and run count to avoid ambiguous run naming across contexts.
+- Test target locations should be derived from context path and Next Action test ids using scaffold conventions, not fixed per-context file lists.
 - Restate-backed execution can expose the same lifecycle semantics as local orchestration while preserving step-level observability.
 
 ## Environment Variables
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `RBX_OPENCODE_PORT` | `4196` | OpenCode SDK server port for orchestration jobs |
+| `RBX_OPENCODE_PORT` | `4096` | OpenCode SDK server port for orchestration jobs |
 | `RBX_WORKTREE_BASE_DIR` | `~/.worktrees` | Base directory where `<project_name>` worktree folders are created |
 | `RBX_WORKTREE_ROOT` | (none) | Optional compatibility alias for worktree base directory |
 
@@ -69,3 +71,5 @@ Runtime notes:
 - If coding steps unexpectedly modify tests, verify orchestration write-policy enforcement is enabled for source-only coding jobs and rejects test-path mutations.
 - If worktree assignment fails, verify `RBX_WORKTREE_BASE_DIR` resolves to a writable location and repository `git worktree` operations are permitted.
 - If Restate startup fails with node-name mismatch for existing data, set `RESTATE_NODE_NAME` to the existing node identity before running orchestration commands.
+- If run output appears inconsistent with latest invocation, verify result polling is scoped to the current workflow id and stale output files from previous runs are cleared.
+- If test path assertions fail for a context, verify derived context test directory follows scaffold rules and Next Action test ids are present/normalized.

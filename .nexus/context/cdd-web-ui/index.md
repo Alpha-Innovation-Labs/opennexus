@@ -20,9 +20,23 @@ Chat-capable flow surfaces now share one reusable `llm-conversation` feature for
 
 Workspace navigation is path-based (`/context`, `/forks`, `/chats`, `/workflows`) and chats support deep links at `/chats/:conversation_id` while the right chat panel remains independently selectable.
 
+When `Chats` view is active, the global right chat sidebar is intentionally hidden and the full conversation surface is rendered in the center pane.
+
 Chat list and transcript hydration use session-storage cache first and then reconcile with latest server state while showing a lightweight syncing indicator.
 
-Chat presentation now uses a compact token-aware header, an integrated auto-grow composer, minimal assistant stream chrome with boxed tool rows, and an opaque sticky previous-user context banner while scrolling.
+Chat presentation now uses compact inline rows for `read`/`grep`/`glob` tools, input-summary collapsed headers for other tool calls, output-first expanded tool cards, diff-focused rows for `apply_patch`, a compact token-aware header, an integrated auto-grow composer, and an opaque sticky previous-user context banner while scrolling.
+
+Chat surface theming now uses harness-agnostic tokens (`--chat-*` and `--tool-*`) so future non-OpenCode harnesses can reuse the same conversation UI contract.
+
+Tool-row truncation now derives from live chat-pane width (not fixed breakpoints), and `apply_patch` rendering now groups assistant-segment patch sequences into one repository-relative file tree plus selected-file Pierre diff view.
+
+Large `apply_patch` sections now start in a bounded collapsed state and use a bottom arrow control to expand/collapse in place.
+
+The sticky previous-user banner now exposes a hover-only prior-turn history menu, keeps the menu open while pointer focus stays within the combined banner/menu surface, and supports click-to-jump transcript navigation per history row.
+
+Chats now support right-click row context actions (open, split open, delete) and OpenCode attachment rendering beneath user messages, including image thumbnail previews with click-to-open dialogs.
+
+Conversation UI implementation is now expected to evolve as decomposed feature-scoped modules (components/hooks/libs) rather than one oversized panel file.
 
 The workspace keeps a persistent right-side chat shell while center views (Context/Forks/Chats/Workflows) change, and chat width restore-on-expand uses saved local state.
 
@@ -147,8 +161,10 @@ opennexus context test-status --context-file <path>
 - If panel, modal, and preview chat behavior diverges, verify those surfaces use the shared `llm-conversation` feature contract instead of local duplicated transport logic.
 - If selecting a chat looks like a full refresh, verify route navigation is client-side and distinguish shell remount issues from in-surface rerender/loading updates.
 - If center and right chat panes show different transcripts, verify this is expected: center follows `/chats/:conversation_id`, right panel keeps its own selected conversation.
+- If right chat sidebar still appears in `/chats/:conversation_id`, verify chats view routing path disables global right panel rendering.
 - If `/chats/:conversation_id` shows hydration mismatch warnings, verify browser-only cache/theme initialization runs post-mount and server/client first render stay deterministic.
 - If a chat route crashes on tool output rendering, verify patch-like tool output paths degrade safely instead of invoking single-file diff rendering on multi-file patches.
+- If conversation-related changes are hard to review safely, verify panel logic is split into feature-scoped single-concern files (`components/`, `hooks/`, `lib/`).
 - If forked chats exist in modal lanes but the `Forks` graph view is empty, verify sessions were created through native OpenCode fork APIs so parent linkage metadata is persisted.
 - If operators cannot tell where a branch split happened, verify fork-origin message highlighting is visible in the branched lane timeline.
 - If forks view shows `Unable to list forked OpenCode conversations: fetch failed`, verify `opencode serve --port 4096` is running (or `OPENCODE_BASE_URL` points to a reachable OpenCode server).
@@ -159,6 +175,8 @@ opennexus context test-status --context-file <path>
 - If fork-origin highlights look incorrect in the `Forks` tab, verify parent message timestamps are available and nearest-prior user-message selection is applied.
 - If simplified review should show one lineage but multiple families appear, verify root-family filtering is limited to the most recently updated fork family.
 - If the theme flips back to dark on refresh, verify `workspace.theme` is persisted and read before shell render.
+- If chat colors drift in TUI mode, verify conversation/title/input/user-message backgrounds and borders are sourced from theme tokens rather than hardcoded component values.
+- If the top navbar still shows an activity-collapse control, verify workspace top-nav only exposes sidebar toggle, theme variant selector, and light/dark toggle actions.
 - If light mode appears active but canvas still looks dark, verify canvas background color is explicitly set for light mode in both Context and Forks views.
 - If switching between Context and Forks drops zoom or layout state, verify tab switching hides/shows mounted canvases instead of remounting instances.
 - If real no-mock streaming E2E is skipped unexpectedly, verify `OPENCODE_E2E_REAL=1` is set in the test command environment.
@@ -168,3 +186,12 @@ opennexus context test-status --context-file <path>
 - If startup logs show frequent `/api/opencode/conversations/:id/messages` calls, verify polling cadence and shared conversation hook dependencies/defaults are referentially stable.
 - If markdown list bullets do not match TUI colors, verify `--md-list-item` and `--md-list-enumeration` are set and `.opencode-markdown *::marker` styling is active.
 - If token usage indicator shows no details on hover, verify shadcn tooltip wiring and hover trigger are mounted in the panel header.
+- If attachment chips do not appear for messages that include directories/files, verify OpenCode file parts are normalized into attachment metadata before UI rendering.
+- If image attachments do not preview, verify attachment MIME classification marks `image/*` parts and image URLs are present in the normalized payload.
+- If split chats do not restore after reload, verify `workspace.chats.split.state` and orientation-specific split layout keys are written/read from local storage.
+- If sticky previous-user history closes while moving pointer from banner into the history menu, verify hover-open state is bound to the shared banner/menu container rather than banner-only hover selectors.
+- If clicking a sticky history row does not jump to the expected turn, verify row click handlers target message elements by `data-chat-message-id` within the active transcript viewport.
+- If compact `read`/`grep`/`glob` rows overflow in narrow panes, verify label max-width is derived from current transcript container width and labels keep `truncate`/hover-title behavior.
+- If consecutive `apply_patch` calls are not grouped as expected, verify grouping is limited to one assistant segment and resets after the next user message.
+- If `apply_patch` tree paths start at `/Users/...` instead of repo-relative paths, verify patch path normalization strips absolute prefixes to the repository root.
+- If collapsed `apply_patch` sections occupy too much space or cannot be reopened, verify bounded collapsed height and bottom-arrow expand/collapse control are active.

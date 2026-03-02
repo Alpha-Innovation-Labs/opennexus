@@ -20,6 +20,7 @@ help:
     @echo "  just \033[0;33mdocs\033[0m                     \033[0;32mRun local docs server\033[0m"
     @echo "  just \033[0;33mweb\033[0m                      \033[0;32mRun local CDD web UI\033[0m"
     @echo "  just \033[0;33mflow\033[0m                     \033[0;32mRun local context graph UI\033[0m"
+    @echo "  just \033[0;33melectron\033[0m                 \033[0;32mBuild and run desktop Electron app\033[0m"
     @echo "  just \033[0;33mrestate\033[0m                  \033[0;32mRun Restate MVP + open UI\033[0m"
     @echo "  just \033[0;33mdocs-sync\033[0m                \033[0;32mCheck docs sync drift\033[0m"
     @echo "  just \033[0;33mbuild\033[0m                    \033[0;32mBuild development binary\033[0m"
@@ -30,10 +31,12 @@ help:
     @echo "  just \033[0;33mrun\033[0m                      \033[0;32mRun local opennexus with args\033[0m"
     @echo "  just \033[0;33mralph\033[0m                    \033[0;32mRun Ralph CLI passthrough\033[0m"
     @echo "  just \033[0;33mmarketplace-search\033[0m       \033[0;32mSearch marketplace locally\033[0m"
+    @echo "  just \033[0;33mmarketplace-list\033[0m         \033[0;32mList marketplace entries locally\033[0m"
     @echo "  just \033[0;33mmarketplace-install\033[0m      \033[0;32mInstall marketplace target locally\033[0m"
     @echo "  just \033[0;33mdocs\033[0m                     \033[0;32mRun local docs server\033[0m"
     @echo "  just \033[0;33mweb\033[0m                      \033[0;32mRun local CDD web UI\033[0m"
     @echo "  just \033[0;33mflow\033[0m                     \033[0;32mRun local context graph UI\033[0m"
+    @echo "  just \033[0;33melectron\033[0m                 \033[0;32mBuild and run desktop Electron app\033[0m"
     @echo "  just \033[0;33mrestate\033[0m                  \033[0;32mRun Restate MVP + open UI\033[0m"
     @echo "  just \033[0;33mdocs-sync\033[0m                \033[0;32mCheck docs sync drift\033[0m"
     @echo ""
@@ -72,10 +75,12 @@ dev:
 import 'justfiles/development/run.just'
 import 'justfiles/development/ralph.just'
 import 'justfiles/development/marketplace-search.just'
+import 'justfiles/development/marketplace-list.just'
 import 'justfiles/development/marketplace-install.just'
 import 'justfiles/development/docs.just'
 import 'justfiles/development/web.just'
 import 'justfiles/development/flow.just'
+import 'justfiles/development/electron.just'
 import 'justfiles/development/restate.just'
 
 # ============================================================================

@@ -16,7 +16,7 @@ mod utils;
 
 use cli::{Cli, Commands, MarketplaceCommands};
 use commands::{
-    resolve_setup_harness, run_marketplace_install, run_marketplace_search,
+    resolve_setup_harness, run_marketplace_install, run_marketplace_list, run_marketplace_search,
     run_orchestration_pipeline, run_ralph, run_setup, run_uninstall, run_update,
 };
 
@@ -40,6 +40,7 @@ fn main() -> Result<()> {
         Some(Commands::Update) => run_update(format),
         Some(Commands::Uninstall) => run_uninstall(format),
         Some(Commands::Marketplace { command }) => match command {
+            MarketplaceCommands::List => run_marketplace_list(format),
             MarketplaceCommands::Search { query } => run_marketplace_search(&query, format),
             MarketplaceCommands::Install { target, package } => {
                 run_marketplace_install(&target, package.as_deref(), format)

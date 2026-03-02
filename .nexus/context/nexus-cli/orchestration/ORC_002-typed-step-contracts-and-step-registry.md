@@ -32,3 +32,6 @@ Pipelines execute via reusable independent steps with declared typed inputs and 
 | Register orchestration blocks from modular files and dispatch by unique `block_id` through a block registry | `orchestration_block_registry_dispatches_modular_blocks_by_unique_block_id` |
 | Include a dedicated worktree assignment block that sets runtime working directory for downstream coding blocks | `orchestration_assign_worktree_block_sets_runtime_working_directory_for_downstream_blocks` |
 | Persist assigned worktree path in step output so replay and restart continue in the same working directory | `orchestration_persists_assigned_worktree_path_for_replay_and_restart` |
+| Derive required test output paths dynamically from context-file location and Next Action test ids using scaffold conventions | `orchestration_derives_test_output_paths_from_context_and_next_actions` |
+| Resolve verification command dynamically from project toolchain signals with optional config override | `orchestration_resolves_test_command_dynamically_with_config_override` |
+| Assert derived required test files exist in red and green phases without hardcoded context-specific paths | `orchestration_asserts_derived_test_files_without_hardcoded_context_paths` |

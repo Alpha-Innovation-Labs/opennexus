@@ -29,8 +29,9 @@ The graph view includes a right-side OpenCode conversation panel that lists repo
 | Stream assistant reply text into the active conversation thread in real time without requiring page reload | `graph_streams_opencode_reply_without_reload` |
 | Render streamed assistant replies when SSE frames use either LF or CRLF delimiters | `graph_parses_lf_and_crlf_sse_frames_for_opencode_reply` |
 | Render assistant tool call entries with OpenCode-aligned state labels (`pending`, `running`, `completed`, `error`) and tool identity | `graph_renders_opencode_tool_calls_with_state_labels` |
-| Render collapsed tool-call headers with one type icon and compact `Tool Use: <name>` labels without visible status words | `graph_renders_compact_tool_call_headers_without_status_words` |
+| Render collapsed tool-call headers with one type icon and input-summary text that truncates with ellipsis, then wraps when expanded | `graph_tool_headers_show_input_summary_with_collapsed_ellipsis_and_expanded_wrap` |
 | Update assistant tool call entries in place as stream events advance tool state during one reply | `graph_updates_tool_call_state_during_streaming_reply` |
+| Render expanded tool-call bodies with output-first content and no separate `Input`/`Output` section labels | `graph_tool_call_body_renders_output_without_input_output_section_labels` |
 | Load tool call traces when reopening an existing conversation from the selector history | `graph_loads_tool_call_traces_from_conversation_history` |
 | Open a new-chat modal with the same conversation UI when the operator presses Ctrl/Cmd+N | `graph_opencode_shortcut_opens_new_chat_modal` |
 | Open a parallel dual-chat modal with two side-by-side conversations when the operator presses Ctrl/Cmd+A | `graph_opencode_shortcut_opens_parallel_dual_chat_modal` |
@@ -62,6 +63,8 @@ The graph view includes a right-side OpenCode conversation panel that lists repo
 | Keep the right chat sidebar mounted in a fixed shell position while center content changes between workspace views | `graph_keeps_right_chat_sidebar_persistent_across_view_switches` |
 | Keep workspace views route-addressable as path segments (`/context`, `/forks`, `/chats`, `/workflows`) with chat deep links at `/chats/:conversation_id` | `graph_uses_path_segment_routes_for_workspace_views_and_chat_selection` |
 | Keep center chat transcript route-selected while right panel conversation state remains independent and locally managed | `graph_keeps_center_route_chat_and_right_panel_chat_state_independent` |
+| Hide the global right chat sidebar while `Chats` view is active so `/chats/:conversation_id` uses center-first conversation layout only | `graph_hides_global_right_chat_sidebar_when_chats_view_is_active` |
+| Render the center `Chats` view with the same full LLM conversation surface (header, transcript, composer) used by panel chat module | `graph_chats_center_uses_full_llm_conversation_surface` |
 | Navigate between sidebar chats without full document reload while preserving mounted shell chrome | `graph_sidebar_chat_navigation_avoids_full_document_reload_and_shell_remount` |
 | Render both center and right chat transcript panes with Shadcn ScrollArea instead of raw overflow containers | `graph_uses_shadcn_scroll_area_for_chat_transcript_surfaces` |
 | Hydrate conversation list and message history from session storage first, then refresh latest server state with a visible syncing indicator | `graph_hydrates_chat_from_session_cache_then_shows_syncing_latest_refresh` |
@@ -69,8 +72,20 @@ The graph view includes a right-side OpenCode conversation panel that lists repo
 | Render one integrated composer with single-line-start auto-grow input, helper hint text, and send-only action row | `graph_renders_single_surface_autogrow_composer_with_send_only_action` |
 | Auto-scroll to the latest transcript item whenever a different conversation is opened after load/refresh settles | `graph_chat_switch_always_lands_on_latest_message_after_load` |
 | Render assistant stream content without outer message chrome while keeping tool rows boxed and collapsible | `graph_renders_minimal_assistant_stream_with_boxed_tool_rows` |
+| Render `glob`, `grep`, and `read` tool calls as compact non-collapsible one-line rows in transcript order | `graph_renders_glob_grep_read_as_compact_single_line_rows` |
+| Keep compact inline tool rows truncated against the live pane width while preserving full label text on hover and keeping timestamps visible | `graph_tool_rows_truncate_against_live_pane_width_with_hover_full_text` |
+| Render `apply_patch` tool calls as patch sections with a repository-relative file tree and selected-file Pierre diff focus | `graph_renders_apply_patch_with_repo_relative_file_tree_and_single_file_diff_focus` |
+| Group consecutive `apply_patch` tool calls only within one assistant segment and reset grouping after the next user message | `graph_groups_apply_patch_calls_within_assistant_segment_boundaries` |
+| Allow horizontal resize between apply-patch file tree and selected-file diff panes with bounded file-tree width constraints | `graph_apply_patch_tree_and_diff_panes_are_resizable_with_width_bounds` |
+| Start `apply_patch` sections in a bounded collapsed height and toggle expand/collapse from a bottom arrow control in both states | `graph_apply_patch_diff_uses_bottom_arrow_toggle_for_bounded_expand_collapse` |
 | Render an opaque sticky previous-user context banner that updates to the prior user turn for the current visible region | `graph_renders_opaque_sticky_previous_user_context_banner` |
+| Keep floating previous-user context banner as single-line text only with no expand/collapse controls | `graph_renders_previous_user_floating_banner_as_single_line_context_only` |
+| Reveal a hover-only history menu from the sticky previous-user banner that lists all prior user turns for the current visible transcript region | `graph_sticky_previous_user_banner_reveals_hover_history_for_visible_region` |
+| Keep sticky previous-user history menu open while pointer moves from banner into menu and close only after pointer leaves both surfaces | `graph_sticky_previous_user_history_closes_only_after_leaving_hover_surface` |
+| Jump transcript to the selected prior user turn when a sticky history item is clicked and show row timestamps right-aligned | `graph_sticky_previous_user_history_click_navigates_with_right_aligned_timestamp` |
 | Apply TUI-scoped conversation background token and user-message left accent treatment for chat transcript surfaces | `graph_applies_tui_conversation_surface_tokens_and_user_left_accent` |
+| Apply chat conversation, title, input, and user-bubble colors via theme tokens instead of hardcoded component hex values | `graph_uses_theme_tokens_for_chat_surface_and_user_message_colors` |
+| Constrain expanded user-message and `apply_patch` diff bodies to bounded height with internal scrolling | `graph_constrains_large_expansions_with_internal_scroll_in_chat_surface` |
 | Keep the left sidebar as a full-height column while top nav, main content, and right chat render inside one encapsulated workspace shell | `graph_workspace_shell_keeps_full_height_left_sidebar_with_encapsulated_top_main_right` |
 | Keep primary workspace navigation (`context`, `forks`, `chats`, `workflows`) in the top nav while left sidebar content changes by active view | `graph_top_nav_owns_primary_view_navigation_and_sidebar_shows_view_specific_content` |
 | Restore previously saved chat width from local storage when expanding a collapsed chat sidebar | `graph_restores_chat_width_from_storage_on_expand` |
@@ -82,7 +97,18 @@ The graph view includes a right-side OpenCode conversation panel that lists repo
 | Remove explicit `user` role labels from user message bubbles while preserving role-specific bubble styling | `graph_chat_hides_user_role_label_in_user_message_bubbles` |
 | Render token usage as a compact circular indicator in the header and show remaining and used values in a shadcn tooltip on hover | `graph_chat_header_renders_token_ring_with_tooltip_values` |
 | Render markdown unordered list markers using TUI orange and ordered list markers using TUI cyan through theme tokens | `graph_markdown_list_markers_follow_tui_marker_colors` |
+| Render bash tool output using Shiki `shellsession` highlighting for consistent terminal transcript styling | `graph_bash_tool_output_uses_shellsession_shiki_rendering` |
 | Render code-modifying tool outputs with Pierre Diffs when patch content is available instead of raw text blocks | `graph_renders_code_modification_tool_output_with_pierre_diffs` |
+| Render Pierre diff syntax using bundled Shiki light/dark themes with system theme mode instead of custom registered diff themes | `graph_pierre_diff_uses_bundled_shiki_light_dark_themes` |
+| Render user-message attachment chips from OpenCode file parts and label directory/file attachments inline under the message body | `graph_renders_user_message_attachment_chips_from_opencode_file_parts` |
+| Render image attachment thumbnails inline and open a full-size preview dialog when the operator clicks an image attachment | `graph_renders_image_attachment_preview_and_click_to_open_dialog` |
+| Suppress redundant pasted-image marker text (for example `IMG clipboard` or `clipboard`) when the same user message already renders image attachment previews | `graph_hides_redundant_pasted_image_text_when_attachment_preview_exists` |
+| Open a shadcn context menu on chat sidebar row right-click and surface row-focused visual state for action targeting | `graph_chat_sidebar_row_supports_context_menu_actions` |
+| Open selected chats in vertical or horizontal split from sidebar context menu actions relative to the active chat lane | `graph_chat_sidebar_context_menu_opens_vertical_and_horizontal_chat_splits` |
+| Persist chat split state across reload, including split orientation, secondary chat selection, and per-orientation split percentages | `graph_persists_chat_split_state_and_layout_percentages_across_reload` |
+| Render a close-chat action next to token usage indicator on all chat headers and allow an empty active-chat state after closing | `graph_chat_header_close_action_clears_active_chat_selection` |
+| Show row-level hover delete action in the timestamp slot and require confirmation before deleting one or many chats | `graph_chat_row_hover_delete_replaces_timestamp_and_confirms_before_delete` |
+| Split oversized conversation panel implementation into feature-scoped component, hook, and lib files so each file owns one concern | `graph_splits_conversation_panel_into_feature_scoped_single_concern_modules` |
 | Validate real OpenCode streaming behavior end-to-end with no request mocking in Playwright | `graph_validates_real_opencode_streaming_e2e` |
 | Show actionable panel errors when conversation listing or messaging APIs fail | `graph_surfaces_actionable_opencode_panel_errors` |
 | Allow horizontal split resize so the conversation panel can expand to half the viewport width | `graph_allows_horizontal_split_resize_to_half_viewport_for_conversation_panel` |

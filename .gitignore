@@ -29,3 +29,7 @@ wrappers/python/opennexus/dist/
 # Local Restate runtime and app dependency artifacts
 restate-data/
 apps/restate-mvp/node_modules/
+apps/desktop-electron/node_modules/
+apps/desktop-electron/dist/
+apps/desktop-electron/resources/
+node_modules/

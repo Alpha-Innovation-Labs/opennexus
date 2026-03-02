@@ -1,8 +1,0 @@
-prompt_file: ../../.nexus/context/playground/project-setup/PRJ_001-uv-init-and-gitignore-baseline.md
-question: Execute this context in the current worktree and create the Python project now.
-red_prompt_template: prompts/templates/playground-project-setup.txt
-implement_prompt_template: prompts/templates/playground-project-setup-summary.txt
-use_sandbox: true
-cleanup_sandbox: false
-sandbox_prefix: playground-project-setup
-test_toolchain: python

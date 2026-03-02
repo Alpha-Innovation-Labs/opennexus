@@ -17,6 +17,7 @@ use crate::output::{print_info, print_success};
 
 const DEFAULT_REGISTRY_URL: &str =
     "https://raw.githubusercontent.com/Alpha-Innovation-Labs/nexus/main/.nexus/marketplace/registry.json";
+const DEFAULT_LOCAL_REGISTRY_PATH: &str = ".nexus/marketplace/registry.json";
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq, Eq)]
 #[serde(rename_all = "snake_case")]
@@ -80,6 +81,39 @@ pub fn run_marketplace_search(query: &str, format: OutputFormat) -> Result<()> {
 
     print_success(&format!("Found {} marketplace entrie(s):", matches.len()));
     for entry in matches {
+        eprintln!(
+            "- {} ({})\n  {}\n  install: opennexus marketplace install {}",
+            entry.id, entry.name, entry.description, entry.id
+        );
+    }
+
+    Ok(())
+}
+
+pub fn run_marketplace_list(format: OutputFormat) -> Result<()> {
+    let registry = fetch_registry_entries()?;
+
+    if format == OutputFormat::Json {
+        println!(
+            "{}",
+            serde_json::json!({
+                "status": "ok",
+                "results": registry,
+            })
+        );
+        return Ok(());
+    }
+
+    if registry.is_empty() {
+        print_info("No marketplace entries are available.");
+        return Ok(());
+    }
+
+    print_success(&format!(
+        "Available marketplace entrie(s): {}",
+        registry.len()
+    ));
+    for entry in &registry {
         eprintln!(
             "- {} ({})\n  {}\n  install: opennexus marketplace install {}",
             entry.id, entry.name, entry.description, entry.id
@@ -161,7 +195,7 @@ fn fetch_registry_entries() -> Result<Vec<RegistryEntry>> {
     let registry_url = std::env::var("NEXUS_MARKETPLACE_REGISTRY_URL")
         .ok()
         .filter(|value| !value.trim().is_empty())
-        .unwrap_or_else(|| DEFAULT_REGISTRY_URL.to_string());
+        .unwrap_or_else(default_registry_source);
 
     let body = if let Some(file_path) = registry_url.strip_prefix("file://") {
         fs::read_to_string(file_path)
@@ -186,6 +220,14 @@ fn fetch_registry_entries() -> Result<Vec<RegistryEntry>> {
 
     serde_json::from_str::<Vec<RegistryEntry>>(&body)
         .context("Marketplace registry payload is invalid JSON.")
+}
+
+fn default_registry_source() -> String {
+    if Path::new(DEFAULT_LOCAL_REGISTRY_PATH).exists() {
+        return format!("file://{}", DEFAULT_LOCAL_REGISTRY_PATH);
+    }
+
+    DEFAULT_REGISTRY_URL.to_string()
 }
 
 fn search_entries<'a>(query: &str, entries: &'a [RegistryEntry]) -> Vec<&'a RegistryEntry> {

@@ -30,3 +30,5 @@ depends_on:
 | Resolve OpenCode SDK server port from environment configuration before runtime initialization | `orchestration_resolves_opencode_sdk_port_from_environment` |
 | Accept pipeline step definitions that reference reusable execution blocks by `block_id` | `orchestration_accepts_pipeline_steps_with_block_id_references` |
 | Accept a separate run config file path and resolve it alongside pipeline definitions | `orchestration_accepts_separate_pipeline_and_config_file_inputs` |
+| Prefer connecting to an existing OpenCode server on `127.0.0.1:4096` and only spawn a local SDK server when unavailable | `orchestration_prefers_existing_opencode_server_on_4096_before_spawning` |
+| Generate workflow run identifiers that include context-derived slug and run count for disambiguated run history | `orchestration_generates_context_and_run_count_scoped_workflow_ids` |

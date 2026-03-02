@@ -1,6 +1,6 @@
 # React Flow UI Theme and Layout Parameter Inventory
 
-Last updated: 2026-02-27
+Last updated: 2026-02-28
 Scope: `apps/react-flow`
 
 ## Investigation Method
@@ -12,6 +12,10 @@ This inventory combines:
    - Theme mode toggle and theme variant selector behavior.
    - Computed CSS variable values (`agent-browser eval` with `getComputedStyle`).
    - Runtime canvas/node positioning and panel geometry.
+3. Chat-route verification on `http://localhost:4174/chats/:conversation_id`:
+   - Context menu interactions on chat rows.
+   - Center-first chat layout without global right sidebar in `Chats` view.
+   - Message/tool rendering behavior (inline tool rows, sticky prior-user context, diff rendering fallbacks).
 
 ## 1) Theme Variable Sources (Authoritative Files)
 
@@ -19,9 +23,19 @@ This inventory combines:
 - Theme mode/variant persistence and DOM wiring: `apps/react-flow/src/features/workspace-shell/components/workspace-shell-layout.tsx`
 - Theme controls UI: `apps/react-flow/src/features/workspace-shell/components/workspace-top-nav.tsx`
 - Runtime theme observer hook: `apps/react-flow/src/shared/hooks/use-theme-mode.ts`
+- Runtime theme variant observer hook: `apps/react-flow/src/shared/hooks/use-theme-variant.ts`
 - Context graph canvas color fallback + viewport behavior: `apps/react-flow/src/features/context-graph/components/context-graph-canvas.tsx`
 - Fork graph canvas color fallback + viewport behavior: `apps/react-flow/src/features/opencode-panel/components/opencode-fork-graph-canvas.tsx`
 - Markdown/syntax theme usage in OpenCode panel: `apps/react-flow/src/features/opencode-panel/components/opencode-conversation-panel.tsx`
+- App-wide font wiring: `apps/react-flow/src/app/layout.tsx`
+
+### 1.1 Global font application contract
+
+- The app uses Next Font `Geist` as the global sans family.
+- Effective wiring requires both classes on `<body>`:
+  - `geistSans.variable` to expose `--font-geist-sans`
+  - `geistSans.className` to apply Geist as the actual rendered font family
+- `globals.css` maps `--font-sans` to `var(--font-geist-sans), "Avenir Next", "Segoe UI", sans-serif`.
 
 ## 2) Complete CSS Variable Inventory
 
@@ -60,7 +74,7 @@ Defined in `apps/react-flow/src/styles/globals.css`:
   - `--color-edge-green`
   - `--color-edge-pink`
 
-### 2.2 Theme-scope utility variables (`:root`, `.dark`, `.dark[data-theme-variant="tui"]`)
+### 2.2 Theme-scope utility variables (`:root`, `.dark`, variant scopes)
 
 - Canvas and grouping
   - `--grid-dot-color`
@@ -76,6 +90,8 @@ Defined in `apps/react-flow/src/styles/globals.css`:
   - `--md-quote`
   - `--md-emph`
   - `--md-strong`
+  - `--md-list-item`
+  - `--md-list-enumeration`
 - Code/syntax palette
   - `--syntax-comment`
   - `--syntax-keyword`
@@ -86,6 +102,14 @@ Defined in `apps/react-flow/src/styles/globals.css`:
   - `--syntax-type`
   - `--syntax-operator`
   - `--syntax-punctuation`
+- OpenCode chat surface/composer
+  - `--opencode-input-bg`
+  - `--opencode-input-area-bg`
+  - `--opencode-composer-border`
+  - `--opencode-composer-chip-bg`
+  - `--chat-surface-bg`
+- Workspace shell
+  - `--workspace-sidebar-bg`
 
 ### 2.3 XYFlow bridge variables (`.react-flow`)
 
@@ -149,13 +173,17 @@ These are the concrete variables XYFlow consumes, all set in `apps/react-flow/sr
 ### 3.1 Mode/variant selectors
 
 - Theme mode (`light`/`dark`) is persisted in local storage key `workspace.theme` and applied by toggling `document.documentElement.classList.toggle("dark", ...)`.
-- Theme variant (`current`/`tui`) is persisted in local storage key `workspace.theme.variant` and applied as `document.documentElement.dataset.themeVariant`.
+- Theme variant (`maroon`/`cursor`/`nexus`) is persisted in local storage key `workspace.theme.variant` and applied as `document.documentElement.dataset.themeVariant`.
+- Default theme variant is `nexus` when no stored value exists.
+- Legacy stored values are migrated at read-time:
+  - `current` -> `maroon`
+  - `tui` -> `cursor`
 
 ### 3.2 Runtime-verified computed values (agent-browser)
 
 Observed with `agent-browser eval`:
 
-- Dark + `current`
+- Dark + `maroon`
   - `--color-background`: `#151313`
   - `--color-foreground`: `#f6f3f3`
   - `--flow-canvas-bg`: `#1a1717`
@@ -163,14 +191,19 @@ Observed with `agent-browser eval`:
   - `--color-edge-blue`: `#93e9f6`
   - `--flow-edge`: `#93e9f6`
   - `--xy-background-color-default`: `#1a1717`
-- Dark + `tui`
+- Dark + `cursor`
   - `--color-background`: `#0a0a0a`
   - `--color-secondary`: `#5c9cf5`
   - `--color-accent`: `#9d7cd8`
   - `--flow-canvas-bg`: `#141414`
   - `--subflow-bg`: `#1e1e1e`
   - Edge palette: `#5c9cf5`, `#7fd88f`, `#9d7cd8`
-- Light + `tui` selected (variant retained, no `.dark` class)
+- Dark + `nexus`
+  - `--color-background`: `#0a0a0a`
+  - `--opencode-input-area-bg`: `#1d1d1d`
+  - `--chat-surface-bg`: `#0a0a0a`
+  - `--workspace-sidebar-bg`: `#141414`
+- Light + `cursor` selected (variant retained, no `.dark` class)
   - `documentElement.className`: empty
   - `--color-background`: light OKLCH-derived value (computed browser color-space string)
   - `--flow-canvas-bg`: light root value (OKLCH-derived)
@@ -281,12 +314,101 @@ From workspace shell components:
 - Left sidebar width
   - Expanded: `w-[280px] min-w-[280px]`
   - Collapsed: `w-0 min-w-0`
-- Right chat panel persistence
+- Right chat panel persistence (non-`Chats` views)
   - Local storage keys: `workspace.chat.size`, `workspace.chat.collapsed`
   - Default size fallback: `32%`
   - Resizable split defaults: `${100 - initialChatPanelSize}%` and `${initialChatPanelSize}%`
+- Chats view shell behavior
+  - `currentView === "chats"` returns center-only content and skips mounting the global right sidebar.
+  - Center chat uses the full `OpencodeConversationPanel` surface bound to route-selected conversation id.
+- Chats center split persistence
+  - Split state key: `workspace.chats.split.state`
+  - Split layout keys: `workspace.chats.split.layout.vertical`, `workspace.chats.split.layout.horizontal`
+  - Split state payload: `{ orientation, conversationId }`
+  - Split layout payload: `{ primary, secondary }` (percent values)
 - Right sidebar render
   - Border/background: `border-l border-border/70 bg-card/55`
+- Left sidebar render
+  - Background token: `bg-[var(--workspace-sidebar-bg)]`
+
+## 8) Chat-Surface Runtime Behaviors Added
+
+### 8.1 Chat row interactions
+
+- Chat rows now support right-click context menu actions:
+  - `Open chat`
+  - `Open in split (vertical)`
+  - `Open in split (horizontal)`
+  - `Delete chat`
+- Hover delete affordance replaces timestamp in the same inline slot.
+- Bulk delete and single delete both use confirmation dialog before API deletion.
+
+### 8.2 Header token indicator parameters
+
+- Header renders compact token indicators:
+  - used token count
+  - usage percentage
+  - circular usage ring with tooltip details
+- Ring implementation uses SVG circles:
+  - radius: `7`
+  - stroke width: `2`
+  - active stroke: `var(--color-primary)`
+  - base stroke: `var(--color-border)`
+- Hover tooltip positioning:
+  - `side="bottom"`, `align="end"`, `sideOffset={8}`
+
+### 8.3 Message attachment rendering parameters
+
+- Attachment source: OpenCode message parts with `type: "file"` and optional `source` metadata.
+- Attachment kind mapping:
+  - `source.type in ["directory", "dir"]` -> `dir`
+  - `mime startsWith("image/")` -> `image`
+  - otherwise -> `file`
+- Image attachments:
+  - inline thumbnail preview (`h-14`, `w-20`, `object-cover`)
+  - click opens modal preview (`max-w-3xl`, image `max-h-[75vh]`, `object-contain`)
+
+### 8.4 Conversation stream rendering details
+
+- Tool call rendering categories
+  - Inline single-line (non-collapsible): `glob`, `grep`, `read`
+  - Collapsible detailed rows: other tools
+  - `apply_patch` special path: one-line patched-file label + diff body section without input/output blocks
+  - Inline/collapsible header overflow hardening (required for narrow right-sidebar widths)
+    - `text-ellipsis` only works when the label node itself has `overflow-hidden + whitespace-nowrap + text-ellipsis` and is width-constrained.
+    - Stable behavior in resizable panes came from deriving tool-label max width from live pane width (via `ResizeObserver`) rather than fixed class-only sizing assumptions.
+    - Inline rows now keep icon + label + timestamp in one line while the label receives a runtime max-width budget and hover `title` for full text.
+    - Parent chain still requires `min-w-0`/`overflow-hidden` across panel, scroll viewport, thread root, and tool-call container to prevent intrinsic-width expansion.
+- Diff rendering path for code-mod tools
+  - `apply_patch` payloads are normalized from `*** Begin Patch` format to unified diff where possible.
+  - Unified diff chunks are rendered with Pierre Diffs per file patch; fallback remains text preview when parsing fails.
+  - Pierre theme mapping is variant-aware:
+    - `maroon`/`cursor`: `themeType: system` with `github-dark-default` / `github-light-default`.
+    - `nexus`: forced dark rendering with Pierre theme (`pierre-dark`).
+  - Internal diff scrolling is now armed only when the diff block is fully visible in the transcript viewport (IntersectionObserver + wheel handoff), preventing premature nested scroll trapping.
+- Sticky prior-user banner
+  - Floating banner shows a single-line truncated prior user message only (non-expandable).
+- User message expansion behavior
+  - Long user messages are expandable/collapsible with chevron affordance.
+  - Expanded state uses internal `ScrollArea` with bounded max height to prevent transcript overflow.
+
+### 8.5 Chat surface theme variables in active use
+
+- Conversation surface token
+  - `--chat-surface-bg` (renamed from `--opencode-conversation-bg`) is the shared background token for chat transcript surfaces.
+- Input/composer token set
+  - `--opencode-input-area-bg` controls input container background and user-message background treatment.
+  - `--opencode-composer-border` controls input and user-message edge borders.
+- Cursor variant overrides
+  - `.dark[data-theme-variant="cursor"]`
+    - `--opencode-input-area-bg: #212121`
+    - `--opencode-composer-border: #737373`
+    - `--chat-surface-bg: #181818`
+- Nexus variant overrides
+  - `.dark[data-theme-variant="nexus"]`
+    - `--opencode-input-area-bg: #1d1d1d`
+    - `--chat-surface-bg: #0a0a0a`
+    - `--workspace-sidebar-bg: #141414`
 
 ## 4.6 Node component-local sizing/treatment
 
@@ -300,7 +422,7 @@ Verified interactions and geometry in live UI:
 
 - Theme controls are interactive and stateful:
   - Toggle button label flips (`Switch to dark mode` <-> `Switch to light mode`).
-  - Variant combobox toggles selected option (`Current Theme` / `TUI Theme`).
+  - Variant combobox toggles selected option (`Nexus` / `Maroon` / `Cursor`).
 - Runtime layout sample (captured from `.react-flow__node`):
   - `project-shell:cdd-web-ui`: `translate(0px, 996px)` width `380px` height `258px`
   - `project-shell:nexus`: `translate(218px, 0px)` width `380px` height `342px`
@@ -309,6 +431,9 @@ Verified interactions and geometry in live UI:
   - Controls panel x/y/size approx `x=695.95`, `y=582`, `28x106`
   - MiniMap approx `202x152`
   - Right sidebar computed width approx `319.047px`
+- Runtime typography confirmation:
+  - Pre-fix symptom: computed `font-family` showed Tailwind fallback stack (`ui-sans-serif, system-ui, ...`) when only `geistSans.variable` + `font-sans` were present.
+  - Current verified state: computed body `font-family` resolves to `Geist, "Geist Fallback"` after adding `geistSans.className` to `<body>`.
 
 ## 6) Parameter Dependency Graph (Practical)
 
