@@ -1,3 +1,8 @@
+---
+name: software-enginering
+description: This skill should be used every time you do software engineering
+---
+
 # Agent Constitution
 
 ## I. Universal Constitution (Applies to every agent, every domain)
