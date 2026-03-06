@@ -16,7 +16,7 @@ CDD separates:
 - Project integration skills (`SKILL.md` or `skill/SKILL.md`, optional): document how a project should be consumed by other projects.
 - Execution learnings (`lessons/<CTX_ID>-*.md`, optional): capture non-obvious problems and validated workarounds for a specific context.
 
-CDD uses feature-scoped typed support artifacts so each context links directly to its own references and lessons.
+CDD uses optional typed companion artifacts so each context links to references and lessons only when they are actually used.
 
 CDD also supports explicit blocking dependencies between contexts.
 
@@ -28,6 +28,15 @@ Use CDD to describe what success looks like, not how code should be implemented.
 .nexus/context/<project>/
 ├── index.md                                        # Project operational knowledge
 ├── SKILL.md                                        # Optional project integration guide (alternative to skill/SKILL.md)
+├── lessons/
+│   └── <CTX_ID>-<name>.md                          # Optional project-scoped lessons learned
+├── reference/
+│   ├── design_reference/
+│   │   └── <CTX_ID>-<name>.md                      # Optional project-scoped design/visual reference
+│   ├── system_design/
+│   │   └── <CTX_ID>-<name>.md                      # Optional project-scoped architecture reference
+│   └── <other_type>/
+│       └── <CTX_ID>-<name>.md                      # Optional additional project-scoped references
 ├── skill/
 │   └── SKILL.md                                    # Optional cross-project wrapper/integration contract
 └── <feature>/
@@ -37,16 +46,14 @@ Use CDD to describe what success looks like, not how code should be implemented.
     │   └── SKILL.md                                # Optional feature wrapper/integration contract
     ├── <CTX_ID>-<name>.md                          # Context specification
     ├── lessons/
-    │   └── <CTX_ID>-<name>.md                      # Context-scoped lessons learned
+    │   └── <CTX_ID>-<name>.md                      # Optional feature-scoped lessons learned
     └── reference/
-        ├── ui_design/
-        │   └── <CTX_ID>-<name>.md                  # Typed UI/visual reference
+        ├── design_reference/
+        │   └── <CTX_ID>-<name>.md                  # Optional design/visual reference
         ├── system_design/
-        │   └── <CTX_ID>-<name>.md                  # Typed architecture/flow reference
-        ├── search_history/
-        │   └── <CTX_ID>-<name>.md                  # Typed prior research/search reference
+        │   └── <CTX_ID>-<name>.md                  # Optional architecture/flow reference
         └── <other_type>/
-            └── <CTX_ID>-<name>.md                  # Additional typed references as needed
+            └── <CTX_ID>-<name>.md                  # Optional additional references as needed
 ```
 
 Mapping:
@@ -58,13 +65,13 @@ Rules:
 - Optional project integration skill may live at `.nexus/context/<project>/SKILL.md` or `.nexus/context/<project>/skill/SKILL.md`.
 - The same optional skill files are allowed per feature (subproject):
   - `.nexus/context/<project>/<feature>/SKILL.md` or `.nexus/context/<project>/<feature>/skill/SKILL.md`
-- Canonical context companion artifact locations are feature-scoped:
-  - Lessons: `.nexus/context/<project>/<feature>/lessons/<CTX_ID>-<name>.md`
-  - Typed references: `.nexus/context/<project>/<feature>/reference/<type>/<CTX_ID>-<name>.md`
-- Legacy global/general files are no longer required:
-  - `.nexus/context/<project>/design_references/design_reference.md`
-  - `.nexus/context/<project>/lessons_learned.md`
-  - `.nexus/context/<project>/<feature>/lessons_learned.md`
+- Context companion artifacts are optional and should be linked with paths relative to the context file:
+  - Lessons (feature): `.nexus/context/<project>/<feature>/lessons/<CTX_ID>-<name>.md`
+  - Lessons (project): `.nexus/context/<project>/lessons/<CTX_ID>-<name>.md`
+  - Typed references (feature): `.nexus/context/<project>/<feature>/reference/<type>/<CTX_ID>-<name>.md`
+  - Typed references (project): `.nexus/context/<project>/reference/<type>/<CTX_ID>-<name>.md`
+- Create and link companion artifacts only when they are used by the context.
+- Prefer adjacent feature-scoped companions so links are simple: `reference/...` and `lessons/...`.
 - Context IDs use a 3-letter prefix from either the **project** or the **feature**.
 - Choose one approach per project and be consistent.
 - If using feature-scoped prefixes, each feature/subfeature must have a unique 3-letter prefix.
@@ -93,8 +100,13 @@ Rules:
 
 Use context-scoped lessons files to record non-obvious execution issues discovered while implementing or operating one specific context.
 
-Allowed canonical path:
+Allowed canonical paths:
+- `.nexus/context/<project>/lessons/<CTX_ID>-<name>.md`
 - `.nexus/context/<project>/<feature>/lessons/<CTX_ID>-<name>.md`
+
+Creation rule:
+- Only create a lessons file when a real lesson was learned for that context.
+- If no lesson was learned, omit the file and omit `lessons` in frontmatter.
 
 Scope:
 - Problems faced in real execution.
@@ -137,10 +149,8 @@ Example file structure:
 │   ├── lessons/
 │   │   └── PLA_002-configure-database-migrations.md
 │   └── reference/
-│       ├── system_design/
-│       │   └── PLA_003-expose-rest-and-sse-contract.md
-│       └── search_history/
-│           └── PLA_002-configure-database-migrations.md
+│       └── system_design/
+│           └── PLA_003-expose-rest-and-sse-contract.md
 ├── auth/
 │   ├── index.md
 │   ├── SKILL.md
@@ -151,7 +161,7 @@ Example file structure:
 │   ├── lessons/
 │   │   └── AUT_001-email-login-success.md
 │   └── reference/
-│       ├── ui_design/
+│       ├── design_reference/
 │       │   └── AUT_001-email-login-success.md
 │       └── system_design/
 │           └── AUT_004-password-reset-request.md
@@ -164,9 +174,9 @@ Example file structure:
     ├── lessons/
     │   └── PRF_002-edit-profile-fields.md
     └── reference/
-        ├── ui_design/
+        ├── design_reference/
         │   └── PRF_001-load-profile-page.md
-        └── search_history/
+        └── system_design/
             └── PRF_003-subscribe-profile-updates-sse.md
 ```
 
@@ -180,25 +190,26 @@ Example context granularity under `auth`:
 - `register-email-password`
 - `password-reset-request`
 
-## Typed References (Feature-Scoped)
+## Typed References (Optional)
 
-Use typed reference files under each feature so references stay tightly scoped and traceable to one context.
+Use typed reference files when needed so references stay traceable to one context.
 
-Canonical folders:
-- `.nexus/context/<project>/<feature>/reference/ui_design/`
+Default folders:
+- `.nexus/context/<project>/reference/design_reference/`
+- `.nexus/context/<project>/reference/system_design/`
+- `.nexus/context/<project>/<feature>/reference/design_reference/`
 - `.nexus/context/<project>/<feature>/reference/system_design/`
-- `.nexus/context/<project>/<feature>/reference/search_history/`
-- Additional typed folders are allowed as needed under `.nexus/context/<project>/<feature>/reference/`.
+- Additional typed folders are allowed as needed under either project-level or feature-level `reference/`.
 
 Guidance:
-- `ui_design`: visual contracts, design tokens, component state and variant behavior.
+- `design_reference`: visual contracts, design intent, interaction states, and expected look/feel (Figma-like guidance).
 - `system_design`: architecture flows, sequence/state diagrams, boundary contracts.
-- `search_history`: prior research, source links, findings, and decision trail.
 - Keep each file context-scoped and named with the matching context ID for deterministic linking.
+- Create reference files only when the context actually uses them.
 
 Legacy compatibility:
 - Existing `.nexus/context/<project>/design_references/design_reference.md` may be retained during migration, but it is not required.
-- New context work should prefer typed feature-scoped references.
+- New context work should prefer typed project-scoped or feature-scoped references.
 
 ## Context File Naming
 
@@ -228,14 +239,23 @@ title: Human-Readable Title
 project: project-name
 feature: feature-name
 created: "YYYY-MM-DD"
-references:
-  ui_design: .nexus/context/<project>/<feature>/reference/ui_design/<CTX_ID>-<name>.md
-  system_design: .nexus/context/<project>/<feature>/reference/system_design/<CTX_ID>-<name>.md
-  search_history: .nexus/context/<project>/<feature>/reference/search_history/<CTX_ID>-<name>.md
-lessons:
-  file: .nexus/context/<project>/<feature>/lessons/<CTX_ID>-<name>.md
 ---
 ```
+
+Optional companion links (include only when used):
+
+```yaml
+references:
+  design_reference: <CTX_ID>-<name>.md
+  system_design: <CTX_ID>-<name>.md
+lesson: <CTX_ID>-<name>.md
+```
+
+Resolution rules:
+- `references.design_reference: <file>.md` resolves to `reference/design_reference/<file>.md`.
+- `references.system_design: <file>.md` resolves to `reference/system_design/<file>.md`.
+- `lesson: <file>.md` resolves to `lessons/<file>.md`.
+- If needed, you may still use explicit context-relative paths (for example `../reference/system_design/<file>.md`).
 
 Optional dependency metadata (blocking prerequisites only):
 
@@ -254,10 +274,10 @@ Rules:
 - Declare dependencies in `depends_on.contexts` only.
 - Every listed dependency is blocking: it must be completed before this context can proceed.
 - `depends_on.contexts` entries must be context IDs (for example `ABC_001`).
-- `references` and `lessons.file` provide deterministic links to this context's companion artifacts.
-- `references.ui_design`, `references.system_design`, and `references.search_history` should point to feature-scoped typed reference files.
-- `lessons.file` should point to the feature-scoped context lesson file.
-- Use repository-relative paths for all companion artifact links.
+- `references` and `lesson` are optional; include them only when the companion files exist and are used by this context.
+- Preferred reference keys are `design_reference` and `system_design`.
+- `references.*` and `lesson` can resolve to feature-scoped or project-scoped files.
+- Use context-file-relative paths for all companion artifact links (never full repository paths).
 - `skills` is optional; use it to reference implementation guidance by skill name only.
 - `skills` entries must be bare names (for example `justfile`, `nextjs`, `pnpm`) and must map to files under `skills/**/<name>/SKILL.md`.
 - Keep dependencies minimal and direct; do not duplicate transitive prerequisites.
@@ -314,8 +334,8 @@ Dependencies are strict prerequisites, not suggestions.
 For each Next Action, agents should consume context artifacts in this order:
 
 1. Context spec (`.nexus/context/<project>/<feature>/<CTX_ID>-<name>.md`)
-2. Linked typed references from context frontmatter (`references.*`)
-3. Linked lessons file from context frontmatter (`lessons.file`)
+2. Linked typed references from context frontmatter (`references.*`), if present
+3. Linked lesson file from context frontmatter (`lesson`), if present
 
 After reading in this order, generate and execute E2E tests aligned to the Next Actions table.
 
@@ -350,7 +370,7 @@ Project `index.md` should include:
 - Overview
 - Features table
 - Architecture (ASCII diagram)
-- Context companion artifact locations (feature `reference/*` and `lessons/` folders)
+- Context companion artifact locations (project and/or feature `reference/*` and `lessons/` folders)
 - Optional operational notes (only when useful)
 
 Feature `index.md` should include:
